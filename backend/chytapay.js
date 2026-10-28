@@ -22,9 +22,12 @@ const URLS = {
 // ⚠️ process.env se lee DENTRO de las funciones: los imports corren antes que dotenv.config().
 function cfg() {
   const prod = /^prod/i.test(process.env.CHYTAPAY_ENV || '')
+  // CHYTAPAY_API_URL / CHYTAPAY_AUTH_URL: solo para las pruebas contra el Chytapay de imitación
+  // (herramientas/prueba-chytapay.mjs). En producción se ignoran.
+  const urls = prod ? URLS.prod : { api: process.env.CHYTAPAY_API_URL || URLS.test.api, auth: process.env.CHYTAPAY_AUTH_URL || URLS.test.auth }
   return {
     prod,
-    urls: prod ? URLS.prod : URLS.test,
+    urls,
     clientId: process.env.CHYTAPAY_CLIENT_ID || '',
     clientSecret: process.env.CHYTAPAY_CLIENT_SECRET || '',
     pk: process.env.CHYTAPAY_PK || '',
