@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- El servidor reemplaza las marcas NOMBRE, DESCRIPCION y URL (entre dobles porcentajes) con los datos de evento.json:
+     así la vista previa de WhatsApp sale bien. -->
+<title>%%NOMBRE%%</title>
+<meta name="description" content="%%DESCRIPCION%%">
+<meta property="og:type" content="website">
+<meta property="og:title" content="%%NOMBRE%%">
+<meta property="og:description" content="%%DESCRIPCION%%">
+<meta property="og:url" content="%%URL%%/">
+<meta property="og:image" content="%%URL%%/assets/compartir.jpg">
+<meta name="theme-color" content="#141022">
+<link rel="icon" href="assets/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="sistema.css">
+<style>
+body{background:var(--noche);}
+.portada{position:relative;min-height:88vh;display:flex;align-items:flex-end;padding:0 16px 56px;overflow:hidden;
+  background:linear-gradient(180deg,rgba(20,16,34,.25) 0%,rgba(20,16,34,.55) 55%,var(--noche) 100%),var(--foto,none) center/cover no-repeat,
+             radial-gradient(ellipse 80% 60% at 50% 20%,#4a2d66,#141022 75%);}
+.portada .dentro{max-width:880px;margin:0 auto;width:100%;text-align:center;}
+.portada img.logo{width:120px;height:120px;border-radius:50%;object-fit:cover;box-shadow:0 10px 40px rgba(0,0,0,.45);border:3px solid rgba(231,194,125,.6);}
+.portada .organiza{margin-top:16px;font-weight:800;font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--oro);}
+.portada h1{font-size:clamp(38px,9vw,74px);margin-top:10px;text-shadow:0 6px 30px rgba(0,0,0,.5);}
+.portada .cuando{margin-top:12px;font-size:clamp(16px,3.6vw,20px);font-weight:600;}
+.portada .lugar{color:var(--gris);margin-top:4px;}
+.portada .btn{max-width:340px;margin-top:26px;}
+.cuenta{display:flex;justify-content:center;gap:10px;margin-top:22px;}
+.cuenta div{min-width:66px;background:rgba(246,240,230,.07);border:1px solid rgba(231,194,125,.25);border-radius:14px;padding:8px 6px;}
+.cuenta b{display:block;font-family:var(--f-display);font-size:28px;line-height:1.1;}
+.cuenta small{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gris);}
+.seccion{max-width:880px;margin:0 auto;padding:56px 16px 0;}
+.seccion h2{font-family:var(--f-display);font-size:clamp(28px,6vw,40px);text-align:center;}
+.seccion .sub{text-align:center;color:var(--gris);margin-top:6px;}
+.entradas{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:26px;}
+.entrada{background:linear-gradient(180deg,rgba(38,30,64,.95),rgba(28,22,48,.95));border:1px solid rgba(231,194,125,.25);border-radius:20px;padding:22px;text-align:center;position:relative;}
+.entrada b{display:block;font-weight:800;font-size:17px;}
+.entrada small{display:block;color:var(--gris);font-size:13px;margin-top:4px;min-height:18px;}
+.entrada .precio{font-family:var(--f-display);font-size:38px;margin:14px 0;color:var(--oro-vivo);}
+.entrada .sello{position:absolute;top:-10px;right:14px;font-weight:800;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;background:var(--rojo);color:#fff;border-radius:999px;padding:3px 10px;}
+.entrada .sello.pocas{background:var(--oro);color:#1d1830;}
+.datos{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:26px;}
+.dato{background:rgba(246,240,230,.05);border:1px solid rgba(246,240,230,.12);border-radius:16px;padding:18px;}
+.dato small{display:block;font-weight:800;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--oro);}
+.dato p{margin-top:6px;font-weight:600;}
+.preguntas{margin-top:22px;display:grid;gap:10px;}
+.preguntas details{background:rgba(246,240,230,.05);border:1px solid rgba(246,240,230,.12);border-radius:14px;padding:14px 16px;}
+.preguntas summary{cursor:pointer;font-weight:800;}
+.preguntas p{margin-top:8px;color:var(--gris);}
+.barra-compra{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:rgba(20,16,34,.94);
+  border-top:1px solid rgba(231,194,125,.25);display:none;z-index:20;backdrop-filter:blur(6px);}
+.barra-compra .btn{max-width:520px;margin:0 auto;display:flex;}
+@media (max-width:700px){.barra-compra.visible{display:block;} body{padding-bottom:84px;}}
+.pie{padding:48px 16px 30px;}
+</style>
+</head>
+<body>
+<header class="portada" style="--foto:url('assets/portada.webp')">
+  <div class="dentro">
+    <img class="logo" src="assets/logo.webp" width="120" height="120" alt="">
+    <p class="organiza" id="organiza"></p>
+    <h1 id="nombre">%%NOMBRE%%</h1>
+    <p class="cuando" id="cuando"></p>
+    <p class="lugar" id="lugar"></p>
+    <div class="cuenta" id="cuenta" hidden><div><b id="c-d">0</b><small>días</small></div><div><b id="c-h">0</b><small>horas</small></div><div><b id="c-m">0</b><small>min</small></div></div>
+    <a class="btn" id="btn-comprar" href="/comprar">Comprar entradas</a>
+  </div>
+</header>
+
+<section class="seccion" id="entradas">
+  <h2>Entradas</h2>
+  <p class="sub" id="sub-entradas">Pagás por transferencia y el QR te llega al correo al instante.</p>
+  <div class="entradas" id="lista"></div>
+</section>
+
+<section class="seccion">
+  <h2>Cuándo y dónde</h2>
+  <div class="datos" id="datos"></div>
+</section>
+
+<section class="seccion">
+  <h2>Preguntas frecuentes</h2>
+  <div class="preguntas" id="preguntas"></div>
+</section>
+
+<p class="pie">¿Ya compraste? <a href="/mis-entradas">Mis entradas</a></p>
+<div class="barra-compra" id="barra"><a class="btn" href="/comprar">Comprar entradas</a></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const pesos = n => '$' + Number(n).toLocaleString('es-AR');
+const esc = x => String(x ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function cuentaRegresiva(fechaISO) {
+  const objetivo = new Date(fechaISO + 'T20:00:00-03:00').getTime();
+  const pintar = () => {
+    const falta = objetivo - Date.now();
+    if (falta <= 0) { $('#cuenta').hidden = true; return; }
+    $('#cuenta').hidden = false;
+    $('#c-d').textContent = Math.floor(falta / 864e5); $('#c-h').textContent = Math.floor(falta / 36e5) % 24; $('#c-m').textContent = Math.floor(falta / 6e4) % 60;
+  };
+  pintar(); setInterval(pintar, 30000);
+}
+
+fetch('/api/config').then(r => r.json()).then(c => {
+  const e = c.evento;
+  $('#organiza').textContent = e.organiza || '';
+  $('#nombre').textContent = e.nombre; $('#cuando').textContent = e.cuando; $('#lugar').textContent = e.lugar;
+  cuentaRegresiva(e.fecha);
+  const abierta = c.ventaAbierta;
+  if (!abierta) {
+    $('#btn-comprar').textContent = 'Entradas muy pronto'; $('#btn-comprar').removeAttribute('href'); $('#btn-comprar').style.opacity = '.7';
+    $('#sub-entradas').textContent = 'La venta online abre muy pronto.';
+  } else { $('#barra').classList.add('visible'); }
+  $('#lista').innerHTML = Object.entries(c.tipos).map(([k, t]) => {
+    const sello = t.estado === 'agotado' ? '<span class="sello">Agotado</span>' : t.estado === 'pocas' ? '<span class="sello pocas">Quedan pocas</span>' : '';
+    const boton = abierta && t.estado !== 'agotado' ? `<a class="btn" href="/comprar?tipo=${encodeURIComponent(k)}">Comprar</a>` : '';
+    return `<div class="entrada">${sello}<b>${esc(t.nombre)}</b><small>${esc(t.detalle || '')}</small><div class="precio">${pesos(t.final)}</div>${boton}</div>`;
+  }).join('');
+  const mapa = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent([e.lugar, e.direccion].filter(Boolean).join(', '));
+  $('#datos').innerHTML = [
+    ['Cuándo', esc(e.cuando)],
+    ['Dónde', `${esc(e.lugar)}${e.direccion ? '<br>' + esc(e.direccion) : ''}<br><a href="${mapa}" target="_blank" rel="noopener">Ver en el mapa</a>`],
+    ...(e.puertas ? [['Apertura de puertas', esc(e.puertas)]] : []),
+    ...(e.menores ? [['Menores', esc(e.menores)]] : []),
+  ].map(([t, v]) => `<div class="dato"><small>${t}</small><p>${v}</p></div>`).join('');
+  const ayuda = e.ayudaWhatsapp ? ` Si tenés un problema, escribinos por <a href="https://wa.me/${encodeURIComponent(e.ayudaWhatsapp)}" target="_blank" rel="noopener">WhatsApp</a>.` : '';
+  $('#preguntas').innerHTML = [
+    ['¿Cómo pago?', 'Por transferencia, desde la app de tu banco o de tu billetera (Mercado Pago, Ualá, Naranja X, MODO o cualquier banco). Al comprar te damos un número de cuenta (CVU) para transferir.'],
+    ['¿Desde qué cuenta transfiero?', 'Desde una cuenta a tu nombre, y poné el DNI del titular de esa cuenta cuando te lo pida. Si transfiere otra persona, el pago no se reconoce automáticamente.' + ayuda],
+    ['¿Cuándo me llegan las entradas?', 'Apenas se acredita la transferencia, que suele tardar unos segundos. Las ves en pantalla y te llegan al correo, con un QR por entrada.'],
+    ['¿Y si pierdo el mail?', 'Entrá a <a href="/mis-entradas">Mis entradas</a> con el email y el DNI que usaste al comprar.'],
+    ['¿Cómo entro?', 'Mostrás el QR en la puerta, desde el celular o impreso. Cada QR sirve una sola vez y cada persona necesita el suyo.'],
+  ].map(([p, r]) => `<details><summary>${p}</summary><p>${r}</p></details>`).join('');
+  fetch('/api/visita', { method: 'POST' }).catch(() => {});
+}).catch(() => {});
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+node_modules/
+.env
+*.env
+backend/usuarios-panel*.txt
+backend/qrs/
+render-env*.txt
+capturas/
+*.bak
+backend/crear-base-aiven.mjs
+*.log
+respaldos/

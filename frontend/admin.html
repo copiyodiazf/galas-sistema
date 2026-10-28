@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel</title>
+<meta name="theme-color" content="#141022">
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="sistema.css">
+<style>
+.marco{max-width:1040px;}
+.barra{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.barra .quien{font-size:13px;color:var(--gris);}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.tabs button{font:800 13px var(--f-texto);letter-spacing:.06em;text-transform:uppercase;padding:10px 14px;border-radius:999px;cursor:pointer;
+  background:rgba(246,240,230,.06);color:var(--crema);border:1px solid rgba(246,240,230,.18);}
+.tabs button.activa{background:var(--oro);color:#1d1830;border-color:var(--oro);}
+.vista{display:none;} .vista.activa{display:block;}
+.chico{font:700 13px var(--f-texto);padding:9px 14px;border-radius:999px;cursor:pointer;border:1px solid rgba(246,240,230,.25);background:transparent;color:var(--crema);text-decoration:none;display:inline-block;}
+.chico.oro{background:var(--oro);color:#1d1830;border-color:var(--oro);}
+.cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px;}
+.cifra{background:rgba(246,240,230,.05);border:1px solid rgba(246,240,230,.12);border-radius:14px;padding:14px;}
+.cifra b{display:block;font-family:var(--f-display);font-weight:700;font-size:28px;line-height:1.1;color:var(--oro-vivo);}
+.cifra span{font-size:12px;color:var(--gris);}
+.cifra.alerta{border-color:rgba(217,83,79,.6);background:rgba(217,83,79,.1);}
+.noche{background:rgba(246,240,230,.05);border:1px solid rgba(246,240,230,.12);border-radius:16px;padding:16px;}
+.noche h3{font-family:var(--f-display);font-weight:700;font-size:22px;}
+.barra-cupo{height:12px;border-radius:999px;background:rgba(246,240,230,.1);overflow:hidden;margin:10px 0 6px;display:flex;}
+.barra-cupo i{display:block;height:100%;}
+.noches{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;}
+.tabla{overflow:auto;border-radius:14px;border:1px solid rgba(246,240,230,.12);margin-top:12px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(246,240,230,.07);white-space:nowrap;}
+th{background:rgba(28,22,48,.97);color:var(--oro);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;position:sticky;top:0;}
+td.n,th.n{text-align:right;}
+tr.click{cursor:pointer;} tr.click:hover{background:rgba(231,194,125,.07);}
+.etq{display:inline-block;font-weight:800;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:3px 7px;background:rgba(246,240,230,.1);}
+.etq.hoy{background:rgba(231,194,125,.22);color:var(--oro-vivo);}
+/* puerta */
+.selector{display:flex;gap:8px;justify-content:center;margin:6px 0 14px;flex-wrap:wrap;}
+.selector button{flex:1;min-width:120px;max-width:220px;font:800 15px var(--f-texto);padding:14px;border-radius:14px;cursor:pointer;border:2px solid rgba(246,240,230,.2);background:transparent;color:var(--crema);}
+.selector button.activa{border-color:var(--oro);background:rgba(231,194,125,.14);color:var(--oro-vivo);}
+#reader{width:100%;max-width:380px;margin:0 auto;border-radius:16px;overflow:hidden;}
+.resultado{max-width:380px;margin:14px auto;border-radius:18px;padding:22px;text-align:center;color:#fff;display:none;}
+.resultado.ok{background:#15803d;} .resultado.err{background:#b91c1c;} .resultado.warn{background:#c2410c;}
+.resultado .grande{font-family:var(--f-texto);font-weight:800;font-size:34px;line-height:1.05;text-transform:uppercase;}
+.resultado .detalle{font-weight:700;margin-top:6px;}
+.contador{text-align:center;color:var(--gris);font-size:14px;margin:10px 0;} .contador b{color:var(--oro-vivo);}
+/* modal */
+.modal{display:none;position:fixed;inset:0;background:rgba(8,6,16,.82);z-index:50;align-items:center;justify-content:center;padding:14px;}
+.modal.abierto{display:flex;}
+.modal-caja{background:var(--noche-2);border:1px solid rgba(231,194,125,.25);border-radius:18px;max-width:620px;width:100%;max-height:92vh;overflow:auto;padding:20px;}
+.qr-mini{display:inline-block;background:#fff;border-radius:12px;padding:8px;margin:6px;text-align:center;color:#1d1830;font-weight:700;font-size:12px;}
+.qr-mini img{display:block;width:170px;height:170px;}
+.fila{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.fila input{flex:1;min-width:180px;}
+.ok-msg{color:#86efac;font-size:13px;} .err-msg{color:#fca5a5;font-size:13px;}
+.login{max-width:380px;margin:30px auto;}
+.login img{display:block;width:130px;height:130px;margin:0 auto 10px;border-radius:50%;object-fit:cover;}
+.sandbox{background:#7c2d12;color:#ffedd5;border-radius:12px;padding:8px 12px;font-size:12.5px;font-weight:700;margin-bottom:12px;}
+.enlace{word-break:break-all;font-size:12.5px;background:rgba(0,0,0,.3);border-radius:10px;padding:10px;margin-top:10px;}
+</style>
+</head>
+<body>
+<main class="marco">
+
+  <!-- ══ Ingreso ══ -->
+  <section id="v-login" class="login" hidden>
+    <img src="assets/logo.webp" width="130" height="130" alt="">
+    <h1 class="centro" style="font-size:28px;">Panel de <em>entradas</em></h1>
+    <p class="centro bajada" data-evento="nombre"></p>
+    <form class="tarjeta" id="f-login">
+      <label for="l-user">Usuario</label><input id="l-user" autocomplete="username" autocapitalize="off">
+      <label for="l-pass">Clave</label><input id="l-pass" type="password" autocomplete="current-password">
+      <div class="error" id="l-err"></div>
+      <button class="btn" type="submit" style="margin-top:16px;">Ingresar</button>
+    </form>
+  </section>
+
+  <!-- ══ Panel ══ -->
+  <section id="v-panel" hidden>
+    <div class="barra">
+      <a class="cabeza" href="/" style="padding:0;"><img src="assets/logo.webp" width="46" height="46" alt="">
+        <span><small id="rol-txt">Panel</small><b data-evento="nombre">Entradas</b></span></a>
+      <div class="fila"><span class="quien" id="quien"></span><button class="chico" onclick="salir()">Salir</button></div>
+    </div>
+    <div class="sandbox" id="aviso-sandbox" hidden>Chytapay en modo PRUEBA: los pagos no son reales.</div>
+    <nav class="tabs" id="tabs"></nav>
+
+    <!-- Resumen -->
+    <div class="vista" id="t-resumen">
+      <div class="fila" style="justify-content:space-between;">
+        <h2 style="font-family:var(--f-display);font-size:26px;">Resumen</h2>
+        <button class="chico" onclick="cargarResumen()">Actualizar</button>
+      </div>
+      <div class="noches" id="r-tipos" style="margin-top:10px;"></div>
+      <div class="cifras" id="r-cifras"></div>
+      <h3 class="paso" style="margin-top:20px;">Online (transferencia por Chytapay)</h3>
+      <div class="tabla"><table><thead><tr><th>Medio</th><th class="n">Compras</th><th class="n">Entradas</th><th class="n">Importe</th></tr></thead><tbody id="r-online"></tbody></table></div>
+      <h3 class="paso" style="margin-top:20px;">Puntos de venta</h3>
+      <div class="tabla"><table><thead><tr><th>Punto</th><th class="n">Ventas</th><th class="n">Entradas</th><th class="n">Cobrado</th><th class="n">Para la academia</th><th class="n">Servicio</th></tr></thead><tbody id="r-puntos"></tbody></table></div>
+    </div>
+
+    <!-- Ventas / Buscar -->
+    <div class="vista" id="t-ventas">
+      <div class="fila"><input id="buscar" placeholder="Buscar por DNI, email, nombre o número de compra" autocomplete="off">
+        <button class="chico oro" onclick="buscar()">Buscar</button></div>
+      <p class="ayuda" id="ventas-titulo" style="margin-top:8px;"></p>
+      <div class="tabla"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Nombre</th><th>DNI</th><th class="n">Cant.</th><th class="n">Total</th><th>Medio</th><th>Ingresó</th></tr></thead><tbody id="v-filas"></tbody></table></div>
+    </div>
+
+    <!-- Puerta -->
+    <div class="vista" id="t-puerta">
+      <div id="puerta-tipos" hidden>
+        <p class="centro paso" style="justify-content:center;">¿Qué entradas estás controlando?</p>
+        <div class="selector" id="sel-puerta"></div>
+      </div>
+      <div class="centro">
+        <button class="btn" id="b-camara" onclick="abrirCamara()" style="max-width:380px;">Abrir la cámara</button>
+        <p style="margin-top:10px;"><button class="chico" onclick="probarSonido()">Probar el sonido</button></p>
+      </div>
+      <div id="zona-scan" hidden>
+        <div id="reader"></div>
+        <div class="resultado" id="res"><div class="grande" id="res-tit"></div><div class="detalle" id="res-det"></div>
+          <button class="btn" onclick="siguiente()" style="margin-top:14px;background:#fff;">Escanear el siguiente</button></div>
+        <div class="contador">Ingresaron <b id="ingresados">0</b> en este celular</div>
+        <div class="fila" style="max-width:380px;margin:0 auto;"><input id="codigo-manual" placeholder="…o pegá el código del QR"><button class="chico oro" onclick="validarManual()">Validar</button></div>
+        <p class="centro" style="margin-top:12px;"><button class="chico" onclick="cerrarCamara()">Cerrar la cámara</button></p>
+      </div>
+    </div>
+
+    <!-- Punto de venta -->
+    <div class="vista" id="t-punto">
+      <form class="tarjeta" id="f-punto" style="margin-top:0;">
+        <p class="paso"><span>1</span>Venta en el punto</p>
+        <div class="selector" id="p-tipos"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><label for="p-cant">Cantidad</label><input id="p-cant" type="number" min="1" max="20" value="1"></div>
+          <div><label for="p-cobro">Cobro</label><select id="p-cobro"><option value="efectivo">Efectivo</option><option value="transferencia">Transferencia</option></select></div>
+        </div>
+        <label for="p-nombre">Nombre y apellido</label><input id="p-nombre" autocomplete="off">
+        <label for="p-email">Email (ahí le llegan las entradas)</label><input id="p-email" type="email" autocapitalize="off" autocomplete="off">
+        <label for="p-dni">DNI</label><input id="p-dni" inputmode="numeric" maxlength="9" autocomplete="off">
+        <div class="aviso" id="p-total" style="margin-top:14px;"></div>
+        <div class="error" id="p-err"></div>
+        <button class="btn" type="submit" style="margin-top:14px;">Cobrar y emitir</button>
+      </form>
+      <section class="tarjeta">
+        <div class="fila" style="justify-content:space-between;"><p class="paso" style="margin:0;">Mi liquidación</p><button class="chico" onclick="cargarMisVentas()">Actualizar</button></div>
+        <div class="cifras" id="mv-cifras"></div>
+        <div class="tabla"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Nombre</th><th class="n">Cant.</th><th>Cobro</th><th class="n">Total</th></tr></thead><tbody id="mv-filas"></tbody></table></div>
+      </section>
+    </div>
+
+    <!-- Herramientas -->
+    <div class="vista" id="t-herramientas">
+      <section class="tarjeta solo-admin" style="margin-top:0;" id="caja-chytapay">
+        <p class="paso">Cobro online: Chytapay</p>
+        <div id="cy-estado" class="ayuda">Consultando…</div>
+        <button class="chico oro" onclick="conectarChytapay()" style="margin-top:10px;" id="cy-boton">Generar enlace para conectar la cuenta de la academia</button>
+        <div id="cy-enlace"></div>
+      </section>
+      <section class="tarjeta">
+        <p class="paso">Planilla</p>
+        <button class="chico" onclick="exportar()">Descargar todas las ventas (CSV)</button>
+      </section>
+      <section class="tarjeta">
+        <div class="fila" style="justify-content:space-between;"><p class="paso" style="margin:0;">Transferencias sin asignar</p><button class="chico" onclick="cargarSinImputar()">Actualizar</button></div>
+        <p class="ayuda">Plata que entró a la cuenta de la academia pero no se pudo asignar sola a una compra (pagó otra persona, pagó tarde o pagó dos veces).
+          La academia la asigna desde su cuenta de Chytapay a la compra que corresponde, y ahí se emiten las entradas solas.</p>
+        <div class="tabla"><table><thead><tr><th>Fecha</th><th class="n">Monto</th><th>Quién pagó</th><th>Motivo</th><th>Compra</th><th></th></tr></thead><tbody id="si-filas"></tbody></table></div>
+      </section>
+      <section class="tarjeta solo-admin">
+        <p class="paso">Cortesía</p>
+        <p class="ayuda">Entrada sin cargo: ocupa lugar en el cupo y le llega al mail como cualquier otra.</p>
+        <div class="selector" id="c-tipos" style="margin-top:10px;"></div>
+        <div class="fila"><input id="c-nombre" placeholder="Nombre"><input id="c-email" placeholder="Email" type="email"><input id="c-cant" type="number" min="1" max="20" value="1" style="max-width:90px;flex:0 0 90px;"></div>
+        <button class="chico oro" onclick="cortesia()" style="margin-top:10px;">Emitir cortesía</button> <span id="c-msg"></span>
+      </section>
+      <section class="tarjeta solo-admin">
+        <p class="paso">Pruebas</p>
+        <button class="chico" onclick="prueba()">Generar entrada de prueba</button>
+        <button class="chico" onclick="repescar()">Revisar pagos pendientes ahora</button>
+        <div id="prueba-qrs" style="margin-top:10px;"></div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<!-- QR de una compra -->
+<div class="modal" id="m-qr" onclick="if(event.target===this)cerrarModal('m-qr')">
+  <div class="modal-caja">
+    <p class="paso" id="mq-tit"></p>
+    <p class="ayuda" id="mq-sub"></p>
+    <div id="mq-qrs" class="centro" style="margin-top:8px;"></div>
+    <div class="fila" style="margin-top:14px;" id="mq-ingreso"><button class="chico oro" onclick="ingresoManual()">Marcar ingreso de toda la compra</button><span id="mq-ing-msg"></span></div>
+    <p class="ayuda puede-reenviar" style="margin-top:14px;">¿Puso mal el email? Reenviá las entradas al correcto:</p>
+    <div class="fila puede-reenviar"><input id="mq-email" type="email" placeholder="email correcto"><button class="chico" onclick="reenviar()">Reenviar</button></div>
+    <div id="mq-msg" style="margin-top:6px;"></div>
+    <p class="centro" style="margin-top:14px;"><button class="chico" onclick="cerrarModal('m-qr')">Cerrar</button></p>
+  </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="cabeza.js"></script>
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const pesos = n => '$' + Math.round(Number(n || 0)).toLocaleString('es-AR');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fecha = f => new Date(f).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+const MOTIVO = { expired: 'Pagó después de vencer', already_paid: 'Pagó dos veces', canceled: 'Compra cancelada', no_cuil_match: 'Pagó otra persona', no_pending: 'Sin compra abierta', ambiguous: 'Más de una compra posible' };
+let S = JSON.parse(localStorage.getItem('gala_sesion') || 'null');
+let PUERTA = localStorage.getItem('gala_puerta') || '';   // '' = todas
+let CFG = null, P_TIPO = null, C_TIPO = null;
+const nombreTipo = t => CFG?.tipos?.[t]?.corto || t;
+const etq = t => `<span class="etq">${esc(nombreTipo(t))}</span>`;
+
+async function api(url, opciones = {}) {
+  const r = await fetch(url, { ...opciones, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (S?.token || ''), ...(opciones.headers || {}) } });
+  if (r.status === 401) { salir(); throw new Error('La sesión venció: volvé a ingresar.'); }
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || d.msg || 'Error');
+  return d;
+}
+
+// ── Ingreso ──
+$('#f-login').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const e = $('#l-err'); e.style.display = 'none';
+  try {
+    const r = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ usuario: $('#l-user').value.trim(), password: $('#l-pass').value }) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'No se pudo ingresar');
+    S = d; localStorage.setItem('gala_sesion', JSON.stringify(d));
+    armar();
+  } catch (x) { e.textContent = x.message; e.style.display = 'block'; }
+});
+function salir() { localStorage.removeItem('gala_sesion'); S = null; cerrarCamara(); location.href = '/admin'; }
+
+// ── Pestañas según el rol ──
+const PESTANAS = {
+  admin: [['resumen', 'Resumen'], ['ventas', 'Ventas'], ['puerta', 'Puerta'], ['punto', 'Punto de venta'], ['herramientas', 'Herramientas']],
+  // La academia: ve todo; no vende ni emite (sin "Punto de venta", ni cortesías, ni pruebas)
+  organizador: [['resumen', 'Resumen'], ['ventas', 'Ventas'], ['puerta', 'Puerta'], ['herramientas', 'Planilla y pagos']],
+  control: [['puerta', 'Puerta'], ['ventas', 'Buscar']],
+  venta: [['punto', 'Vender'], ['ventas', 'Buscar']],
+};
+const ES_ADMIN = () => S.rol === 'admin';
+const VE_TODO = () => ['admin', 'organizador'].includes(S.rol);
+async function armar() {
+  $('#v-login').hidden = true; $('#v-panel').hidden = false;
+  $('#quien').textContent = S.nombre || S.usuario;
+  $('#rol-txt').textContent = { admin: 'Administración', organizador: 'Organización', control: 'Puerta', venta: 'Punto de venta' }[S.rol];
+  $$('.solo-admin').forEach(e => e.hidden = !ES_ADMIN());
+  $$('.puede-reenviar').forEach(e => e.hidden = !['admin', 'venta'].includes(S.rol));
+  $('#tabs').innerHTML = PESTANAS[S.rol].map(([k, t]) => `<button data-t="${k}">${t}</button>`).join('');
+  $$('#tabs button').forEach(b => b.onclick = () => abrir(b.dataset.t));
+  try { CFG = await (await fetch('/api/config')).json(); } catch (e) {}
+  if (CFG?.sandbox) $('#aviso-sandbox').hidden = false;
+  pintarSelectores();
+  abrir(PESTANAS[S.rol][0][0]);
+  avisoChytapay();
+}
+function abrir(t) {
+  $$('#tabs button').forEach(b => b.classList.toggle('activa', b.dataset.t === t));
+  $$('.vista').forEach(v => v.classList.toggle('activa', v.id === 't-' + t));
+  if (t !== 'puerta') cerrarCamara();
+  if (t === 'resumen') cargarResumen();
+  if (t === 'ventas' && VE_TODO() && !$('#buscar').value) cargarResumen();
+  if (t === 'punto') cargarMisVentas();
+  if (t === 'herramientas') { cargarSinImputar(); if (ES_ADMIN()) estadoChytapay(); }
+}
+
+// ── Resumen ──
+let ULTIMAS = [];
+async function cargarResumen() {
+  try {
+    const d = await api('/api/admin/resumen');
+    $('#r-tipos').innerHTML = Object.entries(d.tipos).map(([k, n]) => {
+      const v = n.vendidas / n.cupo * 100, r = n.reservadas / n.cupo * 100;
+      return `<div class="noche"><h3>${esc(n.nombre)}</h3>
+        <div class="barra-cupo"><i style="width:${v}%;background:var(--oro)"></i><i style="width:${r}%;background:rgba(231,194,125,.4)"></i></div>
+        <p style="font-size:14px;"><b style="font-size:20px">${n.vendidas.toLocaleString('es-AR')}</b> de ${n.cupo.toLocaleString('es-AR')} vendidas · <b>${n.libres.toLocaleString('es-AR')}</b> libres</p>
+        <p class="ayuda">${n.reservadas} pagando ahora · ingresaron ${n.ingresaron.toLocaleString('es-AR')}</p></div>`;
+    }).join('');
+    $('#r-cifras').innerHTML = [
+      [pesos(d.recaudado), 'Recaudado para la academia'], [d.entradas.toLocaleString('es-AR'), 'Entradas vendidas'], [d.ordenes, 'Compras'],
+      [d.cortesias, 'Cortesías'], [d.pendientes, 'Pagando ahora'], [d.visitas.hoy + ' / ' + d.visitas.total, 'Visitas hoy / total'],
+    ].map(([b, s]) => `<div class="cifra"><b>${b}</b><span>${s}</span></div>`).join('')
+      + (d.sinImputar ? `<div class="cifra alerta" style="cursor:pointer" onclick="abrir('herramientas')"><b>${d.sinImputar}</b><span>Transferencias sin asignar: ver</span></div>` : '');
+    $('#r-online').innerHTML = d.online.operaciones
+      ? `<tr><td>Transferencia</td><td class="n">${d.online.operaciones}</td><td class="n">${d.online.entradas}</td><td class="n">${pesos(d.online.importe)}</td></tr>`
+      : '<tr><td colspan="4" class="ayuda">Todavía no hay ventas online.</td></tr>';
+    $('#r-puntos').innerHTML = d.porPunto.map(p => `<tr><td>${esc(p.vendedor)}</td><td class="n">${p.operaciones}</td><td class="n">${p.entradas}</td><td class="n">${pesos(p.total)}</td><td class="n">${pesos(p.subtotal)}</td><td class="n">${pesos(p.cargo)}</td></tr>`).join('') || '<tr><td colspan="6" class="ayuda">Todavía no hay ventas en puntos.</td></tr>';
+    ULTIMAS = d.ultimas;
+    if (!$('#buscar').value) pintarVentas(ULTIMAS, 'Últimas 200 compras');
+  } catch (x) { alert(x.message); }
+}
+function pintarVentas(lista, titulo) {
+  $('#ventas-titulo').textContent = titulo;
+  window._lista = lista;
+  $('#v-filas').innerHTML = lista.map((o, i) => `<tr class="click" onclick="verOrden(${i})">
+    <td>${fecha(o.fecha)}</td><td>${etq(o.tipo)}</td><td>${esc(o.nombre)}${o.estado === 'reversada' ? ' <span class="etq" style="background:#7f1d1d">devuelta</span>' : ''}</td><td>${esc(o.dni || '')}</td>
+    <td class="n">${o.cantidad}</td><td class="n">${pesos(o.total)}</td><td>${esc(o.metodo === 'punto' ? 'punto: ' + o.vendedor : o.metodo === 'cortesia' ? 'cortesía' : 'transferencia')}</td>
+    <td>${o.ingresadas}/${o.cantidad}</td></tr>`).join('')
+    || '<tr><td colspan="8" class="ayuda">Sin resultados.</td></tr>';
+}
+async function buscar() {
+  const q = $('#buscar').value.trim();
+  if (q.length < 3) { if (VE_TODO()) pintarVentas(ULTIMAS, 'Últimas 200 compras'); return; }
+  try { const d = await api('/api/admin/buscar?q=' + encodeURIComponent(q)); pintarVentas(d.ordenes, `${d.ordenes.length} resultado(s) para "${q}"`); } catch (x) { alert(x.message); }
+}
+$('#buscar').addEventListener('keydown', e => { if (e.key === 'Enter') buscar(); });
+
+// ── QR de una compra ──
+let ORDEN = null;
+async function verOrden(i) {
+  const o = window._lista[i]; ORDEN = o;
+  try {
+    const d = await api('/api/admin/orden/' + encodeURIComponent(o.id) + '/qrs');
+    $('#mq-tit').textContent = `${d.tipoNombre} · ${d.cantidad}`;
+    $('#mq-sub').textContent = `${d.nombre} · ${d.email} · DNI ${d.dni || '—'}${o.pagador ? ' · pagó: ' + o.pagador : ''}`;
+    $('#mq-qrs').innerHTML = d.qrs.map(q => `<div class="qr-mini"><img src="${esc(q.url)}" alt="">${q.indice} de ${d.cantidad}${q.usado ? ' · ya entró' : ''}</div>`).join('');
+    $('#mq-ingreso').hidden = S.rol === 'venta';
+    $('#mq-email').value = d.email; $('#mq-msg').innerHTML = ''; $('#mq-ing-msg').innerHTML = '';
+    $('#m-qr').classList.add('abierto');
+  } catch (x) { alert(x.message); }
+}
+function cerrarModal(id) { $('#' + id).classList.remove('abierto'); }
+async function reenviar() {
+  try { const d = await api(`/api/admin/orden/${encodeURIComponent(ORDEN.id)}/reenviar`, { method: 'POST', body: JSON.stringify({ email: $('#mq-email').value.trim() }) });
+    $('#mq-msg').innerHTML = `<span class="ok-msg">Enviadas ${d.cantidad} a ${esc(d.email)}.</span>`; }
+  catch (x) { $('#mq-msg').innerHTML = `<span class="err-msg">${esc(x.message)}</span>`; }
+}
+async function ingresoManual() {
+  try { const d = await api(`/api/admin/orden/${encodeURIComponent(ORDEN.id)}/ingresar`, { method: 'POST' });
+    $('#mq-ing-msg').innerHTML = `<span class="ok-msg">Marcadas ${d.marcadas} de ${d.total}.</span>`; }
+  catch (x) { $('#mq-ing-msg').innerHTML = `<span class="err-msg">${esc(x.message)}</span>`; }
+}
+
+// ── Selectores de tipo (puerta, punto de venta y cortesía) ──
+function pintarSelectores() {
+  if (!CFG?.tipos) return;
+  const ids = Object.keys(CFG.tipos);
+  if (!P_TIPO || !CFG.tipos[P_TIPO]) P_TIPO = ids[0];
+  if (!C_TIPO || !CFG.tipos[C_TIPO]) C_TIPO = ids[0];
+  const botones = actual => ids.map(k => `<button type="button" data-tipo="${esc(k)}" class="${k === actual ? 'activa' : ''}">${esc(CFG.tipos[k].corto)}</button>`).join('');
+  $('#p-tipos').innerHTML = botones(P_TIPO); $('#c-tipos').innerHTML = botones(C_TIPO);
+  $$('#p-tipos button').forEach(b => b.onclick = () => { P_TIPO = b.dataset.tipo; pintarSelectores(); });
+  $$('#c-tipos button').forEach(b => b.onclick = () => { C_TIPO = b.dataset.tipo; pintarSelectores(); });
+  // En la puerta solo hace falta elegir si hay más de un tipo (por ejemplo dos funciones)
+  $('#puerta-tipos').hidden = ids.length < 2;
+  if (PUERTA && !CFG.tipos[PUERTA]) PUERTA = '';
+  $('#sel-puerta').innerHTML = `<button type="button" data-p="" class="${PUERTA === '' ? 'activa' : ''}">Todas</button>`
+    + ids.map(k => `<button type="button" data-p="${esc(k)}" class="${k === PUERTA ? 'activa' : ''}">${esc(CFG.tipos[k].corto)}</button>`).join('');
+  $$('#sel-puerta button').forEach(b => b.onclick = () => { PUERTA = b.dataset.p; localStorage.setItem('gala_puerta', PUERTA); pintarSelectores(); });
+  totalPunto();
+}
+function totalPunto() {
+  if (!CFG?.tipos || !P_TIPO) return;
+  const t = CFG.tipos[P_TIPO], c = Math.max(1, +$('#p-cant').value || 1);
+  // Precio único, igual que online: el vendedor cobra un solo número, sin servicio aparte.
+  const pct = CFG.cargoPuntoPct ?? 10, unidad = t.precio + Math.round(t.precio * pct / 100);
+  $('#p-total').innerHTML = `Cobrás <b style="font-size:20px">${pesos(unidad * c)}</b> · ${c} × ${esc(t.nombre)} (${pesos(unidad)})`;
+}
+$('#p-cant').addEventListener('input', totalPunto);
+$('#p-dni').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, ''); });
+$('#f-punto').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const err = $('#p-err'); err.style.display = 'none';
+  const b = ev.target.querySelector('button[type=submit]'); b.disabled = true;
+  try {
+    const d = await api('/api/admin/venta-punto', { method: 'POST', body: JSON.stringify({ tipo: P_TIPO, cantidad: +$('#p-cant').value, cobro: $('#p-cobro').value,
+      nombre: $('#p-nombre').value, email: $('#p-email').value, dni: $('#p-dni').value }) });
+    ORDEN = { id: d.ordenId };
+    $('#mq-tit').textContent = `Venta registrada · ${pesos(d.total)}`;
+    $('#mq-sub').textContent = 'Las entradas también le llegaron al mail. Puede escanear estos QR ahora mismo.';
+    $('#mq-qrs').innerHTML = d.qrs.map(q => `<div class="qr-mini"><img src="${esc(q.url)}" alt="">${q.indice}</div>`).join('');
+    $('#mq-ingreso').hidden = true; $('#mq-email').value = $('#p-email').value; $('#mq-msg').innerHTML = '';
+    $('#m-qr').classList.add('abierto');
+    ['#p-nombre', '#p-email', '#p-dni'].forEach(s => $(s).value = ''); $('#p-cant').value = 1; totalPunto();
+    cargarMisVentas();
+  } catch (x) { err.textContent = x.message; err.style.display = 'block'; }
+  b.disabled = false;
+});
+async function cargarMisVentas() {
+  try {
+    const d = await api('/api/admin/mis-ventas'), t = d.totales;
+    $('#mv-cifras').innerHTML = [[pesos(t.cobrado), 'Cobrado'], [pesos(t.paraOrganizador), 'Para la academia'], [pesos(t.costoServicio), 'Servicio'],
+      [pesos(t.efectivo), 'En efectivo'], [pesos(t.transferencia), 'Por transferencia'], [t.entradas, 'Entradas']].map(([b, s]) => `<div class="cifra"><b>${b}</b><span>${s}</span></div>`).join('');
+    $('#mv-filas').innerHTML = d.ordenes.map(o => `<tr><td>${fecha(o.fecha)}</td><td>${etq(o.tipo)}</td><td>${esc(o.nombre)}</td><td class="n">${o.cantidad}</td><td>${esc(o.cobro)}</td><td class="n">${pesos(o.total)}</td></tr>`).join('')
+      || '<tr><td colspan="6" class="ayuda">Todavía no vendiste.</td></tr>';
+  } catch (x) { /* el admin puede no tener ventas propias */ }
+}
+
+// ── Herramientas ──
+async function estadoChytapay() {
+  try {
+    const d = await api('/api/admin/chytapay');
+    const v = d.vinculo;
+    $('#cy-estado').innerHTML = (d.produccion ? '<b>Producción</b>' : '<b>Modo prueba (sandbox)</b>') + ' · '
+      + (v ? `Conectada la cuenta de <b>${esc(v.nombre || v.fantasia)}</b> (CUIT ${esc(v.cuit)}) desde el ${new Date(v.conectadoEn).toLocaleDateString('es-AR')}.`
+           : '<span class="err-msg">Todavía no hay una cuenta de la academia conectada: sin eso no se puede cobrar online.</span>')
+      + (d.configurado ? '' : '<br><span class="err-msg">Faltan los datos de Chytapay en el servidor (CHYTAPAY_*).</span>');
+    $('#cy-boton').textContent = v ? 'Volver a conectar (otra cuenta o renovar)' : 'Generar enlace para conectar la cuenta de la academia';
+  } catch (x) { $('#cy-estado').textContent = x.message; }
+}
+async function conectarChytapay() {
+  try {
+    const d = await api('/api/admin/chytapay/conectar', { method: 'POST' });
+    $('#cy-enlace').innerHTML = `<p class="ayuda" style="margin-top:10px;">Abrilo vos con la academia al lado, o mandáselo por WhatsApp. Entra con <b>su</b> usuario de Chytapay, ve la comisión y autoriza. Vence en ${d.minutos} minutos y sirve una sola vez.</p>
+      <div class="enlace" id="cy-url">${esc(d.url)}</div>
+      <div class="fila" style="margin-top:8px;"><button class="chico" onclick="navigator.clipboard.writeText(document.getElementById('cy-url').textContent).then(()=>this.textContent='Copiado')">Copiar enlace</button>
+      <a class="chico oro" href="${esc(d.url)}">Abrirlo acá</a></div>`;
+  } catch (x) { $('#cy-enlace').innerHTML = `<p class="err-msg">${esc(x.message)}</p>`; }
+}
+function avisoChytapay() {
+  const r = new URLSearchParams(location.search).get('chytapay');
+  if (!r) return;
+  history.replaceState(null, '', '/admin');
+  const msg = { ok: 'Listo: la cuenta de Chytapay de la academia quedó conectada.', error: 'No se pudo conectar la cuenta de Chytapay. Probá de nuevo.',
+    vencido: 'El enlace venció o ya se usó. Generá uno nuevo.', cancelado: 'Se canceló la conexión con Chytapay.' }[r];
+  if (msg) setTimeout(() => alert(msg), 300);
+  if (ES_ADMIN()) abrir('herramientas');
+}
+async function cargarSinImputar() {
+  try {
+    const d = await api('/api/admin/sin-imputar');
+    $('#si-filas').innerHTML = d.pagos.map(p => `<tr${p.resuelto ? ' style="opacity:.5"' : ''}><td>${fecha(p.fecha)}</td><td class="n">${pesos(p.monto)}</td><td>${esc(p.pagador || '—')}</td>
+      <td>${esc(MOTIVO[p.motivo] || p.motivo)}</td><td>${p.orden ? esc(p.orden.slice(-8)) : '—'}</td>
+      <td>${p.resuelto ? 'resuelto' : ES_ADMIN() ? `<button class="chico" onclick="resolver(${p.id})">Marcar resuelto</button>` : ''}</td></tr>`).join('')
+      || '<tr><td colspan="6" class="ayuda">No hay transferencias sin asignar.</td></tr>';
+  } catch (x) { /* sin permiso o sin datos */ }
+}
+async function resolver(id) { try { await api(`/api/admin/sin-imputar/${id}/resuelto`, { method: 'POST' }); cargarSinImputar(); } catch (x) { alert(x.message); } }
+async function exportar() {
+  const r = await fetch('/api/admin/exportar', { headers: { Authorization: 'Bearer ' + S.token } });
+  if (!r.ok) return alert('No se pudo exportar');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(await r.blob()); a.download = 'ventas.csv'; a.click();
+}
+async function cortesia() {
+  try { const d = await api('/api/admin/entrada-cortesia', { method: 'POST', body: JSON.stringify({ tipo: C_TIPO, nombre: $('#c-nombre').value, email: $('#c-email').value, cantidad: +$('#c-cant').value }) });
+    $('#c-msg').innerHTML = `<span class="ok-msg">Enviada a ${esc(d.email)}.</span>`; $('#c-nombre').value = ''; $('#c-email').value = ''; }
+  catch (x) { $('#c-msg').innerHTML = `<span class="err-msg">${esc(x.message)}</span>`; }
+}
+async function prueba() {
+  try { const d = await api('/api/admin/entrada-prueba', { method: 'POST', body: JSON.stringify({ tipo: P_TIPO, cantidad: 1 }) });
+    $('#prueba-qrs').innerHTML = `<p class="ayuda">Entrada de prueba: no cuenta en ventas ni en el cupo. Escaneala en la pestaña Puerta.</p>` + d.qrs.map(q => `<div class="qr-mini"><img src="${esc(q.url)}" alt=""></div>`).join(''); }
+  catch (x) { alert(x.message); }
+}
+async function repescar() {
+  try { const d = await api('/api/admin/repescar', { method: 'POST' }); alert(`Revisadas ${d.revisadas} compras sin pagar: ${d.emitidas} estaban pagas y se emitieron.`); cargarResumen(); }
+  catch (x) { alert(x.message); }
+}
+
+// ── Puerta ──
+let escaner = null, procesando = false, pausada = false, ingresados = 0, audio = null;
+function abrirCamara() {
+  if (escaner) return;
+  try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === 'suspended') audio.resume(); } catch (e) {}
+  if (typeof Html5Qrcode === 'undefined') return alert('No cargó el lector de QR: revisá la conexión.');
+  $('#zona-scan').hidden = false; $('#b-camara').hidden = true; $('#reader').style.display = ''; $('#res').style.display = 'none';
+  escaner = new Html5Qrcode('reader');
+  escaner.start({ facingMode: 'environment' }, { fps: 10, qrbox: 250 }, alLeer, () => {}).catch(() => mostrar('err', 'No se abrió la cámara', 'Usá el campo de abajo para pegar el código'));
+}
+function cerrarCamara() {
+  if (escaner) { try { escaner.stop(); } catch (e) {} escaner = null; }
+  $('#zona-scan').hidden = true; $('#b-camara').hidden = false; pausada = false; procesando = false;
+}
+function alLeer(txt) {
+  if (procesando) return;
+  procesando = true;
+  try { escaner.pause(true); pausada = true; } catch (e) {}
+  $('#reader').style.display = 'none';
+  validar(txt).finally(() => { procesando = false; });
+}
+function siguiente() {
+  $('#res').style.display = 'none';
+  if (pausada) { $('#reader').style.display = ''; try { escaner.resume(); } catch (e) {} pausada = false; }
+}
+function validarManual() { const c = $('#codigo-manual').value.trim(); if (c) validar(c); $('#codigo-manual').value = ''; }
+function mostrar(clase, titulo, detalle) { const r = $('#res'); r.className = 'resultado ' + clase; r.style.display = 'block'; $('#res-tit').textContent = titulo; $('#res-det').textContent = detalle || ''; }
+async function validar(codigo) {
+  try {
+    const r = await fetch('/api/validar', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + S.token }, body: JSON.stringify({ codigo, tipo: PUERTA || undefined }) });
+    if (r.status === 401) return salir();
+    const d = await r.json();
+    const det = [d.tipo, d.nombre, d.cantidad > 1 ? `${d.ingresadas} de ${d.cantidad} de esta compra` : ''].filter(Boolean).join(' · ');
+    if (d.ok) { mostrar('ok', d.prueba ? 'Prueba OK' : 'Pasa', det); ingresados++; $('#ingresados').textContent = ingresados; sonar('ok'); }
+    else if (d.estado === 'usado') { mostrar('warn', 'Ya entró', det); sonar('usado'); }
+    else { mostrar('err', d.msg || 'No válida', det); sonar('error'); }
+    if (navigator.vibrate) navigator.vibrate(d.ok ? 120 : [80, 60, 80]);
+  } catch (e) { mostrar('err', 'Sin conexión', 'Probá de nuevo'); sonar('error'); }
+}
+// Sonidos generados (sin archivos): dos notas que suben = pasa · dos iguales = repetida · grave = no pasa
+function tono(f, desde, dur, vol) {
+  const o = audio.createOscillator(), g = audio.createGain(), t = audio.currentTime + desde;
+  o.frequency.setValueAtTime(f, t); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  o.connect(g); g.connect(audio.destination); o.start(t); o.stop(t + dur + .02);
+}
+function sonar(tipo) {
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === 'suspended') audio.resume();
+    if (tipo === 'ok') { tono(880, 0, .09, .35); tono(1320, .1, .14, .35); }
+    else if (tipo === 'usado') { tono(600, 0, .12, .3); tono(600, .18, .12, .3); }
+    else tono(200, 0, .35, .4);
+  } catch (e) {}
+}
+function probarSonido() { sonar('ok'); setTimeout(() => sonar('usado'), 900); setTimeout(() => sonar('error'), 1800); }
+
+// Arranque
+if (S?.token) armar(); else $('#v-login').hidden = false;
+</script>
+</body>
+</html>

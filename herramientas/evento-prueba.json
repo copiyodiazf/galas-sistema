@@ -1,0 +1,15 @@
+{
+  "_ayuda": "Evento de prueba para herramientas/prueba-gala.mjs: dos funciones, una con cupo chico para probar el agotado.",
+  "nombre": "Gala de Prueba 2026",
+  "organiza": "Academia de Prueba",
+  "cuando": "Domingo 13 de diciembre de 2026",
+  "fecha": "2026-12-13",
+  "lugar": "Teatro de Prueba",
+  "direccion": "Calle Falsa 123, Santiago del Estero",
+  "puertas": "19:30 h",
+  "ayudaWhatsapp": "5493850000000",
+  "tipos": [
+    { "id": "f18", "nombre": "Función 18 h", "corto": "18 h", "detalle": "Platea general", "precio": 10000, "cupo": 200 },
+    { "id": "f21", "nombre": "Función 21 h", "corto": "21 h", "detalle": "Platea general", "precio": 12000, "cupo": 3 }
+  ]
+}
