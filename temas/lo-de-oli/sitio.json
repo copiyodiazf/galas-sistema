@@ -1,0 +1,36 @@
+{
+  "_ayuda": "Ficha de Patio Lo de O-Li (La Banda). Las fechas de acá se cargan una sola vez; después se editan desde el panel (Cartelera): ahí se agregan los precios cuando estén. Capacidad por noche: 2000 (no se muestra en la página).",
+  "nombre": "Patio Lo de O-Li",
+  "lema": "Espacio Verde · Patio santiagueño",
+  "organiza": "Patio Lo de O-Li",
+  "lugar": "Patio Lo de O-Li",
+  "direccion": "Av. Besares 2279",
+  "ciudad": "La Banda, Santiago del Estero",
+  "instagram": "",
+  "ayudaWhatsapp": "",
+  "menores": "",
+  "modo": "cartelera",
+  "sobre": {
+    "titulo": "El patio",
+    "parrafos": [
+      "Patio Lo de O-Li es un espacio verde sobre la avenida Besares, en La Banda: un patio santiagueño al aire libre, bajo los árboles, donde el folklore se vive de cerca.",
+      "Un lugar tradicional de La Banda, ligado a la identidad cultural santiagueña. Dos veces por mes abrimos el patio para peñas con artistas de la provincia y del país, para compartir con la familia y los amigos."
+    ]
+  },
+  "feriantes": {
+    "titulo": "Feriantes y emprendedores",
+    "texto": "¿Tenés un emprendimiento y querés vender en nuestras peñas? En cada fecha reservamos lugares para feriantes y emprendedores. Los lugares son limitados: consultá disponibilidad y condiciones por WhatsApp.",
+    "whatsapp": "5493855803901",
+    "mensaje": "Hola, quiero consultar por un lugar para vender en una peña del Patio Lo de O-Li."
+  },
+  "eventos": [
+    { "nombre": "Peña Las Dos Lunas", "subtitulo": "3ª edición · 6° aniversario", "fecha": "2026-11-07",
+      "artistas": ["Claudio Acosta", "Gabriel Acosta", "Enrique Marquetti"], "tipos": [] },
+    { "nombre": "La Vuelta de Los Arcanos", "subtitulo": "Arcanos del Desierto · ¡La vuelta!", "fecha": "2026-11-14",
+      "artistas": ["Arcanos del Desierto", "Los Capis", "Dúo Lemos Bravo"], "tipos": [] },
+    { "nombre": "Kijanoss 20 años", "subtitulo": "Los Kijanoss · 20 años", "fecha": "2026-11-22",
+      "artistas": ["Los Kijanoss", "Dany Hoyos", "Los Sacheros"], "tipos": [] },
+    { "nombre": "Fiesta del Violinero", "subtitulo": "La Fiesta del Violinero", "fecha": "2026-12-04",
+      "artistas": ["Néstor Garnica", "invitados"], "tipos": [] }
+  ]
+}

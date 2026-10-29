@@ -1,10 +1,11 @@
-// Completa la cabecera y el título de las pantallas con los datos del evento (de /api/config),
-// así ninguna pantalla tiene el nombre de la gala escrito a mano.
+// Completa la cabecera y el título de las pantallas con los datos del sitio (de /api/config),
+// así ninguna pantalla tiene el nombre del lugar o de la gala escrito a mano.
 fetch('/api/config').then(r => r.json()).then(c => {
-  const e = c.evento || {};
-  document.querySelectorAll('[data-evento]').forEach(el => {
-    const campo = el.dataset.evento;
-    el.textContent = campo === 'organiza' ? (e.organiza || e.cuando || '') : (e[campo] || el.textContent);
+  const s = c.sitio || {};
+  window.SITIO = s;
+  document.querySelectorAll('[data-sitio]').forEach(el => {
+    const campo = el.dataset.sitio;
+    el.textContent = campo === 'bajada' ? (s.lema || s.organiza || s.ciudad || '') : (s[campo] || el.textContent);
   });
-  if (e.nombre && !document.title.includes(e.nombre)) document.title += ' · ' + e.nombre;
+  if (s.nombre && !document.title.includes(s.nombre)) document.title += ' · ' + s.nombre;
 }).catch(() => {});

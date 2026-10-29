@@ -12,8 +12,8 @@
       <img src="${esc(q.url)}" width="250" height="250" alt="Código QR ${q.indice}"></div>`).join('');
     $('#contenido').innerHTML = `
       <h1>¡Listo, <em>${esc(d.nombre)}</em>!</h1>
-      <p class="bajada">Tu compra se confirmó. Las entradas también te llegaron a <b style="color:var(--crema)">${esc(d.email)}</b>.</p>
-      <div class="aviso" style="margin-top:16px;"><b>Hacé una captura de pantalla de cada QR.</b> En el lugar puede no haber señal. Cada QR sirve una sola vez.</div>
+      <p class="bajada">Tu compra para <b style="color:var(--crema)">${esc(d.eventoNombre)}</b> (${esc(d.cuando)}) se confirmó. Las entradas también te llegaron a <b style="color:var(--crema)">${esc(d.email)}</b>.</p>
+      <div class="aviso" style="margin-top:16px;"><b>Hacé una captura de pantalla de cada QR.</b> En el lugar puede no haber señal. Cada QR sirve una sola vez, solo esa fecha.</div>
       <div class="qrs">${qrs}</div>
       <p style="margin-top:18px;"><a class="btn" href="/mis-entradas">Ver mis entradas</a></p>
       <p style="margin-top:10px;"><a class="btn linea" href="/">Volver al evento</a></p>`;

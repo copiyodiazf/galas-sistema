@@ -1,11 +1,12 @@
 import { DataTypes } from 'sequelize'
 import { sequelize } from '../database.js'
 
-// Una orden de compra: siempre de UN tipo de entrada (los define evento.json) y
-// de 1 a MAX_ENTRADAS unidades. Así la compra es corta y el cupo se cuenta fácil.
+// Una orden de compra: siempre de UN evento y UN tipo de entrada de ese evento, y de 1 a
+// MAX_ENTRADAS unidades. Así la compra es corta y el cupo se cuenta fácil.
 const Orden = sequelize.define('Orden', {
   id:        { type: DataTypes.STRING, primaryKey: true },   // 'orden_<uuid>' = referenceId del cobro en Chytapay
-  tipo:      { type: DataTypes.STRING(40), allowNull: false },
+  evento:    { type: DataTypes.STRING(60), allowNull: false },   // id del evento de la cartelera
+  tipo:      { type: DataTypes.STRING(40), allowNull: false },   // id del tipo de entrada dentro del evento
   nombre:    { type: DataTypes.STRING, allowNull: false },
   email:     { type: DataTypes.STRING, allowNull: false },
   dni:       { type: DataTypes.STRING, allowNull: true },
@@ -29,7 +30,7 @@ const Orden = sequelize.define('Orden', {
 }, {
   tableName: 'ordenes',
   timestamps: true,
-  indexes: [{ fields: ['estado', 'createdAt'] }, { fields: ['email'] }, { fields: ['dni'] }, { fields: ['vendedor'] }],
+  indexes: [{ fields: ['evento', 'estado'] }, { fields: ['estado', 'createdAt'] }, { fields: ['email'] }, { fields: ['dni'] }, { fields: ['vendedor'] }],
 })
 
 export default Orden

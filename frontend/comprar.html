@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="sistema.css">
+<link rel="stylesheet" href="/tema.css">
 <style>
 .tipos{display:grid;gap:10px;}
 .tipo{position:relative;display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;cursor:pointer;
@@ -40,6 +41,11 @@
 .medios span{font-weight:700;font-size:12px;padding:5px 10px;border-radius:999px;background:rgba(246,240,230,.08);border:1px solid rgba(246,240,230,.16);}
 .sandbox{background:#7c2d12;color:#ffedd5;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:700;margin-top:12px;}
 .cerrada{display:none;}
+.evento-elegido{display:flex;gap:14px;align-items:center;}
+.evento-elegido img{width:84px;height:84px;border-radius:14px;object-fit:cover;flex:none;}
+.evento-elegido b{display:block;font-family:var(--f-display);font-size:21px;line-height:1.15;}
+.evento-elegido small{display:block;color:var(--gris);font-size:13px;margin-top:3px;}
+.evento-elegido .cambiar{font-size:13px;margin-top:6px;display:inline-block;}
 .importante{margin-top:14px;border-left:4px solid var(--oro);background:rgba(231,194,125,.1);border-radius:10px;padding:11px 14px;font-size:14px;}
 /* Pago simulado (solo pruebas en una PC) */
 .simulado{position:fixed;inset:0;background:rgba(10,8,18,.85);display:none;align-items:center;justify-content:center;padding:16px;z-index:60;}
@@ -55,11 +61,18 @@
   <h1>Comprá tu <em>entrada</em></h1>
   <p class="bajada" id="bajada">Elegís, pagás por transferencia y el QR te llega al correo al instante.</p>
   <div class="sandbox" id="sandbox" hidden>MODO PRUEBA: los pagos no son reales.</div>
-  <div class="tarjeta cerrada" id="cerrada"><p>La venta online todavía no está abierta. Volvé a la <a href="/">página del evento</a>.</p></div>
+  <div class="tarjeta cerrada" id="cerrada"><p>La venta online todavía no está abierta. Volvé a la <a href="/">página principal</a>.</p></div>
 
   <form id="compra" novalidate>
+    <section class="tarjeta" id="caja-fechas" hidden>
+      <p class="paso"><span>1</span>¿Qué fecha?</p>
+      <div class="tipos" id="fechas"></div>
+    </section>
+    <section class="tarjeta" id="caja-evento" hidden>
+      <div class="evento-elegido" id="evento-elegido"></div>
+    </section>
     <section class="tarjeta">
-      <p class="paso"><span>1</span>Tus entradas</p>
+      <p class="paso"><span id="n-entradas">1</span>Tus entradas</p>
       <div class="tipos" id="tipos"></div>
       <div class="cantidad">
         <span>¿Cuántas entradas?</span>
@@ -98,7 +111,7 @@
     </section>
   </form>
 
-  <p class="pie">¿Ya compraste? <a href="/mis-entradas">Mis entradas</a> · <a href="/">Volver al evento</a></p>
+  <p class="pie">¿Ya compraste? <a href="/mis-entradas">Mis entradas</a> · <a href="/">Volver a la cartelera</a></p>
 </main>
 
 <div class="simulado" id="simulado"><div class="caja">
@@ -114,17 +127,40 @@ const $ = s => document.querySelector(s);
 const pesos = n => '$' + Number(n).toLocaleString('es-AR');
 const esc = x => String(x ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-let CFG = null, tipo = null, cant = 1;
-const pedido = new URLSearchParams(location.search).get('tipo');
+let CFG = null, EV = null, tipo = null, cant = 1;
+const params = new URLSearchParams(location.search);
+const pedido = params.get('tipo'), pedidoEvento = params.get('evento');
 const SDK = 'https://unpkg.com/@chytapay/integration-widget@1.6.0';   // versión fija: un cambio de ellos no nos cambia la página
 
-function talon() {
-  const [, m, d] = String(CFG.evento.fecha || '').split('-').map(Number);
-  return d ? [MESES[m - 1], d] : ['', '★'];
+const talon = ev => { const [, m, d] = String(ev.fecha || '').split('-').map(Number); return d ? [MESES[m - 1], d] : ['', '★']; };
+const vendibles = () => CFG.eventos.filter(e => e.vendible);
+// Paso 1 (solo si hay más de una fecha a la venta y no se entró desde una): elegir la fecha.
+function pintarFechas() {
+  const lista = vendibles();
+  $('#caja-fechas').hidden = !(lista.length > 1 && !EV);
+  $('#caja-evento').hidden = !EV;
+  $('#n-entradas').textContent = $('#caja-fechas').hidden ? '1' : '2';
+  if (EV) {
+    $('#evento-elegido').innerHTML = `${EV.imagen ? `<img src="${esc(EV.imagen)}" alt="">` : ''}<div><b>${esc(EV.nombre)}</b>
+      <small>${esc(EV.cuando)}${EV.artistas?.length ? ' · ' + esc(EV.artistas.join(', ')) : ''}</small>
+      ${lista.length > 1 ? '<a href="#" class="cambiar" id="cambiar">Cambiar de fecha</a>' : ''}</div>`;
+    const c = $('#cambiar'); if (c) c.onclick = e => { e.preventDefault(); EV = null; tipo = null; pintarFechas(); pintarTipos(); actualizar(); };
+    return;
+  }
+  $('#fechas').innerHTML = lista.map(e => {
+    const [mes, dia] = talon(e);
+    const desde = Math.min(...Object.values(e.tipos).map(t => t.final));
+    return `<label class="tipo"><input type="radio" name="fecha" value="${esc(e.id)}">
+      <span class="talon"><small>${esc(mes)}</small><b>${esc(dia)}</b></span>
+      <span class="que"><b>${esc(e.nombre)}</b><small>${esc(e.artistas?.join(', ') || e.cuando)}</small></span>
+      <span class="precio">${pesos(desde)}</span></label>`;
+  }).join('');
+  document.querySelectorAll('input[name=fecha]').forEach(r => r.addEventListener('change', () => { EV = CFG.eventos.find(e => e.id === r.value); tipo = null; pintarFechas(); pintarTipos(); actualizar(); }));
 }
 function pintarTipos() {
-  const [mes, dia] = talon();
-  $('#tipos').innerHTML = Object.entries(CFG.tipos).map(([k, t]) => {
+  if (!EV) { $('#tipos').innerHTML = '<p class="ayuda">Primero elegí la fecha.</p>'; return; }
+  const [mes, dia] = talon(EV);
+  $('#tipos').innerHTML = Object.entries(EV.tipos).map(([k, t]) => {
     const agotado = t.estado === 'agotado';
     const marca = agotado ? '<span class="estado">Agotado</span>' : t.estado === 'pocas' ? '<span class="estado pocas">Quedan pocas</span>' : '';
     return `<label class="tipo${agotado ? ' agotado' : ''}">
@@ -134,11 +170,12 @@ function pintarTipos() {
       <span class="precio">${pesos(t.final)}</span></label>`;
   }).join('');
   document.querySelectorAll('input[name=tipo]').forEach(r => r.addEventListener('change', () => { tipo = r.value; actualizar(); }));
-  const inicial = [pedido, ...Object.keys(CFG.tipos)].find(k => k && CFG.tipos[k] && CFG.tipos[k].estado !== 'agotado');
+  const inicial = [tipo, pedido, ...Object.keys(EV.tipos)].find(k => k && EV.tipos[k] && EV.tipos[k].estado !== 'agotado');
   if (inicial) { document.querySelector(`input[name=tipo][value="${CSS.escape(inicial)}"]`).checked = true; tipo = inicial; }
 }
 function actualizar() {
-  const t = tipo && CFG.tipos[tipo];
+  const t = EV && tipo && EV.tipos[tipo];
+  if (!t) { $('#r-linea').textContent = '—'; $('#r-total').textContent = '—'; $('#pagar').textContent = 'Ir a pagar'; }
   $('#cant').textContent = cant;
   $('#menos').disabled = cant <= 1; $('#mas').disabled = cant >= CFG.maxEntradas;
   if (!t) return;
@@ -153,7 +190,11 @@ $('#dni').addEventListener('input', e => { e.target.value = e.target.value.repla
 
 function error(msg) { const e = $('#error'); e.textContent = msg; e.style.display = msg ? 'block' : 'none'; }
 function refrescar() {
-  fetch('/api/config').then(r => r.json()).then(c => { CFG = c; const t = tipo; pintarTipos(); if (t && CFG.tipos[t] && CFG.tipos[t].estado !== 'agotado') { tipo = t; document.querySelector(`input[name=tipo][value="${CSS.escape(t)}"]`).checked = true; } actualizar(); }).catch(() => {});
+  fetch('/api/config').then(r => r.json()).then(c => {
+    CFG = c; if (EV) EV = CFG.eventos.find(e => e.id === EV.id) || null;
+    if (tipo && !(EV?.tipos[tipo] && EV.tipos[tipo].estado !== 'agotado')) tipo = null;
+    pintarFechas(); pintarTipos(); actualizar();
+  }).catch(() => {});
 }
 function cargarSDK() {
   if (window.ChytaPay) return Promise.resolve();
@@ -183,7 +224,8 @@ async function abrirPago(d) {
 
 $('#compra').addEventListener('submit', async ev => {
   ev.preventDefault(); error('');
-  const datos = { tipo, cantidad: cant, nombre: $('#nombre').value.trim(), email: $('#email').value.trim(), dni: $('#dni').value.trim() };
+  if (!EV) return error('Elegí la fecha.');
+  const datos = { evento: EV.id, tipo, cantidad: cant, nombre: $('#nombre').value.trim(), email: $('#email').value.trim(), dni: $('#dni').value.trim() };
   if (!tipo) return error('Elegí el tipo de entrada.');
   if (datos.nombre.length < 3) { $('#nombre').focus(); return error('Falta tu nombre y apellido.'); }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(datos.email)) { $('#email').focus(); return error('Revisá el email: ahí te llegan las entradas.'); }
@@ -203,13 +245,15 @@ $('#compra').addEventListener('submit', async ev => {
 
 fetch('/api/config').then(r => r.json()).then(c => {
   CFG = c;
-  document.title = 'Comprar entradas · ' + c.evento.nombre;
-  $('#cab-nombre').textContent = c.evento.nombre; $('#cab-organiza').textContent = c.evento.organiza || c.evento.cuando;
-  $('#bajada').textContent = `${c.evento.cuando} · ${c.evento.lugar}. Pagás por transferencia y el QR te llega al correo al instante.`;
-  if (!c.ventaAbierta) { $('#compra').style.display = 'none'; $('#cerrada').style.display = 'block'; return; }
+  document.title = 'Comprar entradas · ' + c.sitio.nombre;
+  $('#cab-nombre').textContent = c.sitio.nombre; $('#cab-organiza').textContent = c.sitio.lema || c.sitio.organiza || c.sitio.ciudad || '';
+  $('#bajada').textContent = `${c.sitio.lugar}${c.sitio.direccion ? ' · ' + c.sitio.direccion : ''}. Pagás por transferencia y el QR te llega al correo al instante.`;
+  const lista = vendibles();
+  if (!c.ventaAbierta || !lista.length) { $('#compra').style.display = 'none'; $('#cerrada').style.display = 'block'; return; }
   if (c.sandbox) $('#sandbox').hidden = false;
+  EV = lista.find(e => e.id === pedidoEvento) || (lista.length === 1 ? lista[0] : null);
   $('#reserva').textContent = `Te guardamos el lugar ${c.reservaMinutos} minutos mientras pagás.`;
-  pintarTipos(); actualizar();
+  pintarFechas(); pintarTipos(); actualizar();
 }).catch(() => error('No pudimos cargar los precios. Revisá tu conexión y recargá la página.'));
 </script>
 </body>

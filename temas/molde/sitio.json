@@ -1,0 +1,23 @@
+{
+  "_ayuda": "Ficha del sitio. modo: 'gala' (un solo evento, portada grande) o 'cartelera' (lista de fechas). Los eventos de acá se cargan una sola vez en la base; después se editan desde el panel (pestaña Cartelera). precio = lo que recibe el organizador por entrada; el comprador ve precio + CARGO_PCT como un solo número.",
+  "nombre": "Gala de Fin de Año 2026",
+  "lema": "",
+  "organiza": "Academia de ejemplo",
+  "lugar": "Teatro de ejemplo",
+  "direccion": "Calle 123, Santiago del Estero",
+  "ciudad": "Santiago del Estero",
+  "instagram": "",
+  "ayudaWhatsapp": "",
+  "menores": "",
+  "modo": "gala",
+  "eventos": [
+    {
+      "nombre": "Gala de Fin de Año 2026",
+      "fecha": "2026-12-13",
+      "hora": "20:00",
+      "puertas": "19:30 h",
+      "artistas": [],
+      "tipos": [ { "id": "general", "nombre": "Entrada general", "corto": "General", "detalle": "Ubicación libre", "precio": 10000, "cupo": 500 } ]
+    }
+  ]
+}

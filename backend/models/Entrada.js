@@ -1,10 +1,11 @@
 import { DataTypes } from 'sequelize'
 import { sequelize } from '../database.js'
 
-// Una entrada (un QR). Entra una sola vez.
+// Una entrada (un QR). Vale para SU evento y entra una sola vez.
 const Entrada = sequelize.define('Entrada', {
   id:       { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   orden_id: { type: DataTypes.STRING, allowNull: false },
+  evento:   { type: DataTypes.STRING(60), allowNull: false },
   indice:   { type: DataTypes.INTEGER, allowNull: false },   // 1..cantidad
   tipo:     { type: DataTypes.STRING(40), allowNull: false },
   codigo:   { type: DataTypes.STRING, allowNull: false },    // contenido firmado del QR (base::firma)
@@ -14,7 +15,7 @@ const Entrada = sequelize.define('Entrada', {
 }, {
   tableName: 'entradas',
   timestamps: true,
-  indexes: [{ fields: ['base'], unique: true }, { fields: ['orden_id'] }],
+  indexes: [{ fields: ['base'], unique: true }, { fields: ['orden_id'] }, { fields: ['evento', 'usado'] }],
 })
 
 export default Entrada
