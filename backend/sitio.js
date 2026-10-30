@@ -42,14 +42,15 @@ export function normalizarEvento(d, { idFijo } = {}) {
   }
   const externoUrl = limpio(d.externoUrl, 300)
   if (externoUrl && !/^https:\/\/[^\s<>"']+$/i.test(externoUrl)) return { error: 'El enlace de la otra ticketera tiene que empezar con https://' }
-  if (externoUrl && tipos.length) return { error: 'Una fecha que vende otra ticketera no lleva entradas propias: sacá los tipos de entrada o el enlace' }
+  const externoTexto = limpio(d.externoTexto, 80), externoPrecio = limpio(d.externoPrecio, 80)
+  if ((externoUrl || externoTexto || externoPrecio) && tipos.length) return { error: 'Una fecha que vende otra ticketera no lleva entradas propias: sacá los tipos de entrada o los datos de la otra ticketera' }
   const id = idFijo || slug(d.id || `${fecha}-${nombre}`)
   if (!/^[a-z0-9-]{3,60}$/.test(id)) return { error: 'No se pudo armar el identificador del evento' }
   return {
     evento: {
       id, nombre, subtitulo: limpio(d.subtitulo, 160) || null, fecha, hora: hora || null, puertas: limpio(d.puertas, 40) || null,
       artistas, descripcion: String(d.descripcion ?? '').trim().slice(0, 3000) || null, imagen: limpio(d.imagen, 200) || null, tipos,
-      nota: limpio(d.nota, 120) || null, externoUrl: externoUrl || null, externoTexto: limpio(d.externoTexto, 80) || null, externoPrecio: limpio(d.externoPrecio, 80) || null,
+      nota: limpio(d.nota, 120) || null, externoUrl: externoUrl || null, externoTexto: externoTexto || null, externoPrecio: externoPrecio || null,
       publicado: !apagado(d.publicado), ventaAbierta: !apagado(d.ventaAbierta),
     },
   }

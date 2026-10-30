@@ -434,7 +434,7 @@ async function cargarCartelera() {
     $('#ev-filas').innerHTML = CARTELERA.map((e, i) => `<tr${e.pasado ? ' style="opacity:.55"' : ''}>
       <td>${e.imagen ? `<img class="mini-foto" style="width:44px;height:55px" src="${esc(e.imagen)}" alt="">` : ''}</td>
       <td>${esc(e.cuando)}${e.hora ? '' : ' · <span class="ayuda">hora a confirmar</span>'}</td><td><b>${esc(e.nombre)}</b>${e.artistas?.length ? `<br><span class="ayuda">${esc(e.artistas.join(', '))}</span>` : ''}</td>
-      <td>${e.pasado ? '<span class="etq">pasada</span>' : `${e.publicado ? '<span class="etq ok">publicada</span>' : '<span class="etq no">oculta</span>'} ${e.externoUrl || e.externoPrecio ? '<span class="etq">otra ticketera</span>' : e.vendible ? '<span class="etq ok">a la venta</span>' : `<span class="etq no">${e.tipos.length ? 'venta cerrada' : 'sin precio'}</span>`}`}</td>
+      <td>${e.pasado ? '<span class="etq">pasada</span>' : `${e.publicado ? '<span class="etq ok">publicada</span>' : '<span class="etq no">oculta</span>'} ${e.externoUrl || e.externoPrecio || e.externoTexto ? '<span class="etq">otra ticketera</span>' : e.vendible ? '<span class="etq ok">a la venta</span>' : `<span class="etq no">${e.tipos.length ? 'venta cerrada' : 'sin precio'}</span>`}`}</td>
       <td class="n">${e.vendidas}</td><td class="n">${pesos(e.recaudado)}</td>
       <td><button class="chico" onclick="editarEvento(${i})">Editar</button></td></tr>`).join('')
       || '<tr><td colspan="7" class="ayuda">Todavía no hay fechas. Tocá "+ Nueva fecha".</td></tr>';
@@ -457,7 +457,7 @@ function editarEvento(i) {
   $('#ev-hora').value = e?.hora || ''; $('#ev-puertas').value = e?.puertas || '';
   $('#ev-artistas').value = (e?.artistas || []).join('\n'); $('#ev-desc').value = e?.descripcion || ''; $('#ev-nota').value = e?.nota || '';
   $('#ev-ext-url').value = e?.externoUrl || ''; $('#ev-ext-texto').value = e?.externoTexto || ''; $('#ev-ext-precio').value = e?.externoPrecio || '';
-  $('#ev-ext-url').closest('details').open = Boolean(e?.externoUrl || e?.externoPrecio);
+  $('#ev-ext-url').closest('details').open = Boolean(e?.externoUrl || e?.externoPrecio || e?.externoTexto);
   $('#ev-tipos').innerHTML = ''; (e?.tipos || []).forEach(t => filaTipo(t)); if (!e?.tipos?.length) filaTipo();
   $('#ev-pub').checked = e ? Boolean(Number(e.publicado)) : true; $('#ev-venta').checked = e ? Boolean(Number(e.ventaAbierta)) : true;
   $('#ev-foto').value = ''; $('#ev-foto-vista').hidden = !e?.imagen; if (e?.imagen) $('#ev-foto-vista').src = e.imagen;

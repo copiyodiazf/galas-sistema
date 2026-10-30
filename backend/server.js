@@ -1174,7 +1174,7 @@ app.get('/api/config', async (_req, res) => {
     eventos: [...EVENTOS.values()].filter(e => Number(e.publicado) && noPaso(e)).map(e => ({
       id: e.id, nombre: e.nombre, subtitulo: e.subtitulo, fecha: e.fecha, hora: e.hora, cuando: cuandoDe(e), puertas: e.puertas,
       artistas: e.artistas, descripcion: e.descripcion, imagen: e.imagen, nota: e.nota, vendible: online && vendibleOnline(e),
-      externo: e.externoUrl || e.externoPrecio ? { url: e.externoUrl, texto: e.externoTexto, precio: e.externoPrecio } : null,
+      externo: e.externoUrl || e.externoPrecio || e.externoTexto ? { url: e.externoUrl, texto: e.externoTexto, precio: e.externoPrecio } : null,
       tipos: Object.fromEntries(e.tipos.map(t => [t.id, { nombre: t.nombre, corto: t.corto, detalle: t.detalle, precio: t.precio,
         final: conCargo(t.precio, CARGO_PCT), estado: estados[e.id]?.[t.id] || 'disponible' }])),
     })),

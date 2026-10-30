@@ -200,13 +200,16 @@ function cuentaRegresiva(fecha, hora) {
 function tarjeta(e) {
   const [, m, d] = e.fecha.split('-').map(Number);
   const precios = Object.values(e.tipos).map(t => t.final);
+  // Con un solo tipo, si no es la entrada general se muestra su nombre (ej. "Primeras anticipadas").
+  const unico = precios.length === 1 ? Object.values(e.tipos)[0].nombre : '';
+  const rotulo = precios.length > 1 ? 'Desde' : unico && !/general/i.test(unico) ? unico : 'Entrada';
   const est = estadoEvento(e);
   // Tres casos: la vendemos nosotros, la vende otra ticketera (botón a su venta) o todavía no está a la venta.
   const pie = e.externo
     ? `<div class="ext">${e.externo.precio ? `<b>${esc(e.externo.precio)}</b>` : ''}<span>${esc(e.externo.url ? 'Se vende en su ticketera' : (e.externo.texto || 'Venta en ticketera oficial'))}</span></div>`
       + (e.externo.url ? `<a class="btn" href="${esc(e.externo.url)}" target="_blank" rel="noopener">${esc(e.externo.texto || 'Comprar')}</a>` : '')
     : e.vendible && est !== 'agotado'
-    ? `<span class="precio"><small>${precios.length > 1 ? 'Desde' : 'Entrada'}</small>${pesos(Math.min(...precios))}</span><a class="btn" href="/comprar?evento=${encodeURIComponent(e.id)}">Comprar</a>`
+    ? `<span class="precio"><small>${esc(rotulo)}</small>${pesos(Math.min(...precios))}</span><a class="btn" href="/comprar?evento=${encodeURIComponent(e.id)}">Comprar</a>`
     : `<span class="pronto">${est === 'agotado' ? 'Entradas agotadas' : 'Entradas muy pronto'}</span>`;
   const mas = e.descripcion ? `<details class="mas"><summary>Ver más</summary>${e.descripcion.split(/\n+/).filter(Boolean).map(p => `<p>${esc(p)}</p>`).join('')}</details>` : '';
   return `<article class="pena">
