@@ -245,7 +245,16 @@ textarea{width:100%;font:600 15px var(--f-texto);color:#1d1830;background:#fffaf
     </div>
     <label for="ev-puertas">Apertura de puertas (opcional)</label><input id="ev-puertas" placeholder="21 h">
     <label for="ev-artistas">Artistas (uno por renglón; el principal primero)</label><textarea id="ev-artistas"></textarea>
-    <label for="ev-desc">Descripción (opcional)</label><textarea id="ev-desc"></textarea>
+    <label for="ev-desc">Descripción (opcional: aparece en "Ver más"; un párrafo por renglón)</label><textarea id="ev-desc"></textarea>
+    <label for="ev-nota">Nota en la tarjeta (opcional)</label><input id="ev-nota" placeholder="Cartelera a confirmar">
+    <details style="margin-top:12px;"><summary style="cursor:pointer;font-weight:700;">¿La vende otra ticketera?</summary>
+      <p class="ayuda">Se muestra igual en la cartelera, con un botón a la venta de ellos. Esa fecha no lleva entradas propias.</p>
+      <label for="ev-ext-url">Enlace a su venta (https://…)</label><input id="ev-ext-url" placeholder="https://">
+      <div class="dos">
+        <div><label for="ev-ext-texto">Texto del botón</label><input id="ev-ext-texto" placeholder="Entradas en …"></div>
+        <div><label for="ev-ext-precio">Precio informativo</label><input id="ev-ext-precio" placeholder="Anticipadas $10.000"></div>
+      </div>
+    </details>
     <p class="paso" style="margin-top:16px;">Entradas</p>
     <p class="ayuda">Precio = lo que recibe el organizador por entrada. Capacidad = cuántas se venden de ese tipo (no se muestra en la página). Sin entradas cargadas, la fecha se ve como "Entradas muy pronto".</p>
     <div id="ev-tipos"></div>
@@ -425,7 +434,7 @@ async function cargarCartelera() {
     $('#ev-filas').innerHTML = CARTELERA.map((e, i) => `<tr${e.pasado ? ' style="opacity:.55"' : ''}>
       <td>${e.imagen ? `<img class="mini-foto" style="width:44px;height:55px" src="${esc(e.imagen)}" alt="">` : ''}</td>
       <td>${esc(e.cuando)}${e.hora ? '' : ' · <span class="ayuda">hora a confirmar</span>'}</td><td><b>${esc(e.nombre)}</b>${e.artistas?.length ? `<br><span class="ayuda">${esc(e.artistas.join(', '))}</span>` : ''}</td>
-      <td>${e.pasado ? '<span class="etq">pasada</span>' : `${e.publicado ? '<span class="etq ok">publicada</span>' : '<span class="etq no">oculta</span>'} ${e.vendible ? '<span class="etq ok">a la venta</span>' : `<span class="etq no">${e.tipos.length ? 'venta cerrada' : 'sin precio'}</span>`}`}</td>
+      <td>${e.pasado ? '<span class="etq">pasada</span>' : `${e.publicado ? '<span class="etq ok">publicada</span>' : '<span class="etq no">oculta</span>'} ${e.externoUrl || e.externoPrecio ? '<span class="etq">otra ticketera</span>' : e.vendible ? '<span class="etq ok">a la venta</span>' : `<span class="etq no">${e.tipos.length ? 'venta cerrada' : 'sin precio'}</span>`}`}</td>
       <td class="n">${e.vendidas}</td><td class="n">${pesos(e.recaudado)}</td>
       <td><button class="chico" onclick="editarEvento(${i})">Editar</button></td></tr>`).join('')
       || '<tr><td colspan="7" class="ayuda">Todavía no hay fechas. Tocá "+ Nueva fecha".</td></tr>';
@@ -446,7 +455,9 @@ function editarEvento(i) {
   $('#ev-tit').textContent = e ? 'Editar fecha' : 'Nueva fecha';
   $('#ev-nombre').value = e?.nombre || ''; $('#ev-sub').value = e?.subtitulo || ''; $('#ev-fecha').value = e?.fecha || '';
   $('#ev-hora').value = e?.hora || ''; $('#ev-puertas').value = e?.puertas || '';
-  $('#ev-artistas').value = (e?.artistas || []).join('\n'); $('#ev-desc').value = e?.descripcion || '';
+  $('#ev-artistas').value = (e?.artistas || []).join('\n'); $('#ev-desc').value = e?.descripcion || ''; $('#ev-nota').value = e?.nota || '';
+  $('#ev-ext-url').value = e?.externoUrl || ''; $('#ev-ext-texto').value = e?.externoTexto || ''; $('#ev-ext-precio').value = e?.externoPrecio || '';
+  $('#ev-ext-url').closest('details').open = Boolean(e?.externoUrl || e?.externoPrecio);
   $('#ev-tipos').innerHTML = ''; (e?.tipos || []).forEach(t => filaTipo(t)); if (!e?.tipos?.length) filaTipo();
   $('#ev-pub').checked = e ? Boolean(Number(e.publicado)) : true; $('#ev-venta').checked = e ? Boolean(Number(e.ventaAbierta)) : true;
   $('#ev-foto').value = ''; $('#ev-foto-vista').hidden = !e?.imagen; if (e?.imagen) $('#ev-foto-vista').src = e.imagen;
@@ -478,7 +489,8 @@ $('#f-ev').addEventListener('submit', async ev => {
       detalle: f.querySelector('.t-detalle').value.trim(), precio: Number(f.querySelector('.t-precio').value), cupo: Number(f.querySelector('.t-cupo').value) }))
       .filter(t => t.nombre || t.precio || t.cupo);
     const datos = { nombre: $('#ev-nombre').value, subtitulo: $('#ev-sub').value, fecha: $('#ev-fecha').value, hora: $('#ev-hora').value, puertas: $('#ev-puertas').value,
-      artistas: $('#ev-artistas').value, descripcion: $('#ev-desc').value, tipos, publicado: $('#ev-pub').checked, ventaAbierta: $('#ev-venta').checked };
+      artistas: $('#ev-artistas').value, descripcion: $('#ev-desc').value, nota: $('#ev-nota').value, tipos, publicado: $('#ev-pub').checked, ventaAbierta: $('#ev-venta').checked,
+      externoUrl: $('#ev-ext-url').value.trim(), externoTexto: $('#ev-ext-texto').value, externoPrecio: $('#ev-ext-precio').value };
     const d = EDITANDO ? await api('/api/admin/eventos/' + encodeURIComponent(EDITANDO.id), { method: 'PUT', body: JSON.stringify(datos) })
                        : await api('/api/admin/eventos', { method: 'POST', body: JSON.stringify(datos) });
     const archivo = $('#ev-foto').files[0];

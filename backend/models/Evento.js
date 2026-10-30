@@ -16,7 +16,12 @@ const Evento = sequelize.define('Evento', {
   hora:        { type: DataTypes.STRING(10), allowNull: true },    // "21:30"
   puertas:     { type: DataTypes.STRING(40), allowNull: true },
   artistas:    json('artistas'),                                   // ["Néstor Garnica", "invitados"]
-  descripcion: { type: DataTypes.TEXT, allowNull: true },
+  descripcion: { type: DataTypes.TEXT, allowNull: true },             // el "Ver más" de la tarjeta (quiénes tocan, etc.)
+  nota:        { type: DataTypes.STRING(120), allowNull: true },      // "Cartelera a confirmar"
+  // Fechas que vende OTRA ticketera: se muestran igual en la cartelera, con un botón a su venta.
+  externoUrl:   { type: DataTypes.STRING(300), allowNull: true },
+  externoTexto: { type: DataTypes.STRING(80), allowNull: true },     // "Entradas en Ticketera X"
+  externoPrecio:{ type: DataTypes.STRING(80), allowNull: true },     // "Anticipadas $10.000" (solo informativo)
   imagen:      { type: DataTypes.STRING(200), allowNull: true },   // /img/12 o assets/...
   tipos:       json('tipos'),                                      // [{ id, nombre, corto, detalle, precio, cupo }]
   publicado:   { type: DataTypes.BOOLEAN, defaultValue: false },   // se ve en la cartelera

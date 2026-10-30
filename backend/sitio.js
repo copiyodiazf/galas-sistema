@@ -40,12 +40,16 @@ export function normalizarEvento(d, { idFijo } = {}) {
     if (!(cupo > 0)) return { error: `"${tn}": falta la capacidad (cupo)` }
     tipos.push({ id, nombre: tn, corto: limpio(t.corto || tn, 24), detalle: limpio(t.detalle, 80), precio, cupo })
   }
+  const externoUrl = limpio(d.externoUrl, 300)
+  if (externoUrl && !/^https:\/\/[^\s<>"']+$/i.test(externoUrl)) return { error: 'El enlace de la otra ticketera tiene que empezar con https://' }
+  if (externoUrl && tipos.length) return { error: 'Una fecha que vende otra ticketera no lleva entradas propias: sacá los tipos de entrada o el enlace' }
   const id = idFijo || slug(d.id || `${fecha}-${nombre}`)
   if (!/^[a-z0-9-]{3,60}$/.test(id)) return { error: 'No se pudo armar el identificador del evento' }
   return {
     evento: {
       id, nombre, subtitulo: limpio(d.subtitulo, 160) || null, fecha, hora: hora || null, puertas: limpio(d.puertas, 40) || null,
-      artistas, descripcion: limpio(d.descripcion, 1500) || null, imagen: limpio(d.imagen, 200) || null, tipos,
+      artistas, descripcion: String(d.descripcion ?? '').trim().slice(0, 3000) || null, imagen: limpio(d.imagen, 200) || null, tipos,
+      nota: limpio(d.nota, 120) || null, externoUrl: externoUrl || null, externoTexto: limpio(d.externoTexto, 80) || null, externoPrecio: limpio(d.externoPrecio, 80) || null,
       publicado: !apagado(d.publicado), ventaAbierta: !apagado(d.ventaAbierta),
     },
   }
@@ -71,6 +75,9 @@ export function leerSitio(archivo = process.env.SITIO_ARCHIVO || 'sitio.json') {
       modo: s.modo === 'gala' ? 'gala' : 'cartelera',
       // Secciones opcionales de la página: quiénes somos y el llamado a feriantes/emprendedores.
       sobre: s.sobre?.titulo ? { titulo: limpio(s.sobre.titulo, 80), parrafos: (s.sobre.parrafos || []).map(p => limpio(p, 600)).filter(Boolean).slice(0, 6) } : null,
+      facebook: /^https:\/\//.test(s.facebook || '') ? limpio(s.facebook, 200) : '',
+      // "Lo que se vive": 3 o 4 tarjetas cortas con un ícono (emoji), título y texto.
+      destacados: (s.destacados || []).slice(0, 6).map(d => ({ icono: limpio(d.icono, 8), titulo: limpio(d.titulo, 60), texto: limpio(d.texto, 220) })).filter(d => d.titulo),
       feriantes: s.feriantes?.whatsapp ? { titulo: limpio(s.feriantes.titulo || 'Feriantes y emprendedores', 80), texto: limpio(s.feriantes.texto, 600),
         whatsapp: String(s.feriantes.whatsapp).replace(/\D/g, ''), mensaje: limpio(s.feriantes.mensaje, 200) } : null,
     },

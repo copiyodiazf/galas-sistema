@@ -1173,7 +1173,8 @@ app.get('/api/config', async (_req, res) => {
     sitio: SITIO,
     eventos: [...EVENTOS.values()].filter(e => Number(e.publicado) && noPaso(e)).map(e => ({
       id: e.id, nombre: e.nombre, subtitulo: e.subtitulo, fecha: e.fecha, hora: e.hora, cuando: cuandoDe(e), puertas: e.puertas,
-      artistas: e.artistas, descripcion: e.descripcion, imagen: e.imagen, vendible: online && vendibleOnline(e),
+      artistas: e.artistas, descripcion: e.descripcion, imagen: e.imagen, nota: e.nota, vendible: online && vendibleOnline(e),
+      externo: e.externoUrl || e.externoPrecio ? { url: e.externoUrl, texto: e.externoTexto, precio: e.externoPrecio } : null,
       tipos: Object.fromEntries(e.tipos.map(t => [t.id, { nombre: t.nombre, corto: t.corto, detalle: t.detalle, precio: t.precio,
         final: conCargo(t.precio, CARGO_PCT), estado: estados[e.id]?.[t.id] || 'disponible' }])),
     })),
@@ -1268,6 +1269,20 @@ async function recuperarPendientes() {
   }
 }
 
+// sync() crea las tablas que faltan pero no les agrega columnas nuevas: esto suma las que falten
+// (cuando el sistema crece y una base ya existe). Nunca borra ni cambia columnas.
+async function completarColumnas() {
+  const qi = sequelize.getQueryInterface()
+  for (const modelo of [Evento, Orden, Entrada]) {
+    const tabla = modelo.getTableName()
+    const hay = await qi.describeTable(tabla)
+    for (const [nombre, attr] of Object.entries(modelo.getAttributes())) {
+      const columna = attr.field || nombre
+      if (!hay[columna]) { await qi.addColumn(tabla, columna, { type: attr.type, allowNull: true }); console.log(`🧩 Columna nueva: ${tabla}.${columna}`) }
+    }
+  }
+}
+
 // Las fechas de la ficha se cargan una sola vez: si ya existen en la base, manda la base (el panel).
 async function sembrarEventos() {
   for (const e of SEMILLAS) {
@@ -1278,6 +1293,7 @@ async function sembrarEventos() {
 // Conectar la base en segundo plano y crear las tablas si no existen
 sequelize.authenticate()
   .then(() => sequelize.sync())
+  .then(completarColumnas)
   .then(sembrarEventos)
   .then(cargarEventos)
   .then(() => {

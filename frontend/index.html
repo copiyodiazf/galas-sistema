@@ -53,7 +53,7 @@ body{background:var(--noche);}
 .pena .info .subt{color:var(--oro);font-weight:700;font-size:13px;}
 .pena .info .art{color:var(--crema);font-size:14px;}
 .pena .info .cuando{color:var(--gris);font-size:13px;}
-.pena .info .pie-peña{margin-top:auto;padding-top:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.pena .info .pie-pena{margin-top:auto;padding-top:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .pena .precio{font-family:var(--f-display);font-size:26px;color:var(--oro-vivo);}
 .pena .precio small{display:block;font-family:var(--f-texto);font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gris);}
 .pena .btn{width:auto;padding:12px 18px;font-size:14px;}
@@ -66,6 +66,27 @@ body{background:var(--noche);}
 .entrada .precio{font-family:var(--f-display);font-size:38px;margin:14px 0;color:var(--oro-vivo);}
 .entrada .sello{position:absolute;top:-10px;right:14px;font-weight:800;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;background:var(--rojo);color:#fff;border-radius:999px;padding:3px 10px;}
 .entrada .sello.pocas{background:var(--oro);color:#1d1830;}
+.destacados{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:24px;}
+.destacados div{background:rgba(246,240,230,.05);border:1px solid rgba(246,240,230,.12);border-radius:18px;padding:20px;text-align:center;}
+.destacados .ico{font-size:34px;line-height:1;}
+.destacados h3{font-family:var(--f-display);font-size:20px;margin-top:10px;}
+.destacados p{color:var(--gris);font-size:14px;margin-top:6px;}
+.pasos{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:24px;counter-reset:paso;}
+.pasos div{position:relative;background:var(--noche-2);border:1px solid rgba(231,194,125,.22);border-radius:18px;padding:22px 20px 20px;}
+.pasos b{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--oro);color:#1d1830;font-weight:800;font-size:18px;}
+.pasos h3{font-family:var(--f-display);font-size:20px;margin-top:12px;}
+.pasos p{color:var(--gris);font-size:14px;margin-top:6px;}
+.pasos strong{color:var(--crema);}
+.mapa{width:100%;height:320px;border:0;border-radius:18px;margin-top:14px;filter:saturate(.85);}
+.pena .nota{display:inline-block;align-self:flex-start;font-weight:800;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#1d1830;background:var(--oro);border-radius:999px;padding:3px 10px;}
+.pena details.mas{margin-top:4px;}
+.pena details.mas summary{cursor:pointer;color:var(--oro);font-weight:700;font-size:13px;}
+.pena details.mas p{color:var(--gris);font-size:13.5px;margin-top:8px;line-height:1.55;}
+.pena .ext{display:flex;flex-direction:column;gap:2px;}
+.pena .ext b{font-family:var(--f-display);font-size:20px;color:var(--oro-vivo);line-height:1.15;}
+.pena .ext span{font-size:12px;color:var(--gris);}
+#redes a{margin:0 8px;}
+#redes{display:block;margin-bottom:10px;}
 .sobre{max-width:720px;margin:18px auto 0;text-align:center;color:var(--crema);font-size:16.5px;line-height:1.7;}
 .sobre p+p{margin-top:12px;}
 .llamado{display:flex;gap:22px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:linear-gradient(135deg,rgba(231,194,125,.16),rgba(231,194,125,.05));
@@ -109,6 +130,11 @@ body{background:var(--noche);}
   <div id="lista"></div>
 </section>
 
+<section class="seccion" id="destacados" hidden>
+  <h2>Lo que se vive</h2>
+  <div class="destacados" id="dest-lista"></div>
+</section>
+
 <section class="seccion" id="sobre" hidden>
   <h2 id="sobre-tit"></h2>
   <div class="sobre" id="sobre-txt"></div>
@@ -126,8 +152,18 @@ body{background:var(--noche);}
 </section>
 
 <section class="seccion">
+  <h2>Cómo comprar tu entrada</h2>
+  <div class="pasos">
+    <div><b>1</b><h3>Elegí la fecha</h3><p>Entrá a la cartelera, elegí la peña y cuántas entradas querés.</p></div>
+    <div><b>2</b><h3>Pagá por transferencia</h3><p>Desde la app de tu banco o tu billetera, <strong>desde una cuenta a tu nombre</strong>. Te damos el CVU al momento.</p></div>
+    <div><b>3</b><h3>Recibí tu QR</h3><p>Te llega al correo al instante. En la puerta lo mostrás desde el celular y entrás.</p></div>
+  </div>
+</section>
+
+<section class="seccion">
   <h2>Cómo llegar</h2>
   <div class="datos" id="datos"></div>
+  <iframe class="mapa" id="mapa" title="Mapa" loading="lazy" referrerpolicy="no-referrer-when-downgrade" hidden></iframe>
 </section>
 
 <section class="seccion">
@@ -135,7 +171,7 @@ body{background:var(--noche);}
   <div class="preguntas" id="preguntas"></div>
 </section>
 
-<p class="pie">¿Ya compraste? <a href="/mis-entradas">Mis entradas</a></p>
+<p class="pie"><span id="redes"></span>¿Ya compraste? <a href="/mis-entradas">Mis entradas</a></p>
 <div class="barra-compra" id="barra"><a class="btn" id="btn-barra" href="#cartelera">Comprar entradas</a></div>
 
 <script>
@@ -165,9 +201,14 @@ function tarjeta(e) {
   const [, m, d] = e.fecha.split('-').map(Number);
   const precios = Object.values(e.tipos).map(t => t.final);
   const est = estadoEvento(e);
-  const pie = e.vendible && est !== 'agotado'
+  // Tres casos: la vendemos nosotros, la vende otra ticketera (botón a su venta) o todavía no está a la venta.
+  const pie = e.externo
+    ? `<div class="ext">${e.externo.precio ? `<b>${esc(e.externo.precio)}</b>` : ''}<span>${esc(e.externo.url ? 'Se vende en su ticketera' : (e.externo.texto || 'Venta en ticketera oficial'))}</span></div>`
+      + (e.externo.url ? `<a class="btn" href="${esc(e.externo.url)}" target="_blank" rel="noopener">${esc(e.externo.texto || 'Comprar')}</a>` : '')
+    : e.vendible && est !== 'agotado'
     ? `<span class="precio"><small>${precios.length > 1 ? 'Desde' : 'Entrada'}</small>${pesos(Math.min(...precios))}</span><a class="btn" href="/comprar?evento=${encodeURIComponent(e.id)}">Comprar</a>`
     : `<span class="pronto">${est === 'agotado' ? 'Entradas agotadas' : 'Entradas muy pronto'}</span>`;
+  const mas = e.descripcion ? `<details class="mas"><summary>Ver más</summary>${e.descripcion.split(/\n+/).filter(Boolean).map(p => `<p>${esc(p)}</p>`).join('')}</details>` : '';
   return `<article class="pena">
     <div class="foto${e.imagen ? '' : ' sin-foto'}">${e.imagen ? `<img src="${esc(e.imagen)}" alt="${esc(e.nombre)}" loading="lazy">` : '<div class="sin"><img src="assets/logo.webp" alt=""></div>'}
       <div class="dia"><b>${d}</b><small>${MESES[m - 1]}</small></div>${sello(est)}</div>
@@ -176,7 +217,9 @@ function tarjeta(e) {
       ${e.subtitulo ? `<p class="subt">${esc(e.subtitulo)}</p>` : ''}
       ${e.artistas?.length ? `<p class="art">${esc(e.artistas.join(' · '))}</p>` : ''}
       <p class="cuando">${esc(e.cuando.charAt(0).toUpperCase() + e.cuando.slice(1))}${e.hora ? '' : ' · horario a confirmar'}</p>
-      <div class="pie-peña">${pie}</div>
+      ${e.nota ? `<span class="nota">${esc(e.nota)}</span>` : ''}
+      ${mas}
+      <div class="pie-pena">${pie}</div>
     </div></article>`;
 }
 
@@ -207,6 +250,16 @@ fetch('/api/config').then(r => r.json()).then(c => {
     $('#lista').innerHTML = eventos.map(tarjeta).join('') || '<p class="sub">Muy pronto anunciamos las próximas fechas.</p>';
     if (eventos.some(e => e.vendible)) $('#barra').classList.add('visible');
   }
+  if (s.destacados?.length) {
+    $('#destacados').hidden = false;
+    $('#dest-lista').innerHTML = s.destacados.map(d => `<div><span class="ico">${esc(d.icono)}</span><h3>${esc(d.titulo)}</h3><p>${esc(d.texto)}</p></div>`).join('');
+  }
+  if (s.direccion) {
+    $('#mapa').src = 'https://www.google.com/maps?output=embed&q=' + encodeURIComponent([s.direccion, s.ciudad].filter(Boolean).join(', '));
+    $('#mapa').hidden = false;
+  }
+  $('#redes').innerHTML = [s.facebook && `<a href="${esc(s.facebook)}" target="_blank" rel="noopener">Facebook</a>`,
+    s.instagram && `<a href="https://instagram.com/${encodeURIComponent(s.instagram)}" target="_blank" rel="noopener">Instagram</a>`].filter(Boolean).join('');
   if (s.sobre) {
     $('#sobre').hidden = false; $('#sobre-tit').textContent = s.sobre.titulo;
     $('#sobre-txt').innerHTML = s.sobre.parrafos.map(p => `<p>${esc(p)}</p>`).join('');
