@@ -251,7 +251,9 @@ fetch('/api/config').then(r => r.json()).then(c => {
   const lista = vendibles();
   if (!c.ventaAbierta || !lista.length) {
     // Si la venta online ya cerró por fecha (queda solo la puerta), se dice eso y no "todavía no abrió".
-    const fin = c.eventos.find(e => e.ventaHasta && !e.vendible);
+    // Por la fecha y no por "vendible": con la llave general cerrada (VENTA_ABIERTA=false) tampoco es vendible.
+    const hoy = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);   // fecha argentina (UTC-3)
+    const fin = c.eventos.find(e => e.ventaHasta && hoy > e.ventaHasta);
     if (fin) {
       const enPuerta = Object.values(fin.tipos).map(t => t.finalDespues).filter(Boolean);
       $('#cerrada').innerHTML = `<p>La venta online terminó el ${fin.ventaHasta.slice(8, 10)}/${fin.ventaHasta.slice(5, 7)}.${enPuerta.length ? ` Quedan entradas en la puerta: <b>${pesos(Math.min(...enPuerta))}</b>.` : ''} Volvé a la <a href="/">página principal</a>.</p>`;
