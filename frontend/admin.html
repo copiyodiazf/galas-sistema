@@ -655,7 +655,7 @@ async function estadoChytapay() {
 async function conectarChytapay() {
   try {
     const d = await api('/api/admin/chytapay/conectar', { method: 'POST' });
-    $('#cy-enlace').innerHTML = `<p class="ayuda" style="margin-top:10px;">Abrilo vos con el organizador al lado, o mandáselo por WhatsApp. Entra con <b>su</b> usuario de Chytapay, ve la comisión y autoriza. Vence en ${d.minutos} minutos y sirve una sola vez.</p>
+    $('#cy-enlace').innerHTML = `<p class="ayuda" style="margin-top:10px;">Mandáselo al organizador por WhatsApp (o abrilo con él al lado). Entra con <b>su</b> usuario de Chytapay, ve la comisión y autoriza. Sirve durante ${d.horas / 24} días, aunque se actualice el sistema.</p>
       <div class="enlace" id="cy-url">${esc(d.url)}</div>
       <div class="fila" style="margin-top:8px;"><button class="chico" onclick="navigator.clipboard.writeText(document.getElementById('cy-url').textContent).then(()=>this.textContent='Copiado')">Copiar enlace</button>
       <a class="chico oro" href="${esc(d.url)}">Abrirlo acá</a></div>`;
@@ -670,7 +670,7 @@ function avisoChytapay() {
   if (!r) return;
   history.replaceState(null, '', '/admin');
   let msg = { ok: 'Listo: la cuenta de Chytapay del organizador quedó conectada.', error: 'No se pudo conectar la cuenta de Chytapay. Probá de nuevo.',
-    vencido: 'El enlace venció o ya se usó. Generá uno nuevo.', cancelado: 'Se canceló la conexión con Chytapay.' }[r];
+    vencido: 'El enlace venció (dura 3 días). Generá uno nuevo.', cancelado: 'Se canceló la conexión con Chytapay.' }[r];
   if (msg && sede === 'error') msg += '\n\nOjo: no se pudo asignar a la sede de esta gala. Revisá que la sede exista en el Portal (Tenants) y tocá "volver a asignar".';
   if (msg) setTimeout(() => alert(msg), 300);
   if (ES_ADMIN()) abrir('herramientas');

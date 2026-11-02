@@ -1187,9 +1187,23 @@ app.post('/api/admin/repescar', requireAuth(['admin']), async (_req, res) => {
 })
 
 // ── Conectar la cuenta de Chytapay del organizador (solo admin) ──
-// El admin genera el enlace; lo abre el organizador (en este celular o en el suyo), entra con su
+// El admin genera el enlace y se lo manda al organizador por WhatsApp; lo abre cuando puede, entra con su
 // usuario de Chytapay, ve la comisión y autoriza. Chytapay lo manda de vuelta a /chytapay/vuelta.
-const _estados = new Map()   // state → vence (un solo uso, 15 minutos)
+// El enlace dura HORAS_ENLACE y sigue sirviendo aunque el servidor se reinicie (un deploy): el "state" va
+// firmado, no guardado en memoria. El "code" de Chytapay sirve una sola vez: repetir la vuelta no conecta dos veces.
+const HORAS_ENLACE = 72
+const firmaState = cuerpo => createHmac('sha256', QR_SECRET).update('chytapay-state:' + cuerpo).digest('base64url').slice(0, 32)
+function nuevoState() {
+  const cuerpo = Buffer.from(JSON.stringify({ exp: Date.now() + HORAS_ENLACE * 3600000, n: randomBytes(9).toString('base64url') })).toString('base64url')
+  return `${cuerpo}.${firmaState(cuerpo)}`
+}
+function stateVigente(state) {
+  const [cuerpo, firma] = String(state || '').split('.')
+  if (!cuerpo || !firma) return false
+  const a = Buffer.from(firma), b = Buffer.from(firmaState(cuerpo))
+  if (a.length !== b.length || !timingSafeEqual(a, b)) return false
+  try { return JSON.parse(Buffer.from(cuerpo, 'base64url').toString()).exp > Date.now() } catch { return false }
+}
 app.get('/api/admin/chytapay', requireAuth(['admin']), async (_req, res) => {
   try {
     const v = await vinculoActual()
@@ -1201,16 +1215,11 @@ app.get('/api/admin/chytapay', requireAuth(['admin']), async (_req, res) => {
 })
 app.post('/api/admin/chytapay/conectar', requireAuth(['admin']), (_req, res) => {
   if (!process.env.CHYTAPAY_CLIENT_ID || !process.env.CHYTAPAY_CLIENT_SECRET) return res.status(400).json({ error: 'Faltan CHYTAPAY_CLIENT_ID y CHYTAPAY_CLIENT_SECRET en el servidor' })
-  const state = randomBytes(24).toString('base64url')
-  for (const [k, vence] of _estados) if (vence < Date.now()) _estados.delete(k)
-  _estados.set(state, Date.now() + 15 * 60000)
-  res.json({ url: urlAutorizar(state), minutos: 15 })
+  res.json({ url: urlAutorizar(nuevoState()), horas: HORAS_ENLACE })
 })
 app.get('/chytapay/vuelta', rateLimit({ windowMs: 60000, max: 20 }), async (req, res) => {
   const state = String(req.query.state || ''), code = String(req.query.code || '')
-  const vence = _estados.get(state)
-  _estados.delete(state)
-  if (!vence || vence < Date.now()) return res.redirect('/admin?chytapay=vencido')
+  if (!stateVigente(state)) return res.redirect('/admin?chytapay=vencido')
   if (!code) return res.redirect('/admin?chytapay=cancelado')
   try {
     const tokens = await canjearCode(code)

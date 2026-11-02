@@ -94,6 +94,10 @@ sus colores y su servicio en Render (José eligió tres sistemas separados, 28/1
   muestra "venta online cerrada · en puerta $X" y la compra lo dice; la boletería del panel sigue vendiendo.
 - `/api/config` manda por tipo `final` (lo de hoy), `etapas` (finales, con `vigente`/`paso`) y `finalDespues`.
 
+- **Enlace para conectar la cuenta del organizador** (Panel → Herramientas, solo admin): dura **72 h** y
+  sobrevive a los deploys (el `state` va firmado con `QR_SECRET`, no en memoria; igual que canchas, 02/11/2026).
+  Se manda por WhatsApp; antes duraba 15 minutos.
+
 ## Chytapay: sedes (multitenant)
 - Chytapay habilitó las **sedes** (Portal → Tenants) para la integración de José: una sede por gala, cada una
   con su `key` y su URL de avisos (`<PUBLIC_URL>/api/webhooks/chytapay`).
