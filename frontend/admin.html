@@ -397,13 +397,10 @@ async function cargarResumen() {
         <p style="font-size:14px;"><b style="font-size:20px">${n.vendidas.toLocaleString('es-AR')}</b> de ${n.cupo.toLocaleString('es-AR')} vendidas · <b>${n.libres.toLocaleString('es-AR')}</b> libres</p>
         <p class="ayuda">${n.reservadas} pagando ahora · ingresaron ${n.ingresaron.toLocaleString('es-AR')}</p></div>`;
     }).join('') || '<p class="ayuda">Esta fecha todavía no tiene entradas cargadas (Cartelera → Editar).</p>';
-    // Neto estimado: lo del organizador menos la comisión de Chytapay sobre lo cobrado online (la paga su cuenta).
-    const neto = d.recaudado - Math.round(d.online.importe * d.pasarelaPct / 100);
     const cifra = ([b, s, clase = '', ir = '']) => `<div class="cifra ${clase}"${ir ? ` style="cursor:pointer" onclick="${ir}"` : ''}><b>${b}</b><span>${s}</span></div>`;
     $('#r-cifras').innerHTML = [
       [d.entradas.toLocaleString('es-AR'), 'Entradas vendidas', 'fuerte'], [d.ordenes, 'Compras'],
       [pesos(d.cobrado), 'Cobrado (lo que pagó el público)'], [pesos(d.recaudado), `${ORG} (sin el servicio)`, 'fuerte'],
-      [pesos(neto), `Neto estimado, después de Chytapay (${String(d.pasarelaPct).replace('.', ',')} %)`],
       [d.pendientes, 'Compras pagando ahora', '', "abrirOperaciones('pagando')"],
       ...(d.intentos ? [[d.intentos, 'Compras que no se pagaron: ver', '', "abrirOperaciones('sinpagar')"]] : []),
       ...(d.cortesias ? [[d.cortesias, 'Cortesías']] : []),

@@ -106,8 +106,8 @@ sus colores y su servicio en Render (José eligió tres sistemas separados, 28/1
 ## Panel del organizador (02/11/2026)
 Todo se cobra por transferencia (Chytapay): el panel no desglosa por medio de pago.
 - **Resumen:**
-  - Cifras: entradas, compras, cobrado (lo que pagó el público), "Para vos" (sin el servicio) y neto estimado
-    después de Chytapay (`COMISION_PASARELA_PCT`, por defecto 0,968).
+  - Cifras: entradas, compras, cobrado (lo que pagó el público) y "Para vos" (sin el servicio).
+    Sin "neto estimado" después de Chytapay: José lo sacó el 02/11.
   - Compras pagando ahora y compras que no se pagaron.
   - Tablas **por etapa de precio** y **por día** (hora argentina), para cruzar con los movimientos de la cuenta de Chytapay.
   - Con cupo ≥ 100000 ("sin tope") no hay barra ni "libres".

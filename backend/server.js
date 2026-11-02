@@ -78,7 +78,6 @@ const MAX_ENTRADAS = numEnv('MAX_ENTRADAS', 10)
 const RESERVA_MINUTOS = Math.min(60, Math.max(10, numEnv('RESERVA_MINUTOS', 30)))  // también es el vencimiento del cobro en Chytapay (3 a 60)
 const POCAS = numEnv('AVISO_POCAS', 30)                // desde cuántas libres se avisa "quedan pocas" (el cupo nunca se muestra)
 const SIN_TOPE = 100000                                 // un cupo así de grande = "sin tope": el panel no muestra barra ni libres
-const COMISION_PASARELA_PCT = numEnv('COMISION_PASARELA_PCT', 0.968)   // Chytapay: 0,8 % + IVA, la paga la cuenta que cobra (estimado del panel)
 const VENTA_ABIERTA = String(process.env.VENTA_ABIERTA || 'true') !== 'false'   // llave general de la venta online
 const ORGANIZACION = ['admin', 'organizador']          // ven resumen, ventas, planilla y cargan la cartelera
 
@@ -862,7 +861,6 @@ app.get('/api/admin/resumen', requireAuth(ORGANIZACION), async (req, res) => {
       cortesias, pendientes, sinImputar, intentos,
       ordenes: Number(totales?.ordenes || 0), entradas: Number(totales?.entradas || 0),
       recaudado: Number(totales?.recaudado || 0), cobrado: Number(totales?.cobrado || 0), cargo: Number(totales?.cargo || 0),
-      pasarelaPct: COMISION_PASARELA_PCT,
       porDia: Object.values(porDia).sort((a, b) => b.dia.localeCompare(a.dia)),
       porPrecio: Object.values(porPrecio).sort((a, b) => a.precio - b.precio),
       online: { operaciones: Number(online?.operaciones || 0), entradas: Number(online?.entradas || 0), importe: Number(online?.importe || 0) },
