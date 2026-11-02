@@ -133,6 +133,16 @@ Todo se cobra por transferencia (Chytapay): el panel no desglosa por medio de pa
 - ⚠️ `prueba-gala.mjs` (las 39) quedó de antes de la cartelera: usa `EVENTO_ARCHIVO` y compra sin `evento`.
   Hay que adaptarla.
 
+## En producción (repo privado github.com/copidiaz17/galas-sistema, rama main)
+Un servicio de Render por gala, todos del mismo repo: Root Directory `backend`, build `npm ci`, start
+`node server.js`, región **Singapore** (la del Aiven de Rítmica), Auto-Deploy **apagado** (Manual Deploy).
+- **El Quinto Elemento** (tema `patin-fa`): servicio `el-quinto-elemento` → https://el-quinto-elemento.onrender.com
+  - Base `gala_quinto_elemento` en el Aiven de Rítmica (02/11/2026).
+  - Variables en `render-env-quinto.txt` (git lo ignora): Chytapay de PRODUCCIÓN, `CHYTAPAY_SEDE=patin-fa`,
+    `VENTA_ABIERTA=false` hasta que Flor conecte su cuenta.
+  - Usuarios (jose admin, florencia organizador, puerta1 y puerta2 control) en `backend/usuarios-panel-render-quinto.txt`.
+  - Scripts contra esa base: `ENV_RENDER=render-env-quinto.txt USUARIOS_ARCHIVO=usuarios-panel-render-quinto.txt node herramientas/con-env-render.mjs <script>`.
+
 ## Pendiente
 - Adaptar `prueba-gala.mjs` a la cartelera.
 - Datos, logos y fotos de las otras galas del 13/12/2026.
