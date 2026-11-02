@@ -26,6 +26,7 @@ const Evento = sequelize.define('Evento', {
   tipos:       json('tipos'),                                      // [{ id, nombre, corto, detalle, precio, cupo }]
   publicado:   { type: DataTypes.BOOLEAN, defaultValue: false },   // se ve en la cartelera
   ventaAbierta:{ type: DataTypes.BOOLEAN, defaultValue: true },    // con publicado, se puede comprar
+  ventaHasta:  { type: DataTypes.DATEONLY, allowNull: true },       // último día de venta online (después, solo en puerta)
 }, {
   tableName: 'eventos',
   timestamps: true,

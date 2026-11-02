@@ -24,7 +24,7 @@ import { Op, QueryTypes, fn, col } from 'sequelize'
 import { sequelize, Orden, Entrada, Usuario, Visita, SinImputar, Evento, Imagen } from './models/index.js'
 import { leerSitio, normalizarEvento } from './sitio.js'
 import { chytapayConfigurado, chytapayEsProduccion, clavePublicable, crearCobroCheckout, cobroPagado, firmaValida,
-  urlAutorizar, canjearCode, guardarVinculo, vinculoActual } from './chytapay.js'
+  urlAutorizar, canjearCode, guardarVinculo, vinculoActual, asignarSede, sedeConfigurada } from './chytapay.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: join(__dirname, '.env') })
@@ -77,6 +77,8 @@ const CARGO_PUNTO_PCT = numEnv('CARGO_PUNTO_PCT', 10)  // en los puntos de venta
 const MAX_ENTRADAS = numEnv('MAX_ENTRADAS', 10)
 const RESERVA_MINUTOS = Math.min(60, Math.max(10, numEnv('RESERVA_MINUTOS', 30)))  // también es el vencimiento del cobro en Chytapay (3 a 60)
 const POCAS = numEnv('AVISO_POCAS', 30)                // desde cuántas libres se avisa "quedan pocas" (el cupo nunca se muestra)
+const SIN_TOPE = 100000                                 // un cupo así de grande = "sin tope": el panel no muestra barra ni libres
+const COMISION_PASARELA_PCT = numEnv('COMISION_PASARELA_PCT', 0.968)   // Chytapay: 0,8 % + IVA, la paga la cuenta que cobra (estimado del panel)
 const VENTA_ABIERTA = String(process.env.VENTA_ABIERTA || 'true') !== 'false'   // llave general de la venta online
 const ORGANIZACION = ['admin', 'organizador']          // ven resumen, ventas, planilla y cargan la cartelera
 
@@ -88,7 +90,6 @@ if (IS_PROD && (QR_SECRET.startsWith('CAMBIAR') || QR_SECRET.length < 24)) {
   process.exit(1)
 }
 const SCAN_TOKEN = process.env.SCAN_TOKEN || ''
-const conCargo = (precio, pct) => precio + Math.round(precio * pct / 100)
 const NO_VENTA = ['prueba']                 // no ocupan lugar ni son plata
 const NO_PLATA = ['prueba', 'cortesia']     // ocupan lugar pero no son venta
 
@@ -113,6 +114,28 @@ function cuandoDe(ev) {
 }
 const fechaCorta = ev => ev.fecha.slice(8, 10) + '/' + ev.fecha.slice(5, 7)
 
+// ───── Precios ─────
+// El precio de un tipo HOY (hora argentina): la primera etapa que todavía rige, o el precio base.
+const precioVigente = (t, dia = hoyAR()) => (t.etapas || []).find(e => dia <= e.hasta)?.precio ?? t.precio
+// Lo que paga el público por `cantidad` entradas y cómo se reparte (academia / cargo).
+// Con precioIncluyeCargo el total es exacto (precio × cantidad) y el cargo sale de adentro.
+function importes(precio, cantidad, pct) {
+  if (SITIO.precioIncluyeCargo) {
+    const total = precio * cantidad, subtotal = Math.round(total * 100 / (100 + pct))
+    return { subtotal, cargo: total - subtotal, total }
+  }
+  const subtotal = precio * cantidad, cargo = Math.round(subtotal * pct / 100)
+  return { subtotal, cargo, total: subtotal + cargo }
+}
+const finalDe = (precio, pct = CARGO_PCT) => importes(precio, 1, pct).total
+// Para la página: el calendario de precios (finales) con la etapa que rige hoy marcada.
+function etapasPublicas(t, dia = hoyAR()) {
+  if (!t.etapas?.length) return {}
+  const hoy = t.etapas.findIndex(e => dia <= e.hasta)
+  return { etapas: t.etapas.map((e, i) => ({ hasta: e.hasta, nombre: e.nombre, final: finalDe(e.precio), vigente: i === hoy, paso: hoy === -1 || i < hoy })),
+    finalDespues: finalDe(t.precio) }
+}
+
 // ───── Cartelera (en memoria; se recarga cada vez que el panel cambia algo) ─────
 let EVENTOS = new Map()
 async function cargarEventos() {
@@ -123,7 +146,8 @@ async function cargarEventos() {
 const eventoDe = id => EVENTOS.get(String(id || ''))
 const tipoDe = (ev, tipo) => ev?.tipos?.find(t => t.id === String(tipo || ''))
 const noPaso = ev => ev.fecha >= nocheDeHoy()   // hasta el mediodía siguiente sigue "vigente"
-const vendibleOnline = ev => ev && Number(ev.publicado) !== 0 && Number(ev.ventaAbierta) !== 0 && noPaso(ev) && ev.tipos.length > 0
+const enFechaDeVenta = ev => !ev.ventaHasta || hoyAR() <= ev.ventaHasta   // después, solo en puerta
+const vendibleOnline = ev => ev && Number(ev.publicado) !== 0 && Number(ev.ventaAbierta) !== 0 && noPaso(ev) && enFechaDeVenta(ev) && ev.tipos.length > 0
 // El evento que se controla en la puerta por defecto: el de hoy, o el próximo.
 function eventoActual() {
   const lista = [...EVENTOS.values()]
@@ -134,7 +158,10 @@ const nombreDe = o => { const ev = eventoDe(o.evento); return { eventoNombre: ev
 // La portada con los datos del sitio puestos por el servidor: WhatsApp y Google no ejecutan JavaScript,
 // así que el título y la descripción de la vista previa tienen que venir ya en el HTML.
 const escAttr = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
-const PORTADA = readFileSync(join(FRONT, 'index.html'), 'utf8')
+// Una gala puede traer su PROPIA portada (temas/<tema>/index.html, diseño exclusivo); si no, va la del molde.
+// Compra, panel, puerta y mails son siempre los del molde.
+const PORTADA_TEMA = join(TEMA_DIR, 'index.html')
+const PORTADA = readFileSync(existsSync(PORTADA_TEMA) ? PORTADA_TEMA : join(FRONT, 'index.html'), 'utf8')
   .replaceAll('%%NOMBRE%%', escAttr(SITIO.nombre))
   .replaceAll('%%DESCRIPCION%%', escAttr([SITIO.lema || SITIO.organiza, SITIO.direccion || SITIO.lugar].filter(Boolean).join(' · ') + '. Entradas online con QR al instante.'))
   .replaceAll('%%URL%%', escAttr(FRONTEND_URL))
@@ -326,7 +353,7 @@ function validarCompra(body, { maximo = MAX_ENTRADAS, online = true } = {}) {
   if (nombre.length > 80 || !/^[\p{L}][\p{L}\p{M} '’.-]*$/u.test(nombre)) return { error: 'Revisá el nombre: solo letras y espacios.' }
   if (email.length > 120 || !/^[^\s@<>"'`]+@[^\s@<>"'`]+\.[^\s@<>"'`]{2,}$/.test(email)) return { error: 'Revisá el email: ahí te llegan las entradas.' }
   if (dni.length < 7 || dni.length > 9) return { error: 'Revisá el DNI (solo números).' }
-  return { evento: ev.id, tipo: t.id, cantidad, nombre, email, dni, precio: t.precio }
+  return { evento: ev.id, tipo: t.id, cantidad, nombre, email, dni, precio: precioVigente(t) }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -546,9 +573,7 @@ app.post('/api/orders', rateLimit({ windowMs: 60000, max: 30 }), async (req, res
     if (freno) return res.status(429).json({ error: freno })
 
     const id = 'orden_' + randomUUID()
-    const subtotal = v.precio * v.cantidad
-    const cargo = Math.round(subtotal * CARGO_PCT / 100)
-    const total = subtotal + cargo
+    const { subtotal, cargo, total } = importes(v.precio, v.cantidad, CARGO_PCT)
     const { precio, ...datos } = v
     const r = await crearOrdenConCupo({ id, ...datos, metodo: 'chytapay', subtotal, cargo, total, estado: 'pendiente' })
     if (r.error) return res.status(r.status).json({ error: r.error })
@@ -615,6 +640,8 @@ app.post('/api/webhooks/chytapay', limiteAvisos, async (req, res) => {
     } else if (d.event === 'payment.unmatched') {
       // Plata que entró a la cuenta del organizador y no se pudo asignar a una compra (pagó otra
       // persona, pagó tarde o pagó dos veces). Se registra para que la asigne a mano.
+      // Con sedes, cada gala recibe solo los de su academia: si llega uno de otra sede, no es nuestro.
+      if (d.tenantKey && sedeConfigurada() && d.tenantKey !== sedeConfigurada()) return console.log(`ℹ️ Pago sin imputar de otra sede (${d.tenantKey}): ignorado`)
       await SinImputar.create({ avisoId: avisoId || null, motivo: d.reason, monto: d.amount, pagador: d.payerName,
         pagadorCuil: d.payerCuil != null ? String(d.payerCuil) : null, orden_id: d.paymentRequest?.referenceId || null,
         fecha: d.operationDate ? new Date(d.operationDate) : new Date() }).catch(e => { if (!/unique/i.test(e?.name || '')) throw e })
@@ -772,9 +799,16 @@ const filaOrden = (o, ingresos = {}) => {
     eventoFecha: ev?.fecha || '', tipo: o.tipo, tipoNombre: tipoDe(ev, o.tipo)?.corto || o.tipo,
     nombre: o.nombre, email: o.email, dni: o.dni, cantidad: o.cantidad,
     subtotal: o.subtotal, cargo: o.cargo, total: o.total, estado: o.estado,
-    fecha: o.pagadaEn || o.createdAt, medioPago: o.medioPago, pagador: o.pagador,
+    fecha: o.pagadaEn || o.createdAt, creada: o.createdAt, medioPago: o.medioPago, pagador: o.pagador,
+    operacion: o.paymentId || null,   // el cobro en Chytapay: para cruzarlo con la cuenta del organizador
     ingresadas: ingresos[o.id] || 0,
   }
+}
+// Cómo se ve una compra en el panel: pagada, pagando ahora (dentro de la reserva), no pagó, devuelta o cortesía.
+function estadoVista(o, corte = new Date(Date.now() - RESERVA_MINUTOS * 60000)) {
+  if (o.estado === 'reversada') return 'devuelta'
+  if (o.estado === 'pagada') return o.metodo === 'cortesia' ? 'cortesia' : 'pagada'
+  return o.estado === 'pendiente' && new Date(o.createdAt) >= corte ? 'pagando' : 'sinpagar'
 }
 async function ingresosDe(ids) {
   const r = {}
@@ -793,7 +827,23 @@ app.get('/api/admin/resumen', requireAuth(ORGANIZACION), async (req, res) => {
     const oc = await ocupacion(ev.id)
     const pagadas = { evento: ev.id, estado: 'pagada', metodo: { [Op.notIn]: NO_PLATA } }
     const totales = await Orden.findOne({ where: pagadas, raw: true,
-      attributes: [[fn('COUNT', col('id')), 'ordenes'], [fn('SUM', col('cantidad')), 'entradas'], [fn('SUM', col('subtotal')), 'recaudado'], [fn('SUM', col('total')), 'cobrado']] })
+      attributes: [[fn('COUNT', col('id')), 'ordenes'], [fn('SUM', col('cantidad')), 'entradas'], [fn('SUM', col('subtotal')), 'recaudado'], [fn('SUM', col('total')), 'cobrado'], [fn('SUM', col('cargo')), 'cargo']] })
+    // Por día (hora argentina) y por precio por entrada (= etapa): para cruzar con la cuenta de Chytapay.
+    const nombrePrecio = {}
+    for (const t of ev.tipos) {
+      nombrePrecio[finalDe(t.precio)] ??= t.etapas?.length ? 'Después de las etapas' : t.nombre
+      for (const e of t.etapas || []) nombrePrecio[finalDe(e.precio)] = e.nombre || `Hasta el ${e.hasta.slice(8, 10)}/${e.hasta.slice(5, 7)}`
+    }
+    const porDia = {}, porPrecio = {}
+    for (const o of await Orden.findAll({ where: pagadas, raw: true, attributes: ['pagadaEn', 'createdAt', 'cantidad', 'subtotal', 'total'] })) {
+      const dia = hoyAR(new Date(o.pagadaEn || o.createdAt)), unidad = Math.round(o.total / o.cantidad)
+      const d = porDia[dia] ??= { dia, compras: 0, entradas: 0, cobrado: 0, paraOrganizador: 0 }
+      d.compras++; d.entradas += o.cantidad; d.cobrado += o.total; d.paraOrganizador += o.subtotal
+      const p = porPrecio[unidad] ??= { precio: unidad, nombre: nombrePrecio[unidad] || null, entradas: 0, cobrado: 0, paraOrganizador: 0 }
+      p.entradas += o.cantidad; p.cobrado += o.total; p.paraOrganizador += o.subtotal
+    }
+    const intentos = await Orden.count({ where: { evento: ev.id, metodo: 'chytapay', estado: { [Op.in]: ['pendiente', 'abandonada'] },
+      createdAt: { [Op.lt]: new Date(Date.now() - RESERVA_MINUTOS * 60000) } } })
     const online = await Orden.findOne({ where: { ...pagadas, metodo: 'chytapay' }, raw: true,
       attributes: [[fn('COUNT', col('id')), 'operaciones'], [fn('SUM', col('cantidad')), 'entradas'], [fn('SUM', col('total')), 'importe']] })
     const porPuntoFilas = await Orden.findAll({ where: { ...pagadas, metodo: 'punto' }, raw: true, group: ['vendedor'],
@@ -808,10 +858,13 @@ app.get('/api/admin/resumen', requireAuth(ORGANIZACION), async (req, res) => {
     res.json({
       eventos: lista,
       evento: { id: ev.id, nombre: ev.nombre, cuando: cuandoDe(ev), publicado: Boolean(Number(ev.publicado)), ventaAbierta: vendibleOnline(ev) },
-      tipos: Object.fromEntries(Object.entries(oc).map(([k, t]) => [k, { ...t, nombre: tipoDe(ev, k)?.nombre || k, ingresaron: ingresosPorTipo[k] || 0 }])),
-      cortesias, pendientes, sinImputar,
+      tipos: Object.fromEntries(Object.entries(oc).map(([k, t]) => [k, { ...t, nombre: tipoDe(ev, k)?.nombre || k, ingresaron: ingresosPorTipo[k] || 0, sinTope: t.cupo >= SIN_TOPE }])),
+      cortesias, pendientes, sinImputar, intentos,
       ordenes: Number(totales?.ordenes || 0), entradas: Number(totales?.entradas || 0),
-      recaudado: Number(totales?.recaudado || 0), cobrado: Number(totales?.cobrado || 0),
+      recaudado: Number(totales?.recaudado || 0), cobrado: Number(totales?.cobrado || 0), cargo: Number(totales?.cargo || 0),
+      pasarelaPct: COMISION_PASARELA_PCT,
+      porDia: Object.values(porDia).sort((a, b) => b.dia.localeCompare(a.dia)),
+      porPrecio: Object.values(porPrecio).sort((a, b) => a.precio - b.precio),
       online: { operaciones: Number(online?.operaciones || 0), entradas: Number(online?.entradas || 0), importe: Number(online?.importe || 0) },
       porPunto: porPuntoFilas.map(f => ({ vendedor: f.vendedor, operaciones: Number(f.operaciones), entradas: Number(f.entradas), subtotal: Number(f.subtotal), cargo: Number(f.cargo), total: Number(f.total) })),
       visitas: { total: await Visita.count(), hoy: await Visita.count({ where: { createdAt: { [Op.gte]: inicioHoy } } }) },
@@ -821,6 +874,30 @@ app.get('/api/admin/resumen', requireAuth(ORGANIZACION), async (req, res) => {
   } catch (e) {
     console.error('❌ Error en resumen:', e?.message || e)
     res.status(500).json({ error: 'Error al armar el resumen' })
+  }
+})
+
+// Operaciones de UN evento, para controlar la venta: todas las compras con su estado (pagada, pagando
+// ahora, no pagó, devuelta, cortesía) y cuántas hay de cada una.
+app.get('/api/admin/operaciones', requireAuth(ORGANIZACION), async (req, res) => {
+  try {
+    const ev = eventoDe(req.query.evento) || eventoActual()
+    if (!ev) return res.json({ ordenes: [], cuentas: {} })
+    const filtro = String(req.query.estado || 'pagada')
+    const todas = await Orden.findAll({ where: { evento: ev.id, metodo: { [Op.notIn]: NO_VENTA } }, order: [['createdAt', 'DESC']], limit: 3000 })
+    const corte = new Date(Date.now() - RESERVA_MINUTOS * 60000)
+    const cuentas = { pagada: 0, pagando: 0, sinpagar: 0, devuelta: 0, cortesia: 0 }
+    const elegidas = []
+    for (const o of todas) {
+      const e = estadoVista(o, corte)
+      cuentas[e]++
+      if (filtro === 'todas' || filtro === e) elegidas.push({ o, e })
+    }
+    const ing = await ingresosDe(elegidas.filter(x => x.o.estado === 'pagada').map(x => x.o.id))
+    res.json({ evento: ev.id, filtro, cuentas, ordenes: elegidas.map(({ o, e }) => ({ ...filaOrden(o, ing), estadoVista: e })) })
+  } catch (e) {
+    console.error('❌ Error listando operaciones:', e?.message || e)
+    res.status(500).json({ error: 'No se pudieron traer las operaciones' })
   }
 })
 
@@ -846,7 +923,7 @@ app.get('/api/admin/exportar', requireAuth(ORGANIZACION), async (req, res) => {
     const ev = eventoDe(req.query.evento)
     const ordenes = await Orden.findAll({ where: { estado: 'pagada', metodo: { [Op.notIn]: NO_VENTA }, ...(ev ? { evento: ev.id } : {}) }, order: [['pagadaEn', 'ASC']] })
     const ing = await ingresosDe(ordenes.map(o => o.id))
-    const cols = ['id', 'fecha', 'eventoFecha', 'eventoNombre', 'tipoNombre', 'cantidad', 'nombre', 'email', 'dni', 'metodo', 'vendedor', 'cobro', 'pagador', 'subtotal', 'cargo', 'total', 'ingresadas']
+    const cols = ['id', 'fecha', 'eventoFecha', 'eventoNombre', 'tipoNombre', 'cantidad', 'nombre', 'email', 'dni', 'metodo', 'vendedor', 'cobro', 'pagador', 'operacion', 'subtotal', 'cargo', 'total', 'ingresadas']
     const celda = v => `"${String(v ?? '').replace(/"/g, '""')}"`
     const filas = ordenes.map(o => { const f = filaOrden(o, ing); f.fecha = new Date(f.fecha).toISOString(); return cols.map(c => celda(f[c])).join(';') })
     res.set('Content-Type', 'text/csv; charset=utf-8')
@@ -895,7 +972,10 @@ app.put('/api/admin/eventos/:id', requireAuth(ORGANIZACION), async (req, res) =>
   try {
     const actual = eventoDe(req.params.id)
     if (!actual) return res.status(404).json({ error: 'Evento no encontrado' })
-    const r = normalizarEvento({ ...actual, ...req.body }, { idFijo: actual.id })
+    // El panel no edita las etapas de precio: si un tipo no las manda, conserva las que ya tenía.
+    const cuerpo = { ...(req.body || {}) }
+    if (Array.isArray(cuerpo.tipos)) cuerpo.tipos = cuerpo.tipos.map(t => (t && t.etapas === undefined && tipoDe(actual, t.id)?.etapas) ? { ...t, etapas: tipoDe(actual, t.id).etapas } : t)
+    const r = normalizarEvento({ ...actual, ...cuerpo }, { idFijo: actual.id })
     if (r.error) return res.status(400).json({ error: r.error })
     // No se puede sacar un tipo que ya vendió ni bajar el cupo por debajo de lo vendido y reservado.
     const oc = await ocupacion(actual.id)
@@ -1014,15 +1094,14 @@ app.post('/api/admin/venta-punto', requireAuth(['venta', 'admin']), async (req, 
     const v = validarCompra(req.body || {}, { maximo: 20, online: false })
     if (v.error) return res.status(400).json({ error: v.error })
     const cobro = req.body?.cobro === 'transferencia' ? 'transferencia' : 'efectivo'
-    const subtotal = v.precio * v.cantidad
-    const cargo = Math.round(subtotal * CARGO_PUNTO_PCT / 100)
+    const { subtotal, cargo, total } = importes(v.precio, v.cantidad, CARGO_PUNTO_PCT)
     const { precio, ...datos } = v
     const r = await crearOrdenConCupo({ id: 'orden_' + randomUUID(), ...datos, metodo: 'punto', vendedor: req.usuario.usuario, cobro,
-      subtotal, cargo, total: subtotal + cargo, estado: 'pagada', pagadaEn: new Date() })
+      subtotal, cargo, total, estado: 'pagada', pagadaEn: new Date() })
     if (r.error) return res.status(r.status).json({ error: r.error })
     const { entradas } = await emitirEntradas(r.orden)
-    console.log(`💵 Venta en punto (${req.usuario.usuario}, ${cobro}): ${v.cantidad} ${v.evento}/${v.tipo} → ${v.email} · ${pesos(subtotal + cargo)}`)
-    res.json({ ok: true, ordenId: r.orden.id, total: subtotal + cargo, qrs: entradas.map(e => ({ indice: e.indice, url: urlQR(e.codigo) })) })
+    console.log(`💵 Venta en punto (${req.usuario.usuario}, ${cobro}): ${v.cantidad} ${v.evento}/${v.tipo} → ${v.email} · ${pesos(total)}`)
+    res.json({ ok: true, ordenId: r.orden.id, total, qrs: entradas.map(e => ({ indice: e.indice, url: urlQR(e.codigo) })) })
   } catch (e) {
     console.error('❌ Error en venta en punto:', e?.message || e)
     res.status(500).json({ error: 'No se pudo registrar la venta' })
@@ -1062,7 +1141,7 @@ app.get('/api/admin/orden/:id/qrs', requireAuth(['admin', 'control', 'venta', 'o
 })
 
 // Reenviar las entradas a otro email (para quien escribió mal el suyo)
-app.post('/api/admin/orden/:id/reenviar', requireAuth(['admin', 'venta']), async (req, res) => {
+app.post('/api/admin/orden/:id/reenviar', requireAuth(['admin', 'venta', 'organizador']), async (req, res) => {
   try {
     const email = String(req.body?.email || '').trim().toLowerCase()
     if (email.length > 120 || !/^[^\s@<>"'`]+@[^\s@<>"'`]+\.[^\s@<>"'`]{2,}$/.test(email)) return res.status(400).json({ error: 'Email inválido' })
@@ -1116,7 +1195,7 @@ const _estados = new Map()   // state → vence (un solo uso, 15 minutos)
 app.get('/api/admin/chytapay', requireAuth(['admin']), async (_req, res) => {
   try {
     const v = await vinculoActual()
-    res.json({ configurado: chytapayConfigurado(), produccion: chytapayEsProduccion(),
+    res.json({ configurado: chytapayConfigurado(), produccion: chytapayEsProduccion(), sede: sedeConfigurada() || null,
       vinculo: v ? { nombre: v.nombre, fantasia: v.fantasia, cuit: v.cuit, email: v.email, conectadoEn: v.conectadoEn } : null })
   } catch (e) {
     res.status(500).json({ error: 'No se pudo consultar la conexión' })
@@ -1139,10 +1218,28 @@ app.get('/chytapay/vuelta', rateLimit({ windowMs: 60000, max: 20 }), async (req,
     const tokens = await canjearCode(code)
     const v = await guardarVinculo(tokens)
     console.log(`🔗 Chytapay conectado: ${v.nombre} (${v.cuit})`)
-    res.redirect('/admin?chytapay=ok')
+    // La cuenta queda conectada aunque falle la sede: se reintenta desde Herramientas.
+    let sede = ''
+    if (sedeConfigurada()) {
+      try { await asignarSede(tokens.idToken); sede = '&sede=ok'; console.log(`🏠 Cuenta asignada a la sede "${sedeConfigurada()}"`) }
+      catch (e) { sede = '&sede=error'; console.error('❌ Sede de Chytapay:', e?.message || e) }
+    }
+    res.redirect('/admin?chytapay=ok' + sede)
   } catch (e) {
     console.error('❌ Error conectando Chytapay:', e?.message || e)
     res.redirect('/admin?chytapay=error')
+  }
+})
+// Reasignar la cuenta conectada a la sede de esta gala (si la sede se creó después de conectar).
+app.post('/api/admin/chytapay/sede', requireAuth(['admin']), async (_req, res) => {
+  try {
+    if (!sedeConfigurada()) return res.status(400).json({ error: 'Falta CHYTAPAY_SEDE en el servidor (la key de la sede de esta gala)' })
+    if (!(await vinculoActual())) return res.status(400).json({ error: 'Primero conectá la cuenta de Chytapay de la academia' })
+    await asignarSede()
+    res.json({ ok: true, sede: sedeConfigurada() })
+  } catch (e) {
+    console.error('❌ Sede de Chytapay:', e?.message || e)
+    res.status(500).json({ error: e?.message || 'No se pudo asignar la sede' })
   }
 })
 
@@ -1174,9 +1271,12 @@ app.get('/api/config', async (_req, res) => {
     eventos: [...EVENTOS.values()].filter(e => Number(e.publicado) && noPaso(e)).map(e => ({
       id: e.id, nombre: e.nombre, subtitulo: e.subtitulo, fecha: e.fecha, hora: e.hora, cuando: cuandoDe(e), puertas: e.puertas,
       artistas: e.artistas, descripcion: e.descripcion, imagen: e.imagen, nota: e.nota, vendible: online && vendibleOnline(e),
+      ventaHasta: e.ventaHasta || null,
       externo: e.externoUrl || e.externoPrecio || e.externoTexto ? { url: e.externoUrl, texto: e.externoTexto, precio: e.externoPrecio } : null,
-      tipos: Object.fromEntries(e.tipos.map(t => [t.id, { nombre: t.nombre, corto: t.corto, detalle: t.detalle, precio: t.precio,
-        final: conCargo(t.precio, CARGO_PCT), estado: estados[e.id]?.[t.id] || 'disponible' }])),
+      // final = lo que paga hoy el público. etapas = el calendario de precios (finales), para mostrarlo;
+      // finalDespues = el precio cuando terminan las etapas (por ejemplo, en puerta).
+      tipos: Object.fromEntries(e.tipos.map(t => [t.id, { nombre: t.nombre, corto: t.corto, detalle: t.detalle, precio: precioVigente(t),
+        final: finalDe(precioVigente(t)), estado: estados[e.id]?.[t.id] || 'disponible', ...etapasPublicas(t) }])),
     })),
     sandbox: !chytapayEsProduccion(),
   })
@@ -1184,8 +1284,10 @@ app.get('/api/config', async (_req, res) => {
 // Para el panel: todos los eventos (también los no publicados) con sus tipos, para la puerta,
 // la boletería y las cortesías.
 app.get('/api/admin/config', requireAuth(['admin', 'control', 'venta', 'organizador']), (_req, res) => {
-  res.json({ cargoPuntoPct: CARGO_PUNTO_PCT, actual: eventoActual()?.id || null, sandbox: !chytapayEsProduccion(),
-    eventos: [...EVENTOS.values()].map(e => ({ id: e.id, nombre: e.nombre, fecha: e.fecha, cuando: cuandoDe(e), pasado: !noPaso(e), tipos: e.tipos })) })
+  res.json({ cargoPuntoPct: CARGO_PUNTO_PCT, actual: eventoActual()?.id || null, sandbox: !chytapayEsProduccion(), precioIncluyeCargo: SITIO.precioIncluyeCargo, modo: SITIO.modo,
+    // unidadPunto: lo que cobra la boletería por entrada hoy (mismo cálculo que el servidor).
+    eventos: [...EVENTOS.values()].map(e => ({ id: e.id, nombre: e.nombre, fecha: e.fecha, cuando: cuandoDe(e), pasado: !noPaso(e),
+      tipos: e.tipos.map(t => ({ ...t, unidadPunto: finalDe(precioVigente(t), CARGO_PUNTO_PCT) })) })) })
 })
 
 // Direcciones cortas (se dictan por teléfono sin decir "punto html")

@@ -38,8 +38,21 @@ export function normalizarEvento(d, { idFijo } = {}) {
     const precio = Math.round(Number(t.precio)), cupo = Math.round(Number(t.cupo))
     if (!(precio > 0)) return { error: `"${tn}": falta el precio` }
     if (!(cupo > 0)) return { error: `"${tn}": falta la capacidad (cupo)` }
-    tipos.push({ id, nombre: tn, corto: limpio(t.corto || tn, 24), detalle: limpio(t.detalle, 80), precio, cupo })
+    // Etapas de precio ("hasta el 30/11, $20.000"): rigen hasta el final de su día "hasta", en orden.
+    // Después de la última vale `precio` (por ejemplo, el precio en puerta).
+    const etapas = []
+    for (const e of (Array.isArray(t.etapas) ? t.etapas : []).slice(0, 6)) {
+      const hasta = String(e.hasta || '').slice(0, 10), p = Math.round(Number(e.precio))
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(hasta) || isNaN(new Date(hasta + 'T12:00:00Z'))) return { error: `"${tn}": cada etapa necesita su fecha "hasta" (AAAA-MM-DD)` }
+      if (!(p > 0)) return { error: `"${tn}": a la etapa hasta ${hasta} le falta el precio` }
+      if (etapas.length && hasta <= etapas[etapas.length - 1].hasta) return { error: `"${tn}": las etapas van en orden de fecha` }
+      etapas.push({ hasta, precio: p, nombre: limpio(e.nombre, 40) || null })
+    }
+    tipos.push({ id, nombre: tn, corto: limpio(t.corto || tn, 24), detalle: limpio(t.detalle, 80), precio, cupo, ...(etapas.length ? { etapas } : {}) })
   }
+  // Último día de venta ONLINE (incluido). Sin dato, se vende online hasta la noche del evento.
+  const ventaHasta = String(d.ventaHasta || '').slice(0, 10)
+  if (ventaHasta && (!/^\d{4}-\d{2}-\d{2}$/.test(ventaHasta) || ventaHasta > fecha)) return { error: 'El último día de venta online va como AAAA-MM-DD y no puede ser después del evento' }
   const externoUrl = limpio(d.externoUrl, 300)
   if (externoUrl && !/^https:\/\/[^\s<>"']+$/i.test(externoUrl)) return { error: 'El enlace de la otra ticketera tiene que empezar con https://' }
   const externoTexto = limpio(d.externoTexto, 80), externoPrecio = limpio(d.externoPrecio, 80)
@@ -51,7 +64,7 @@ export function normalizarEvento(d, { idFijo } = {}) {
       id, nombre, subtitulo: limpio(d.subtitulo, 160) || null, fecha, hora: hora || null, puertas: limpio(d.puertas, 40) || null,
       artistas, descripcion: String(d.descripcion ?? '').trim().slice(0, 3000) || null, imagen: limpio(d.imagen, 200) || null, tipos,
       nota: limpio(d.nota, 120) || null, externoUrl: externoUrl || null, externoTexto: externoTexto || null, externoPrecio: externoPrecio || null,
-      publicado: !apagado(d.publicado), ventaAbierta: !apagado(d.ventaAbierta),
+      publicado: !apagado(d.publicado), ventaAbierta: !apagado(d.ventaAbierta), ventaHasta: ventaHasta || null,
     },
   }
 }
@@ -74,6 +87,9 @@ export function leerSitio(archivo = process.env.SITIO_ARCHIVO || 'sitio.json') {
       ayudaWhatsapp: String(s.ayudaWhatsapp || '').replace(/\D/g, ''), menores: limpio(s.menores, 200),
       // "gala" = un solo evento: la portada lo muestra en grande. "cartelera" = lista de fechas.
       modo: s.modo === 'gala' ? 'gala' : 'cartelera',
+      // true = los precios de la ficha son lo que PAGA el público, con el cargo adentro (la academia
+      // recibe precio / 1,10). false (el de siempre) = son lo que recibe la academia y el cargo va encima.
+      precioIncluyeCargo: s.precioIncluyeCargo === true,
       // Secciones opcionales de la página: quiénes somos y el llamado a feriantes/emprendedores.
       sobre: s.sobre?.titulo ? { titulo: limpio(s.sobre.titulo, 80), parrafos: (s.sobre.parrafos || []).map(p => limpio(p, 600)).filter(Boolean).slice(0, 6) } : null,
       facebook: /^https:\/\//.test(s.facebook || '') ? limpio(s.facebook, 200) : '',

@@ -29,6 +29,13 @@
 .cifra b{display:block;font-family:var(--f-display);font-weight:700;font-size:28px;line-height:1.1;color:var(--oro-vivo);}
 .cifra span{font-size:12px;color:var(--gris);}
 .cifra.alerta{border-color:rgba(217,83,79,.6);background:rgba(217,83,79,.1);}
+.cifra.fuerte{border-color:var(--oro);background:color-mix(in srgb,var(--oro) 12%,transparent);}
+.filtros{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.filtros button{font:700 13px var(--f-texto);color:var(--crema);background:rgba(246,240,230,.06);border:1px solid rgba(246,240,230,.14);border-radius:99px;padding:7px 13px;cursor:pointer;}
+.filtros button.activa{background:var(--oro);color:var(--noche);border-color:transparent;}
+.filtros button b{margin-left:6px;opacity:.7;}
+.dia-barra{height:8px;border-radius:99px;background:var(--oro);min-width:3px;}
+.etq.pagando{background:rgba(231,194,125,.35);}
 .noche{background:rgba(246,240,230,.05);border:1px solid rgba(246,240,230,.12);border-radius:16px;padding:16px;}
 .noche h3{font-family:var(--f-display);font-weight:700;font-size:22px;}
 .barra-cupo{height:12px;border-radius:999px;background:rgba(246,240,230,.1);overflow:hidden;margin:10px 0 6px;display:flex;}
@@ -114,18 +121,26 @@ textarea{width:100%;font:600 15px var(--f-texto);color:#1d1830;background:#fffaf
       <p class="ayuda" id="r-estado"></p>
       <div class="noches" id="r-tipos" style="margin-top:10px;"></div>
       <div class="cifras" id="r-cifras"></div>
-      <h3 class="paso" style="margin-top:20px;">Online (transferencia por Chytapay)</h3>
-      <div class="tabla"><table><thead><tr><th>Medio</th><th class="n">Compras</th><th class="n">Entradas</th><th class="n">Importe</th></tr></thead><tbody id="r-online"></tbody></table></div>
-      <h3 class="paso" style="margin-top:20px;">Puntos de venta</h3>
-      <div class="tabla"><table><thead><tr><th>Punto</th><th class="n">Ventas</th><th class="n">Entradas</th><th class="n">Cobrado</th><th class="n">Para el organizador</th><th class="n">Servicio</th></tr></thead><tbody id="r-puntos"></tbody></table></div>
+      <p class="ayuda" id="r-cobro" style="margin-top:12px;"></p>
+      <!-- Todo se cobra por transferencia (Chytapay): no hay desglose por medio de pago. Sí por etapa de precio y por día. -->
+      <h3 class="paso" style="margin-top:22px;">Por etapa de precio</h3>
+      <div class="tabla"><table><thead><tr><th>Etapa</th><th class="n">Precio</th><th class="n">Entradas</th><th class="n">Cobrado</th><th class="n col-org">Para el organizador</th></tr></thead><tbody id="r-precios"></tbody></table></div>
+      <h3 class="paso" style="margin-top:22px;">Por día</h3>
+      <p class="ayuda">Cada compra entra en el momento a la cuenta de Chytapay: con esta tabla se cruza con los movimientos de la cuenta.</p>
+      <div class="tabla"><table><thead><tr><th>Día</th><th class="n">Compras</th><th class="n">Entradas</th><th style="width:30%"></th><th class="n">Cobrado</th><th class="n col-org">Para el organizador</th></tr></thead><tbody id="r-dias"></tbody></table></div>
+      <div id="r-caja-puntos" hidden>
+        <h3 class="paso" style="margin-top:22px;">Puntos de venta</h3>
+        <div class="tabla"><table><thead><tr><th>Punto</th><th class="n">Ventas</th><th class="n">Entradas</th><th class="n">Cobrado</th><th class="n">Para el organizador</th><th class="n">Servicio</th></tr></thead><tbody id="r-puntos"></tbody></table></div>
+      </div>
     </div>
 
     <!-- Ventas / Buscar -->
     <div class="vista" id="t-ventas">
+      <div class="filtros" id="v-filtros" hidden></div>
       <div class="fila"><input id="buscar" placeholder="Buscar por DNI, email, nombre o número de compra (en todas las fechas)" autocomplete="off">
         <button class="chico oro" onclick="buscar()">Buscar</button></div>
       <p class="ayuda" id="ventas-titulo" style="margin-top:8px;"></p>
-      <div class="tabla"><table><thead><tr><th>Compra</th><th>Fecha</th><th>Entrada</th><th>Nombre</th><th>DNI</th><th class="n">Cant.</th><th class="n">Total</th><th>Medio</th><th>Ingresó</th></tr></thead><tbody id="v-filas"></tbody></table></div>
+      <div class="tabla"><table><thead id="v-cabeza"></thead><tbody id="v-filas"></tbody></table></div>
     </div>
 
     <!-- Cartelera -->
@@ -135,7 +150,7 @@ textarea{width:100%;font:600 15px var(--f-texto);color:#1d1830;background:#fffaf
         <button class="chico oro" onclick="editarEvento(null)">+ Nueva fecha</button>
       </div>
       <p class="ayuda">Cada fecha con sus entradas. "Publicada" = se ve en la página. "Venta abierta" = se puede comprar online (en la boletería se vende igual).
-        El precio es lo que recibe el organizador: el comprador ve ese precio + el servicio, como un solo número. La capacidad no se muestra en la página.</p>
+        <span id="ayuda-precio">El precio es lo que recibe el organizador: el comprador ve ese precio + el servicio, como un solo número.</span> La capacidad no se muestra en la página.</p>
       <div class="tabla"><table><thead><tr><th></th><th>Fecha</th><th>Evento</th><th>Estado</th><th class="n">Vendidas</th><th class="n">Para el organizador</th><th></th></tr></thead><tbody id="ev-filas"></tbody></table></div>
     </div>
 
@@ -310,14 +325,16 @@ function salir() { localStorage.removeItem('gala_sesion'); S = null; cerrarCamar
 
 // ── Pestañas según el rol ──
 const PESTANAS = {
-  admin: [['resumen', 'Resumen'], ['ventas', 'Ventas'], ['cartelera', 'Cartelera'], ['puerta', 'Puerta'], ['punto', 'Punto de venta'], ['herramientas', 'Herramientas']],
-  // El organizador: ve todo y carga la cartelera; no vende ni emite (sin "Punto de venta", ni cortesías, ni pruebas)
-  organizador: [['resumen', 'Resumen'], ['ventas', 'Ventas'], ['cartelera', 'Cartelera'], ['puerta', 'Puerta'], ['herramientas', 'Planilla y pagos']],
+  admin: [['resumen', 'Resumen'], ['ventas', 'Operaciones'], ['cartelera', 'Cartelera'], ['puerta', 'Puerta'], ['punto', 'Punto de venta'], ['herramientas', 'Herramientas']],
+  // El organizador: ve todo y carga la cartelera; no vende ni emite (sin "Punto de venta", ni cortesías, ni pruebas).
+  // En una gala de una sola fecha tampoco ve la cartelera (los precios y las etapas los carga José en la ficha).
+  organizador: [['resumen', 'Resumen'], ['ventas', 'Operaciones'], ['cartelera', 'Cartelera'], ['puerta', 'Puerta'], ['herramientas', 'Planilla y pagos']],
   control: [['puerta', 'Puerta'], ['ventas', 'Buscar']],
   venta: [['punto', 'Vender'], ['ventas', 'Buscar']],
 };
 const ES_ADMIN = () => S.rol === 'admin';
 const VE_TODO = () => ['admin', 'organizador'].includes(S.rol);
+const PUEDE_REENVIAR = () => ['admin', 'venta', 'organizador'].includes(S.rol);   // el organizador también (es su evento)
 let PEST = null;
 async function cargarCfg() {
   CFG = await api('/api/admin/config');
@@ -325,6 +342,7 @@ async function cargarCfg() {
   $('#sel-evento').innerHTML = CFG.eventos.map(e => `<option value="${esc(e.id)}"${e.id === EVA ? ' selected' : ''}>${fCorta(e.fecha)} · ${esc(e.nombre)}${e.pasado ? ' (pasada)' : ''}</option>`).join('')
     || '<option value="">Todavía no hay fechas: cargalas en Cartelera</option>';
   if (CFG.sandbox) $('#aviso-sandbox').hidden = false;
+  if (CFG.precioIncluyeCargo) $('#ayuda-precio').textContent = 'El precio es el FINAL, lo que paga el público (el servicio va adentro: el organizador recibe el precio ÷ 1,10).';
   pintarSelectores();
 }
 $('#sel-evento').addEventListener('change', e => { EVA = e.target.value; localStorage.setItem('gala_evento', EVA); PUERTA = ''; pintarSelectores(); abrir(PEST); });
@@ -333,10 +351,11 @@ async function armar() {
   $('#quien').textContent = S.nombre || S.usuario;
   $('#rol-txt').textContent = { admin: 'Administración', organizador: 'Organización', control: 'Puerta', venta: 'Punto de venta' }[S.rol];
   $$('.solo-admin').forEach(e => e.hidden = !ES_ADMIN());
-  $$('.puede-reenviar').forEach(e => e.hidden = !['admin', 'venta'].includes(S.rol));
+  $$('.puede-reenviar').forEach(e => e.hidden = !PUEDE_REENVIAR());
   $('#tabs').innerHTML = PESTANAS[S.rol].map(([k, t]) => `<button data-t="${k}">${t}</button>`).join('');
   $$('#tabs button').forEach(b => b.onclick = () => abrir(b.dataset.t));
   try { await cargarCfg(); } catch (e) { alert(e.message); }
+  if (CFG?.modo === 'gala' && S.rol === 'organizador') $('#tabs [data-t="cartelera"]')?.remove();
   abrir(PESTANAS[S.rol][0][0]);
   avisoChytapay();
 }
@@ -345,10 +364,11 @@ function abrir(t) {
   $$('#tabs button').forEach(b => b.classList.toggle('activa', b.dataset.t === t));
   $$('.vista').forEach(v => v.classList.toggle('activa', v.id === 't-' + t));
   // El selector de fecha no hace falta en la cartelera ni en la búsqueda
-  $('#caja-sel').hidden = ['cartelera'].includes(t) || (t === 'ventas' && !VE_TODO());
+  $('#caja-sel').hidden = ['cartelera'].includes(t) || (t === 'ventas' && !VE_TODO()) || (CFG?.eventos.length || 0) <= 1;
   if (t !== 'puerta') cerrarCamara();
   if (t === 'resumen') cargarResumen();
-  if (t === 'ventas' && VE_TODO() && !$('#buscar').value) cargarResumen();
+  $('#v-filtros').hidden = !VE_TODO();
+  if (t === 'ventas' && VE_TODO() && !$('#buscar').value) cargarOperaciones();
   if (t === 'cartelera') cargarCartelera();
   if (t === 'puerta') pintarPuerta();
   if (t === 'punto') cargarMisVentas();
@@ -364,38 +384,83 @@ async function cargarResumen() {
     if (!d.evento) return;
     $('#r-titulo').textContent = d.evento.nombre;
     $('#r-estado').innerHTML = `${esc(d.evento.cuando)} · ${d.evento.publicado ? '<span class="etq ok">publicada</span>' : '<span class="etq no">oculta</span>'} ${d.evento.ventaAbierta ? '<span class="etq ok">venta online abierta</span>' : '<span class="etq no">venta online cerrada</span>'}`;
+    const ORG = S.rol === 'organizador' ? 'Para vos' : 'Para el organizador';
+    $$('.col-org').forEach(th => th.textContent = ORG);
     $('#r-tipos').innerHTML = Object.entries(d.tipos).map(([k, n]) => {
       const v = n.vendidas / n.cupo * 100, r = n.reservadas / n.cupo * 100;
+      // Sin tope de venta: ni barra ni "libres" (serían 99.000 y pico).
+      if (n.sinTope) return `<div class="noche"><h3>${esc(n.nombre)}</h3>
+        <p style="font-size:14px;margin-top:6px;"><b style="font-size:26px">${n.vendidas.toLocaleString('es-AR')}</b> vendidas · sin tope de venta</p>
+        <p class="ayuda">${n.reservadas} entrada${n.reservadas === 1 ? '' : 's'} en proceso de pago · ingresaron ${n.ingresaron.toLocaleString('es-AR')}</p></div>`;
       return `<div class="noche"><h3>${esc(n.nombre)}</h3>
         <div class="barra-cupo"><i style="width:${v}%;background:var(--oro)"></i><i style="width:${r}%;background:rgba(231,194,125,.4)"></i></div>
         <p style="font-size:14px;"><b style="font-size:20px">${n.vendidas.toLocaleString('es-AR')}</b> de ${n.cupo.toLocaleString('es-AR')} vendidas · <b>${n.libres.toLocaleString('es-AR')}</b> libres</p>
         <p class="ayuda">${n.reservadas} pagando ahora · ingresaron ${n.ingresaron.toLocaleString('es-AR')}</p></div>`;
     }).join('') || '<p class="ayuda">Esta fecha todavía no tiene entradas cargadas (Cartelera → Editar).</p>';
+    // Neto estimado: lo del organizador menos la comisión de Chytapay sobre lo cobrado online (la paga su cuenta).
+    const neto = d.recaudado - Math.round(d.online.importe * d.pasarelaPct / 100);
+    const cifra = ([b, s, clase = '', ir = '']) => `<div class="cifra ${clase}"${ir ? ` style="cursor:pointer" onclick="${ir}"` : ''}><b>${b}</b><span>${s}</span></div>`;
     $('#r-cifras').innerHTML = [
-      [pesos(d.recaudado), 'Recaudado para el organizador'], [d.entradas.toLocaleString('es-AR'), 'Entradas vendidas'], [d.ordenes, 'Compras'],
-      [d.cortesias, 'Cortesías'], [d.pendientes, 'Pagando ahora'], [d.visitas.hoy + ' / ' + d.visitas.total, 'Visitas a la página hoy / total'],
-    ].map(([b, s]) => `<div class="cifra"><b>${b}</b><span>${s}</span></div>`).join('')
-      + (d.sinImputar ? `<div class="cifra alerta" style="cursor:pointer" onclick="abrir('herramientas')"><b>${d.sinImputar}</b><span>Transferencias sin asignar: ver</span></div>` : '');
-    $('#r-online').innerHTML = d.online.operaciones
-      ? `<tr><td>Transferencia</td><td class="n">${d.online.operaciones}</td><td class="n">${d.online.entradas}</td><td class="n">${pesos(d.online.importe)}</td></tr>`
-      : '<tr><td colspan="4" class="ayuda">Todavía no hay ventas online para esta fecha.</td></tr>';
-    $('#r-puntos').innerHTML = d.porPunto.map(p => `<tr><td>${esc(p.vendedor)}</td><td class="n">${p.operaciones}</td><td class="n">${p.entradas}</td><td class="n">${pesos(p.total)}</td><td class="n">${pesos(p.subtotal)}</td><td class="n">${pesos(p.cargo)}</td></tr>`).join('') || '<tr><td colspan="6" class="ayuda">Todavía no hay ventas en puntos para esta fecha.</td></tr>';
+      [d.entradas.toLocaleString('es-AR'), 'Entradas vendidas', 'fuerte'], [d.ordenes, 'Compras'],
+      [pesos(d.cobrado), 'Cobrado (lo que pagó el público)'], [pesos(d.recaudado), `${ORG} (sin el servicio)`, 'fuerte'],
+      [pesos(neto), `Neto estimado, después de Chytapay (${String(d.pasarelaPct).replace('.', ',')} %)`],
+      [d.pendientes, 'Compras pagando ahora', '', "abrirOperaciones('pagando')"],
+      ...(d.intentos ? [[d.intentos, 'Compras que no se pagaron: ver', '', "abrirOperaciones('sinpagar')"]] : []),
+      ...(d.cortesias ? [[d.cortesias, 'Cortesías']] : []),
+      [d.visitas.hoy + ' / ' + d.visitas.total, 'Visitas a la página hoy / total'],
+      ...(d.sinImputar ? [[d.sinImputar, 'Transferencias sin asignar: ver', 'alerta', "abrir('herramientas')"]] : []),
+    ].map(cifra).join('');
+    $('#r-cobro').textContent = d.cobrado
+      ? `Todo se cobra por transferencia a la cuenta de Chytapay del organizador. De lo cobrado (${pesos(d.cobrado)}), ${pesos(d.cargo)} son el servicio de la plataforma, que Chytapay separa solo en cada pago.`
+      : '';
+    $('#r-precios').innerHTML = d.porPrecio.map(p => `<tr><td>${esc(p.nombre || '—')}</td><td class="n">${pesos(p.precio)}</td><td class="n">${p.entradas}</td><td class="n">${pesos(p.cobrado)}</td><td class="n">${pesos(p.paraOrganizador)}</td></tr>`).join('')
+      || '<tr><td colspan="5" class="ayuda">Todavía no hay ventas para esta fecha.</td></tr>';
+    const maxDia = Math.max(1, ...d.porDia.map(x => x.entradas));
+    $('#r-dias').innerHTML = d.porDia.map(x => `<tr><td>${['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'][new Date(x.dia + 'T12:00:00Z').getUTCDay()]} ${fCorta(x.dia)}</td>
+      <td class="n">${x.compras}</td><td class="n">${x.entradas}</td><td><div class="dia-barra" style="width:${x.entradas / maxDia * 100}%"></div></td>
+      <td class="n">${pesos(x.cobrado)}</td><td class="n">${pesos(x.paraOrganizador)}</td></tr>`).join('')
+      || '<tr><td colspan="6" class="ayuda">Todavía no hay ventas para esta fecha.</td></tr>';
+    $('#r-caja-puntos').hidden = !d.porPunto.length;
+    $('#r-puntos').innerHTML = d.porPunto.map(p => `<tr><td>${esc(p.vendedor)}</td><td class="n">${p.operaciones}</td><td class="n">${p.entradas}</td><td class="n">${pesos(p.total)}</td><td class="n">${pesos(p.subtotal)}</td><td class="n">${pesos(p.cargo)}</td></tr>`).join('');
     ULTIMAS = d.ultimas;
-    if (!$('#buscar').value) pintarVentas(ULTIMAS, `Últimas compras de ${d.evento.nombre}`);
   } catch (x) { alert(x.message); }
 }
+// Estado de una compra en la lista (las de la búsqueda vienen sin estadoVista: son pagadas o devueltas).
+const ESTADOS = { pagada: ['pagada', 'ok'], pagando: ['pagando ahora', 'pagando'], sinpagar: ['no pagó', 'no'], devuelta: ['devuelta', 'no'], cortesia: ['cortesía', ''] };
+const estadoDe = o => o.estadoVista || (o.estado === 'reversada' ? 'devuelta' : o.metodo === 'cortesia' ? 'cortesia' : 'pagada');
 function pintarVentas(lista, titulo) {
   $('#ventas-titulo').textContent = titulo;
   window._lista = lista;
-  $('#v-filas').innerHTML = lista.map((o, i) => `<tr class="click" onclick="verOrden(${i})">
-    <td>${fecha(o.fecha)}</td><td>${fCorta(o.eventoFecha)}</td><td>${etq(o.tipoNombre)}</td><td>${esc(o.nombre)}${o.estado === 'reversada' ? ' <span class="etq no">devuelta</span>' : ''}</td><td>${esc(o.dni || '')}</td>
-    <td class="n">${o.cantidad}</td><td class="n">${pesos(o.total)}</td><td>${esc(o.metodo === 'punto' ? 'punto: ' + o.vendedor : o.metodo === 'cortesia' ? 'cortesía' : 'transferencia')}</td>
-    <td>${o.ingresadas}/${o.cantidad}</td></tr>`).join('')
-    || '<tr><td colspan="9" class="ayuda">Sin resultados.</td></tr>';
+  // Columnas que solo sirven con varias fechas o varios tipos de entrada; "Pagó desde" = quién transfirió (Chytapay).
+  const variasFechas = (CFG?.eventos.length || 0) > 1, variosTipos = new Set(lista.map(o => o.tipoNombre)).size > 1;
+  $('#v-cabeza').innerHTML = `<tr><th>Compra</th>${variasFechas ? '<th>Fecha</th>' : ''}${variosTipos ? '<th>Entrada</th>' : ''}<th>Nombre</th><th>DNI</th>
+    <th class="n">Cant.</th><th class="n">Total</th><th>Pagó desde</th><th>Estado</th><th>Ingresó</th></tr>`;
+  $('#v-filas').innerHTML = lista.map((o, i) => {
+    const e = estadoDe(o), [txt, clase] = ESTADOS[e];
+    const desde = o.metodo === 'punto' ? 'punto: ' + o.vendedor : o.metodo === 'cortesia' ? '—' : (o.pagador || (e === 'pagada' ? 'transferencia' : '—'));
+    return `<tr class="click" onclick="verOrden(${i})"><td>${fecha(e === 'pagada' ? o.fecha : o.creada || o.fecha)}</td>${variasFechas ? `<td>${fCorta(o.eventoFecha)}</td>` : ''}${variosTipos ? `<td>${etq(o.tipoNombre)}</td>` : ''}
+      <td>${esc(o.nombre)}</td><td>${esc(o.dni || '')}</td><td class="n">${o.cantidad}</td><td class="n">${pesos(o.total)}</td><td>${esc(desde)}</td>
+      <td><span class="etq ${clase}">${txt}</span></td><td>${['pagada', 'cortesia'].includes(e) ? `${o.ingresadas}/${o.cantidad}` : ''}</td></tr>`;
+  }).join('') || '<tr><td colspan="10" class="ayuda">Sin resultados.</td></tr>';
 }
+// Operaciones de la fecha elegida, filtradas por estado (con la cantidad de cada uno en los botones).
+let FILTRO = 'pagada';
+const FILTROS = [['pagada', 'Pagadas'], ['pagando', 'Pagando ahora'], ['sinpagar', 'No pagaron'], ['devuelta', 'Devueltas'], ['cortesia', 'Cortesías'], ['todas', 'Todas']];
+async function cargarOperaciones() {
+  if (!EVA) return;
+  try {
+    const d = await api(`/api/admin/operaciones?evento=${encodeURIComponent(EVA)}&estado=${FILTRO}`);
+    const total = Object.values(d.cuentas).reduce((a, b) => a + b, 0);
+    $('#v-filtros').innerHTML = FILTROS.filter(([k]) => k === FILTRO || k === 'todas' || k === 'pagada' || d.cuentas[k])
+      .map(([k, t]) => `<button class="${k === FILTRO ? 'activa' : ''}" onclick="abrirOperaciones('${k}')">${t}<b>${k === 'todas' ? total : d.cuentas[k]}</b></button>`).join('');
+    const ayuda = { sinpagar: ' · empezaron la compra y no transfirieron (o transfirieron tarde: mirá "Transferencias sin asignar")', pagando: ' · tienen el CVU y todavía están a tiempo de transferir' }[FILTRO] || '';
+    pintarVentas(d.ordenes, `${d.ordenes.length} ${FILTROS.find(f => f[0] === FILTRO)[1].toLowerCase()}${ayuda}`);
+  } catch (x) { alert(x.message); }
+}
+function abrirOperaciones(filtro) { FILTRO = filtro; $('#buscar').value = ''; if (PEST !== 'ventas') abrir('ventas'); else cargarOperaciones(); }
 async function buscar() {
   const q = $('#buscar').value.trim();
-  if (q.length < 3) { if (VE_TODO()) pintarVentas(ULTIMAS, 'Últimas compras de la fecha elegida'); return; }
+  if (q.length < 3) { if (VE_TODO()) cargarOperaciones(); return; }
   try { const d = await api('/api/admin/buscar?q=' + encodeURIComponent(q)); pintarVentas(d.ordenes, `${d.ordenes.length} resultado(s) para "${q}" en todas las fechas`); } catch (x) { alert(x.message); }
 }
 $('#buscar').addEventListener('keydown', e => { if (e.key === 'Enter') buscar(); });
@@ -404,12 +469,24 @@ $('#buscar').addEventListener('keydown', e => { if (e.key === 'Enter') buscar();
 let ORDEN = null;
 async function verOrden(i) {
   const o = window._lista[i]; ORDEN = o;
+  // Compra sin pagar: no hay QR ni reenvío; se muestran los datos para poder escribirle.
+  const pagada = ['pagada', 'cortesia', 'devuelta'].includes(estadoDe(o));
+  $('#mq-ingreso').hidden = !pagada || S.rol === 'venta';
+  $$('.puede-reenviar').forEach(e => e.hidden = !pagada || !PUEDE_REENVIAR());
+  $('#mq-msg').hidden = !pagada;
+  if (!pagada) {
+    $('#mq-tit').textContent = `${o.nombre} · ${o.cantidad} entrada${o.cantidad > 1 ? 's' : ''} · ${pesos(o.total)}`;
+    $('#mq-sub').textContent = `${ESTADOS[estadoDe(o)][0]} · empezó la compra el ${fecha(o.creada || o.fecha)} · DNI ${o.dni || '—'}`;
+    $('#mq-qrs').innerHTML = `<p class="ayuda" style="text-align:left">${estadoDe(o) === 'pagando' ? 'Todavía está a tiempo de transferir: si paga, la entrada sale sola.' : 'No llegó a pagar dentro de la reserva. Si dice que transfirió, buscalo en "Transferencias sin asignar".'}</p>
+      <p style="margin-top:10px;text-align:left"><a href="mailto:${esc(o.email)}">${esc(o.email)}</a></p>`;
+    $('#m-qr').classList.add('abierto');
+    return;
+  }
   try {
     const d = await api('/api/admin/orden/' + encodeURIComponent(o.id) + '/qrs');
     $('#mq-tit').textContent = `${d.eventoNombre} · ${d.tipoNombre} · ${d.cantidad}`;
     $('#mq-sub').textContent = `${d.cuando} · ${d.nombre} · ${d.email} · DNI ${d.dni || '—'}${o.pagador ? ' · pagó: ' + o.pagador : ''}`;
     $('#mq-qrs').innerHTML = d.qrs.map(q => `<div class="qr-mini"><img src="${esc(q.url)}" alt="">${q.indice} de ${d.cantidad}${q.usado ? ' · ya entró' : ''}</div>`).join('');
-    $('#mq-ingreso').hidden = S.rol === 'venta';
     $('#mq-email').value = d.email; $('#mq-msg').innerHTML = ''; $('#mq-ing-msg').innerHTML = '';
     $('#m-qr').classList.add('abierto');
   } catch (x) { alert(x.message); }
@@ -446,7 +523,8 @@ function filaTipo(t = {}) {
     <div><label>Detalle (opcional)</label><input class="t-detalle" placeholder="Anticipada, mesa…" value="${esc(t.detalle || '')}"></div>
     <div><label>Precio ($)</label><input class="t-precio" type="number" min="1" placeholder="15000" value="${t.precio ?? ''}"></div>
     <div><label>Capacidad</label><input class="t-cupo" type="number" min="1" placeholder="2000" value="${t.cupo ?? ''}"></div>
-    <button type="button" class="chico rojo" title="Sacar">✕</button><input type="hidden" class="t-id" value="${esc(t.id || '')}">`;
+    <button type="button" class="chico rojo" title="Sacar">✕</button><input type="hidden" class="t-id" value="${esc(t.id || '')}">
+    ${t.etapas?.length ? `<p class="ayuda" style="grid-column:1/-1;margin:0;">Etapas: ${t.etapas.map(x => `hasta el ${fCorta(x.hasta)} ${pesos(x.precio)}`).join(' · ')} · después, el precio de arriba. Las etapas se cambian en la ficha (pedíselo a José).</p>` : ''}`;
   div.querySelector('button').onclick = () => div.remove();
   $('#ev-tipos').appendChild(div);
 }
@@ -531,7 +609,7 @@ function totalPunto() {
   if (!t) { $('#p-total').textContent = 'Elegí una fecha con entradas cargadas.'; return; }
   const c = Math.max(1, +$('#p-cant').value || 1);
   // Precio único, igual que online: el vendedor cobra un solo número, sin servicio aparte.
-  const pct = CFG.cargoPuntoPct ?? 10, unidad = t.precio + Math.round(t.precio * pct / 100);
+  const pct = CFG.cargoPuntoPct ?? 10, unidad = t.unidadPunto ?? (t.precio + Math.round(t.precio * pct / 100));
   $('#p-total').innerHTML = `Cobrás <b style="font-size:20px">${pesos(unidad * c)}</b> · ${c} × ${esc(t.nombre)} (${pesos(unidad)}) · ${esc(evElegido().nombre)} ${fCorta(evElegido().fecha)}`;
 }
 $('#p-cant').addEventListener('input', totalPunto);
@@ -572,7 +650,8 @@ async function estadoChytapay() {
     $('#cy-estado').innerHTML = (d.produccion ? '<b>Producción</b>' : '<b>Modo prueba (sandbox)</b>') + ' · '
       + (v ? `Conectada la cuenta de <b>${esc(v.nombre || v.fantasia)}</b> (CUIT ${esc(v.cuit)}) desde el ${new Date(v.conectadoEn).toLocaleDateString('es-AR')}.`
            : '<span class="err-msg">Todavía no hay una cuenta del organizador conectada: sin eso no se puede cobrar online.</span>')
-      + (d.configurado ? '' : '<br><span class="err-msg">Faltan los datos de Chytapay en el servidor (CHYTAPAY_*).</span>');
+      + (d.configurado ? '' : '<br><span class="err-msg">Faltan los datos de Chytapay en el servidor (CHYTAPAY_*).</span>')
+      + (d.sede ? `<br>Sede de esta gala en Chytapay: <b>${esc(d.sede)}</b>${v ? ' · <a href="#" onclick="asignarSede();return false;">volver a asignar la cuenta a esta sede</a>' : ''}` : '');
     $('#cy-boton').textContent = v ? 'Volver a conectar (otra cuenta o renovar)' : 'Generar enlace para conectar la cuenta del organizador';
   } catch (x) { $('#cy-estado').textContent = x.message; }
 }
@@ -585,12 +664,17 @@ async function conectarChytapay() {
       <a class="chico oro" href="${esc(d.url)}">Abrirlo acá</a></div>`;
   } catch (x) { $('#cy-enlace').innerHTML = `<p class="err-msg">${esc(x.message)}</p>`; }
 }
+async function asignarSede() {
+  try { const d = await api('/api/admin/chytapay/sede', { method: 'POST' }); alert(`Listo: la cuenta quedó en la sede "${d.sede}".`); }
+  catch (x) { alert(x.message); }
+}
 function avisoChytapay() {
-  const r = new URLSearchParams(location.search).get('chytapay');
+  const q = new URLSearchParams(location.search), r = q.get('chytapay'), sede = q.get('sede');
   if (!r) return;
   history.replaceState(null, '', '/admin');
-  const msg = { ok: 'Listo: la cuenta de Chytapay del organizador quedó conectada.', error: 'No se pudo conectar la cuenta de Chytapay. Probá de nuevo.',
+  let msg = { ok: 'Listo: la cuenta de Chytapay del organizador quedó conectada.', error: 'No se pudo conectar la cuenta de Chytapay. Probá de nuevo.',
     vencido: 'El enlace venció o ya se usó. Generá uno nuevo.', cancelado: 'Se canceló la conexión con Chytapay.' }[r];
+  if (msg && sede === 'error') msg += '\n\nOjo: no se pudo asignar a la sede de esta gala. Revisá que la sede exista en el Portal (Tenants) y tocá "volver a asignar".';
   if (msg) setTimeout(() => alert(msg), 300);
   if (ES_ADMIN()) abrir('herramientas');
 }

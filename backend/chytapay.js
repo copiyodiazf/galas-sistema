@@ -105,6 +105,23 @@ export async function quienSoy(idToken) {
   return r.datos
 }
 
+// ═══ Sedes (multitenant) ═══
+// Cada gala es una "sede" de la integración (Portal → Tenants), con SU URL de avisos. Al conectar la
+// cuenta de la academia se la asigna a la sede de este sistema (CHYTAPAY_SEDE = la key de la sede):
+// así los payment.unmatched de esa cuenta llegan solo acá. Los avisos de cada cobro ya vienen por su
+// webhookUrl. Sin CHYTAPAY_SEDE no se hace nada (integración de una sola URL).
+export const sedeConfigurada = () => String(process.env.CHYTAPAY_SEDE || '').trim()
+export async function asignarSede(tokenAcademia) {
+  const tenantKey = sedeConfigurada()
+  if (!tenantKey) return { ok: false, motivo: 'sin CHYTAPAY_SEDE' }
+  if (simulado()) return { ok: true, tenantKey, simulado: true }
+  const hacer = t => pedir(`${cfg().urls.api}/my-integration/tenant`, { metodo: 'PUT', cuerpo: { tenantKey }, token: t })
+  const r = tokenAcademia ? await hacer(tokenAcademia) : await conToken(hacer)
+  if (r.status === 404) throw new Error(`La sede "${tenantKey}" no existe en el Portal de Chytapay (Tenants): creala con esa key y la URL de avisos de esta gala`)
+  if (!r.ok) throw errorDe(r, 'No se pudo asignar la sede en Chytapay')
+  return { ok: true, tenantKey }
+}
+
 // Guarda (o reemplaza) la cuenta de la academia conectada. Hay una sola por sistema.
 export async function guardarVinculo({ refreshToken, idToken, expiresIn }) {
   const yo = await quienSoy(idToken)

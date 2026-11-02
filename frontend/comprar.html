@@ -249,7 +249,15 @@ fetch('/api/config').then(r => r.json()).then(c => {
   $('#cab-nombre').textContent = c.sitio.nombre; $('#cab-organiza').textContent = c.sitio.lema || c.sitio.organiza || c.sitio.ciudad || '';
   $('#bajada').textContent = `${c.sitio.lugar}${c.sitio.direccion ? ' · ' + c.sitio.direccion : ''}. Pagás por transferencia y el QR te llega al correo al instante.`;
   const lista = vendibles();
-  if (!c.ventaAbierta || !lista.length) { $('#compra').style.display = 'none'; $('#cerrada').style.display = 'block'; return; }
+  if (!c.ventaAbierta || !lista.length) {
+    // Si la venta online ya cerró por fecha (queda solo la puerta), se dice eso y no "todavía no abrió".
+    const fin = c.eventos.find(e => e.ventaHasta && !e.vendible);
+    if (fin) {
+      const enPuerta = Object.values(fin.tipos).map(t => t.finalDespues).filter(Boolean);
+      $('#cerrada').innerHTML = `<p>La venta online terminó el ${fin.ventaHasta.slice(8, 10)}/${fin.ventaHasta.slice(5, 7)}.${enPuerta.length ? ` Quedan entradas en la puerta: <b>${pesos(Math.min(...enPuerta))}</b>.` : ''} Volvé a la <a href="/">página principal</a>.</p>`;
+    }
+    $('#compra').style.display = 'none'; $('#cerrada').style.display = 'block'; return;
+  }
   if (c.sandbox) $('#sandbox').hidden = false;
   EV = lista.find(e => e.id === pedidoEvento) || (lista.length === 1 ? lista[0] : null);
   $('#reserva').textContent = `Te guardamos el lugar ${c.reservaMinutos} minutos mientras pagás.`;
