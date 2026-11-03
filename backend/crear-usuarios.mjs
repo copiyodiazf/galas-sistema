@@ -1,6 +1,6 @@
 // Crea (o renueva la clave de) usuarios del panel. Las claves se generan al azar y se
 // guardan en usuarios-panel.txt (está en .gitignore): NO se muestran en pantalla.
-//   node crear-usuarios.mjs admin:copidiaz17@gmail.com "organizador:academia@ejemplo.com:Nombre" control:puerta1 venta:boleteria
+//   node crear-usuarios.mjs admin:jose "organizador:academia@ejemplo.com:Nombre" control:puerta1 venta:boleteria
 //   (rol:usuario[:Nombre a mostrar])
 import { randomBytes, scryptSync } from 'crypto'
 import { appendFileSync } from 'fs'

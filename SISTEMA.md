@@ -137,8 +137,16 @@ Todo se cobra por transferencia (Chytapay): el panel no desglosa por medio de pa
 - ⚠️ `prueba-gala.mjs` (las 39) quedó de antes de la cartelera: usa `EVENTO_ARCHIVO` y compra sin `evento`.
   Hay que adaptarla.
 
-## En producción (repo privado github.com/copidiaz17/galas-sistema, rama main)
-Un servicio de Render por gala, todos del mismo repo: Root Directory `backend`, build `npm ci`, start
+## Cuenta de eventos en Render: se despliega desde una COPIA PÚBLICA (03/11/2026)
+- El repo privado pasó a **github.com/copiyodiazf/galas-sistema** (copidiaz17 tiene push). La cuenta 2 de Render
+  (la de los eventos) no pudo conectarse a GitHub: Render vincula cada usuario de GitHub a una sola cuenta.
+- Render toma **github.com/copidiaz17/galas-web** (PÚBLICO, "Public Git Repository"): solo backend, frontend y
+  temas, sin historia, sin este archivo ni herramientas, y sin las notas `_ayuda` de cada sitio.json.
+- **Para publicar un cambio:** commit acá → `node herramientas/publicar-deploy.mjs` → Manual Deploy en Render.
+  NUNCA editar galas-web a mano (se pisa entera en cada publicación).
+
+## En producción (repo privado github.com/copiyodiazf/galas-sistema, rama main)
+Un servicio de Render por gala, todos del mismo código (en la cuenta de eventos, desde galas-web): Root Directory `backend`, build `npm ci`, start
 `node server.js`, región **Singapore** (la del Aiven de Rítmica), Auto-Deploy **apagado** (Manual Deploy).
 - **El Quinto Elemento** (tema `patin-fa`): servicio `el-quinto-elemento` → https://el-quinto-elemento.onrender.com
   - Base `gala_quinto_elemento` en el Aiven de Rítmica (02/11/2026).
