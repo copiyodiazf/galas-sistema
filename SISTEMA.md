@@ -108,6 +108,8 @@ sus colores y su servicio en Render (José eligió tres sistemas separados, 28/1
 - **Dominios autorizados** del Portal: vacío, o TODAS las galas (si se carga una sola, el widget no anda en las demás).
 
 ## Panel del organizador (02/11/2026)
+- **Cortesías (03/11/2026):** el organizador también las emite (pestaña "Cortesías y planilla"). Pide confirmación,
+  acepta un DNI opcional (para "Mis entradas") y el mail dice "Tu invitación… te invita" en vez de "tu compra".
 Todo se cobra por transferencia (Chytapay): el panel no desglosa por medio de pago.
 - **Resumen:**
   - Cifras: entradas, compras, cobrado (lo que pagó el público) y "Para vos" (sin el servicio).
