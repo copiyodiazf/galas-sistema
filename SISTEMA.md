@@ -140,7 +140,7 @@ Todo se cobra por transferencia (Chytapay): el panel no desglosa por medio de pa
 ## Cuenta de eventos en Render: se despliega desde una COPIA PÚBLICA (03/11/2026)
 - El repo privado pasó a **github.com/copiyodiazf/galas-sistema** (copidiaz17 tiene push). La cuenta 2 de Render
   (la de los eventos) no pudo conectarse a GitHub: Render vincula cada usuario de GitHub a una sola cuenta.
-- Render toma **github.com/copidiaz17/galas-web** (PÚBLICO, "Public Git Repository"): solo backend, frontend y
+- Render toma **github.com/copiyodiazf/galas-web** (PÚBLICO, "Public Git Repository"; copidiaz17 sube como colaborador): solo backend, frontend y
   temas, sin historia, sin este archivo ni herramientas, y sin las notas `_ayuda` de cada sitio.json.
 - **Para publicar un cambio:** commit acá → `node herramientas/publicar-deploy.mjs` → Manual Deploy en Render.
   NUNCA editar galas-web a mano (se pisa entera en cada publicación).

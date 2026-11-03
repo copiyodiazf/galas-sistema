@@ -1,7 +1,7 @@
 // Copia PÚBLICA para Render (la cuenta de los eventos no puede conectarse al GitHub de este repo).
 // Lleva solo backend, frontend y temas del último commit, SIN historia, sin SISTEMA.md ni herramientas, y sin
 // las notas "_..." de cada sitio.json. Render la toma como "Public Git Repository".
-//   node herramientas/publicar-deploy.mjs        → arma C:\galas-deploy, hace commit y push a copidiaz17/galas-web
+//   node herramientas/publicar-deploy.mjs        → arma C:\galas-deploy, hace commit y push a copiyodiazf/galas-web
 //   node herramientas/publicar-deploy.mjs --revisar   → solo la arma, para mirarla antes de subir
 // El código se edita SIEMPRE acá (repo privado): la copia pública se pisa entera en cada publicación.
 import { execSync } from 'child_process'
@@ -10,7 +10,7 @@ import { join } from 'path'
 import { tmpdir } from 'os'
 
 const ORIGEN = 'C:/galas-sistema', DESTINO = 'C:/galas-deploy'
-const REMOTO = 'https://copidiaz17@github.com/copidiaz17/galas-web.git'
+const REMOTO = 'https://copidiaz17@github.com/copiyodiazf/galas-web.git'   // copidiaz17 sube como colaborador
 const sh = (c, cwd = ORIGEN) => execSync(c, { cwd, stdio: ['ignore', 'pipe', 'inherit'], env: { ...process.env, GCM_INTERACTIVE: 'never' } }).toString().trim()
 
 if (sh('git status --porcelain')) throw new Error('Hay cambios sin commit en galas-sistema: commitealos antes de publicar')
