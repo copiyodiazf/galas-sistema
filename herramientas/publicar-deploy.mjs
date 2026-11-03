@@ -2,6 +2,7 @@
 // Lleva solo backend, frontend y temas del último commit, SIN historia, sin SISTEMA.md ni herramientas, y sin
 // las notas "_..." de cada sitio.json. Render la toma como "Public Git Repository".
 //   node herramientas/publicar-deploy.mjs        → arma C:\galas-deploy, hace commit y push a copidiaz17/galas-web
+//   node herramientas/publicar-deploy.mjs --revisar   → solo la arma, para mirarla antes de subir
 // El código se edita SIEMPRE acá (repo privado): la copia pública se pisa entera en cada publicación.
 import { execSync } from 'child_process'
 import { existsSync, mkdirSync, readdirSync, rmSync, readFileSync, writeFileSync } from 'fs'
@@ -32,6 +33,7 @@ for (const tema of readdirSync(join(DESTINO, 'temas'))) {
 writeFileSync(join(DESTINO, '.gitignore'), 'node_modules/\n.env\n*.env\n')
 writeFileSync(join(DESTINO, 'README.md'), '# Venta de entradas de galas\n\nCopia para desplegar en Render (Root Directory `backend`, build `npm ci`, start `node server.js`, una variable `TEMA` por gala).\n')
 
+if (process.argv.includes('--revisar')) { console.log(`Armada en ${DESTINO} (versión ${version}), sin subir: revisala y corré sin --revisar`); process.exit(0) }
 sh('git add -A', DESTINO)
 if (!sh('git status --porcelain', DESTINO)) { console.log(`Sin cambios: la copia pública ya tiene ${version}`); process.exit(0) }
 sh(`git commit -q -m "galas-sistema ${version}"`, DESTINO)
