@@ -111,7 +111,7 @@
     </section>
   </form>
 
-  <p class="pie">¿Ya compraste? <a href="/mis-entradas">Mis entradas</a> · <a href="/">Volver a la cartelera</a></p>
+  <p class="pie">¿Ya compraste? <a href="/mis-entradas">Mis entradas</a> · <a href="/">Volver a la cartelera</a><span id="pie-wa" hidden> · ¿Problemas para pagar? <a id="pie-wa-a" target="_blank" rel="noopener">WhatsApp</a></span></p>
 </main>
 
 <div class="simulado" id="simulado"><div class="caja">
@@ -248,6 +248,10 @@ fetch('/api/config').then(r => r.json()).then(c => {
   document.title = 'Comprar entradas · ' + c.sitio.nombre;
   $('#cab-nombre').textContent = c.sitio.nombre; $('#cab-organiza').textContent = c.sitio.lema || c.sitio.organiza || c.sitio.ciudad || '';
   $('#bajada').textContent = `${c.sitio.lugar}${c.sitio.direccion ? ' · ' + c.sitio.direccion : ''}. Pagás por transferencia y el QR te llega al correo al instante.`;
+  if (c.sitio.ayudaWhatsapp) {
+    $('#pie-wa-a').href = `https://wa.me/${encodeURIComponent(c.sitio.ayudaWhatsapp)}?text=${encodeURIComponent(`Hola, tengo una consulta sobre las entradas de ${c.sitio.nombre}.`)}`;
+    $('#pie-wa').hidden = false;
+  }
   const lista = vendibles();
   if (!c.ventaAbierta || !lista.length) {
     // Si la venta online ya cerró por fecha (queda solo la puerta), se dice eso y no "todavía no abrió".
