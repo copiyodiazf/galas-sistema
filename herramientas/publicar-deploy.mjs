@@ -18,10 +18,11 @@ const version = sh('git rev-parse --short HEAD')
 if (!existsSync(join(DESTINO, '.git'))) { mkdirSync(DESTINO, { recursive: true }); sh('git init -q -b main', DESTINO); sh(`git remote add origin ${REMOTO}`, DESTINO) }
 for (const f of readdirSync(DESTINO)) if (f !== '.git') rmSync(join(DESTINO, f), { recursive: true, force: true })
 
-const tar = join(tmpdir(), `galas-${version}.tar`)
-sh(`git archive --format=tar -o "${tar}" HEAD backend frontend temas`)
-sh(`tar -xf "${tar}" -C "${DESTINO}"`)
-rmSync(tar)
+// Los archivos del último commit (solo lo que git sigue: nada de .env ni usuarios), con un índice aparte
+// para no tocar el del repo. Sin tar: el de Git Bash no entiende rutas "C:/...".
+const indice = join(tmpdir(), `galas-indice-${version}`)
+execSync(`git --work-tree="${DESTINO}" checkout HEAD -- backend frontend temas`, { cwd: ORIGEN, stdio: 'inherit', env: { ...process.env, GIT_INDEX_FILE: indice } })
+rmSync(indice, { force: true })
 
 // Las notas internas de cada ficha (claves que empiezan con "_") no se publican.
 const sinNotas = x => Array.isArray(x) ? x.map(sinNotas)
