@@ -381,15 +381,22 @@ const LOGO_MAIL = existsSync(join(TEMA_DIR, 'assets', 'mail-logo.png')) ? join(T
 const primerNombre = n => escapeHtml(String(n || '').split(' ')[0])
 const cuantasEntradas = (orden) => orden.cantidad === 1 ? '1 entrada' : `${orden.cantidad} entradas`
 
+const MC = SITIO.mail   // colores del mail del tema (sitio.json → "mail")
+const botonMail = `background:${MC.acento};color:${MC.acentoTexto};text-decoration:none;`
 function encabezadoMail(ev) {
   const logo = existsSync(LOGO_MAIL) ? `<img src="cid:logo" width="110" height="110" alt="" style="display:block;margin:0 auto 10px;border-radius:50%;">` : ''
+  // La franja va en celdas con fondo (no con degradé): así se ve igual en Gmail, Outlook y el celular.
+  const franja = MC.franja.length ? `
+      <tr><td style="padding:0;font-size:0;line-height:0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+        ${MC.franja.map(c => `<td height="6" style="height:6px;background:${c};font-size:0;line-height:0;">&nbsp;</td>`).join('')}
+      </tr></table></td></tr>` : ''
   return `
-      <tr><td align="center" style="background:#141022;padding:26px 20px 22px;">
+      <tr><td align="center" style="background:${MC.encabezado};padding:26px 20px 22px;">
         ${logo}
-        <div style="font:800 13px/1.4 Arial,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#e7c27d;">${escapeHtml(SITIO.nombre)}</div>
+        <div style="font:800 13px/1.4 Arial,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:${MC.sobrecabeza};">${escapeHtml(SITIO.nombre)}</div>
         <div style="font:700 20px/1.3 Arial,sans-serif;color:#ffffff;margin-top:6px;">${escapeHtml(ev?.nombre || '')}</div>
         <div style="font:400 14px/1.5 Arial,sans-serif;color:#d9d3e8;margin-top:4px;">${escapeHtml(ev ? cuandoDe(ev) : '')}</div>
-      </td></tr>`
+      </td></tr>${franja}`
 }
 const adjuntoLogo = () => existsSync(LOGO_MAIL) ? [{ filename: 'logo.png', path: LOGO_MAIL, cid: 'logo' }] : []
 
@@ -416,7 +423,7 @@ async function enviarMailPendiente(orden) {
         <p style="font-size:15px;line-height:1.6;margin:0 0 12px;">Empezaste a comprar <b>${cuantasEntradas(orden)}</b> y el pago quedó sin completar. <b>No se te cobró nada.</b></p>
         <p style="font-size:15px;line-height:1.6;margin:0;">Se paga por transferencia, desde la app de tu banco o de tu billetera. Importante: <b>transferí desde una cuenta a tu nombre</b>, con el DNI que pusiste en la compra.</p>
         <div style="text-align:center;margin:24px 0 4px;">
-          <a href="${FRONTEND_URL}/comprar?evento=${encodeURIComponent(orden.evento)}" style="background:#e7c27d;color:#1d1830;text-decoration:none;font-weight:800;padding:14px 32px;border-radius:30px;display:inline-block;">Retomar mi compra</a>
+          <a href="${FRONTEND_URL}/comprar?evento=${encodeURIComponent(orden.evento)}" style="${botonMail}font-weight:800;padding:14px 32px;border-radius:30px;display:inline-block;">Retomar mi compra</a>
         </div>${ayuda}
         <p style="font-size:12px;color:#7d7590;margin:22px 0 0;text-align:center;">Si ya compraste, ignorá este mensaje.</p>
       </td></tr>
@@ -440,8 +447,8 @@ async function enviarMailEntradas(orden, entradas) {
 
   const qrsHtml = entradas.map((e, i) => `
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;">
-          <tr><td align="center" style="background:#ffffff;border:3px solid #1d1830;border-radius:14px;padding:18px 14px;">
-            <div style="font:800 13px/1.3 Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8a6a2a;">${escapeHtml(nombreEv)} · ${ev ? fechaCorta(ev) : ''}</div>
+          <tr><td align="center" style="background:#ffffff;border:3px solid ${MC.franja.length ? MC.franja[i % MC.franja.length] : '#1d1830'};border-radius:14px;padding:18px 14px;">
+            <div style="font:800 13px/1.3 Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:${MC.titulos};">${escapeHtml(nombreEv)} · ${ev ? fechaCorta(ev) : ''}</div>
             <div style="font:700 13px/1.3 Arial,sans-serif;color:#3a334d;margin-top:4px;">${escapeHtml(tipo.nombre)} · ${i + 1} de ${orden.cantidad}</div>
             <img src="cid:qr${i}" width="240" height="240" alt="Código QR de la entrada ${i + 1}" style="display:block;margin:12px auto 8px;">
             <div style="font:400 10px/1.4 Consolas,monospace;color:#9a9a9a;word-break:break-all;max-width:320px;margin:auto;">${escapeHtml(e.codigo)}</div>
@@ -469,7 +476,7 @@ async function enviarMailEntradas(orden, entradas) {
       </td></tr>
       <tr><td style="padding:22px 26px 0;">${qrsHtml}</td></tr>
       <tr><td style="padding:4px 26px 0;">
-        <div style="font:800 12px/1.2 Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8a6a2a;margin-bottom:8px;">Cómo entrar</div>
+        <div style="font:800 12px/1.2 Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:${MC.titulos};margin-bottom:8px;">Cómo entrar</div>
         <ul style="font:400 14px/1.7 Arial,sans-serif;color:#3a334d;margin:0;padding-left:20px;">
           <li>Mostrá el QR en la puerta, desde el celular o impreso. <b>Hacele una captura</b>: en el lugar puede no haber señal.</li>
           <li>Cada persona necesita su propio QR.</li>
@@ -477,7 +484,7 @@ async function enviarMailEntradas(orden, entradas) {
         </ul>
       </td></tr>
       <tr><td align="center" style="padding:22px 26px 6px;">
-        <a href="${FRONTEND_URL}/mis-entradas" style="display:inline-block;background:#e7c27d;color:#1d1830;text-decoration:none;font:800 15px/1 Arial,sans-serif;padding:14px 30px;border-radius:999px;">Ver mis entradas</a>
+        <a href="${FRONTEND_URL}/mis-entradas" style="display:inline-block;${botonMail}font:800 15px/1 Arial,sans-serif;padding:14px 30px;border-radius:999px;">Ver mis entradas</a>
       </td></tr>
       <tr><td align="center" style="padding:18px 26px 26px;">
         <div style="font:400 12px/1.6 Arial,sans-serif;color:#7d7590;">${escapeHtml(SITIO.nombre)}${SITIO.lema ? ' · ' + escapeHtml(SITIO.lema) : ''}<br>N° de compra: ${escapeHtml(orden.id)}</div>

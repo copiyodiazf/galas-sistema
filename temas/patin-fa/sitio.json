@@ -8,6 +8,15 @@
   "ciudad": "Boedo, CABA",
   "instagram": "patin_fa",
   "ayudaWhatsapp": "5493854414082",
+  "mail": {
+    "_ayuda": "Colores del mail de las entradas: noche violeta, lila, violeta de la marca y la franja de los cuatro elementos (fuego, aire, tierra, agua).",
+    "encabezado": "#1b1236",
+    "sobrecabeza": "#cfa8f2",
+    "acento": "#663B8F",
+    "acentoTexto": "#ffffff",
+    "titulos": "#663B8F",
+    "franja": ["#ff4a3d", "#ffc53d", "#4cd98a", "#5b9cff"]
+  },
   "menores": "Pagan entrada desde los 11 años (presentarse con DNI). Las y los patinadores del show no pagan.",
   "modo": "gala",
   "precioIncluyeCargo": true,

@@ -69,6 +69,20 @@ export function normalizarEvento(d, { idFijo } = {}) {
   }
 }
 
+// Colores del mail de las entradas (opcional, por tema). Lo que falta o no es un #rrggbb queda con los del molde.
+const HEX = /^#[0-9a-f]{6}$/i
+const colorDe = (x, porDefecto) => HEX.test(String(x || '')) ? String(x) : porDefecto
+function coloresMail(m = {}) {
+  return {
+    encabezado: colorDe(m.encabezado, '#141022'),    // fondo de la cabecera (con el logo)
+    sobrecabeza: colorDe(m.sobrecabeza, '#e7c27d'),  // el nombre del sitio, arriba del evento
+    acento: colorDe(m.acento, '#e7c27d'),            // botones
+    acentoTexto: colorDe(m.acentoTexto, '#1d1830'),  // texto de los botones
+    titulos: colorDe(m.titulos, '#8a6a2a'),          // rótulos sobre blanco ("Cómo entrar", el de cada QR)
+    franja: (Array.isArray(m.franja) ? m.franja : []).filter(c => HEX.test(String(c))).slice(0, 6),   // franja de colores bajo la cabecera
+  }
+}
+
 export function leerSitio(archivo = process.env.SITIO_ARCHIVO || 'sitio.json') {
   const ruta = isAbsolute(archivo) ? archivo : join(aqui, archivo)
   const s = JSON.parse(readFileSync(ruta, 'utf8'))
@@ -90,6 +104,7 @@ export function leerSitio(archivo = process.env.SITIO_ARCHIVO || 'sitio.json') {
       // true = los precios de la ficha son lo que PAGA el público, con el cargo adentro (la academia
       // recibe precio / 1,10). false (el de siempre) = son lo que recibe la academia y el cargo va encima.
       precioIncluyeCargo: s.precioIncluyeCargo === true,
+      mail: coloresMail(s.mail || {}),
       // Secciones opcionales de la página: quiénes somos y el llamado a feriantes/emprendedores.
       sobre: s.sobre?.titulo ? { titulo: limpio(s.sobre.titulo, 80), parrafos: (s.sobre.parrafos || []).map(p => limpio(p, 600)).filter(Boolean).slice(0, 6) } : null,
       facebook: /^https:\/\//.test(s.facebook || '') ? limpio(s.facebook, 200) : '',
