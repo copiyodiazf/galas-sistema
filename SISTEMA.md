@@ -144,6 +144,10 @@ Un servicio de Render por gala, todos del mismo repo: Root Directory `backend`, 
   - Base `gala_quinto_elemento` en el Aiven de Rítmica (02/11/2026).
   - Variables en `render-env-quinto.txt` (git lo ignora): Chytapay de PRODUCCIÓN, `CHYTAPAY_SEDE=patin-fa`,
     `VENTA_ABIERTA=false` hasta que Flor conecte su cuenta.
+  - **Comisión de José: 7,36 % del precio final** (no 9,09 %): Distribución de Chytapay 7.36 y
+    `CARGO_PCT=CARGO_PUNTO_PCT=7.9447` (= 7,36 / 92,64 × 100, porque `CARGO_PCT` es el recargo SOBRE la parte
+    del organizador). Diciembre $24.000 → José $1.766, Flor $22.234 − 0,968 % de Chytapay ≈ $22.000 limpios.
+    Para otra gala: `CARGO_PCT = 100 × d / (100 − d)` con `d` = el % de la Distribución.
   - Usuarios (jose admin, florencia organizador, puerta1 y puerta2 control) en `backend/usuarios-panel-render-quinto.txt`.
   - Scripts contra esa base: `ENV_RENDER=render-env-quinto.txt USUARIOS_ARCHIVO=usuarios-panel-render-quinto.txt node herramientas/con-env-render.mjs <script>`.
 
