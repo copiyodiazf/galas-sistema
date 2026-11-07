@@ -11,8 +11,10 @@ import { fileURLToPath } from 'url'
 const [tema, urlPublica, salida, local = 'http://localhost:3045'] = process.argv.slice(2)
 if (!tema || !/^https:\/\//.test(urlPublica || '') || !salida) { console.log('Uso: node vista-previa.mjs <tema> <url pública> <carpeta salida> [servidor local]'); process.exit(1) }
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..', 'temas', tema)
-const portada = join(raiz, 'index.html')
-if (!existsSync(portada)) { console.log(`El tema "${tema}" no tiene portada propia (index.html)`); process.exit(1) }
+const FRONT = join(dirname(fileURLToPath(import.meta.url)), '..', 'frontend')
+// Si el tema no trae portada propia, va la del molde con su sistema.css y el tema.css del cliente (07/11, Lo de O-Li)
+const propia = existsSync(join(raiz, 'index.html'))
+const portada = propia ? join(raiz, 'index.html') : join(FRONT, 'index.html')
 
 const cfg = await fetch(local + '/api/config').then(r => r.json())
 const s = cfg.sitio
@@ -24,6 +26,7 @@ let html = readFileSync(portada, 'utf8')
   .replaceAll('%%NOMBRE%%', esc(s.nombre)).replaceAll('%%DESCRIPCION%%', esc(descripcion)).replaceAll('%%URL%%', esc(urlPublica.replace(/\/$/, '')))
   .replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<meta name="robots" content="noindex, nofollow">')
   .replace(/<script type="speculationrules">[\s\S]*?<\/script>\n?/, '')   // en la copia no hay /comprar
+  .replace('href="/tema.css"', 'href="tema.css"')                        // en Pages la copia vive en una subcarpeta
 html = html.replace(/<script>(?![\s\S]*<script>)/, `<script>window.VISTA_PREVIA = ${JSON.stringify(copia).replace(/</g, '\\u003c')};</script>\n<script>`)
 if (html.includes('%%')) { console.log('Quedaron marcas %% sin reemplazar'); process.exit(1) }
 
@@ -32,6 +35,10 @@ mkdirSync(salida, { recursive: true })
 for (const f of readdirSync(salida)) if (f !== '.git') rmSync(join(salida, f), { recursive: true, force: true })
 writeFileSync(join(salida, 'index.html'), html)
 cpSync(join(raiz, 'assets'), join(salida, 'assets'), { recursive: true, filter: f => !/mail-logo\.png$/.test(f) })
+if (!propia) {
+  cpSync(join(FRONT, 'sistema.css'), join(salida, 'sistema.css'))
+  if (existsSync(join(raiz, 'tema.css'))) cpSync(join(raiz, 'tema.css'), join(salida, 'tema.css'))
+}
 writeFileSync(join(salida, '.nojekyll'), '')
 writeFileSync(join(salida, 'robots.txt'), 'User-agent: *\nDisallow: /\n')
 console.log(`Vista previa de "${tema}" lista en ${salida} (${cfg.eventos.length} evento/s, precios del ${new Date().toLocaleDateString('es-AR')})`)

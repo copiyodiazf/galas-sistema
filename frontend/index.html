@@ -329,7 +329,8 @@ function galeria(g) {
   document.addEventListener('keydown', ev => { if (!visor.open) return; if (ev.key === 'ArrowLeft') mostrar(actual - 1); if (ev.key === 'ArrowRight') mostrar(actual + 1); });
 }
 
-fetch('/api/config').then(r => r.json()).then(c => {
+// Vista previa estática (herramientas/vista-previa.mjs, GitHub Pages): los datos vienen copiados en la página
+(window.VISTA_PREVIA ? Promise.resolve(window.VISTA_PREVIA) : fetch('/api/config').then(r => r.json())).then(c => {
   const s = c.sitio, eventos = c.eventos || [];
   const gala = s.modo === 'gala' && eventos.length === 1;
   const e0 = eventos[0];
@@ -398,7 +399,14 @@ fetch('/api/config').then(r => r.json()).then(c => {
     ['¿Y si pierdo el mail?', 'Entrá a <a href="/mis-entradas">Mis entradas</a> con el email y el DNI que usaste al comprar.'],
     ['¿Cómo entro?', 'Mostrás el QR en la puerta, desde el celular o impreso. Cada QR sirve una sola vez, solo para la fecha que compraste, y cada persona necesita el suyo.'],
   ].map(([p, r]) => `<details><summary>${p}</summary><p>${r}</p></details>`).join('');
-  fetch('/api/visita', { method: 'POST' }).catch(() => {});
+  if (c.vistaPrevia) {
+    // En la copia no hay sistema detrás: comprar y "Mis entradas" avisan en vez de llevar a una página que no existe
+    document.body.insertAdjacentHTML('afterbegin', '<div style="position:fixed;top:10px;left:10px;z-index:50;background:rgba(0,0,0,.6);color:#fff;font:700 11px/1 Montserrat,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:7px 11px;border-radius:999px">Vista previa</div>');
+    document.addEventListener('click', ev => {
+      if (!ev.target.closest('a[href^="/comprar"], a[href^="/mis-entradas"]')) return;
+      ev.preventDefault(); alert('Esta es una vista previa: la compra de entradas se habilita cuando la página esté publicada.');
+    });
+  } else fetch('/api/visita', { method: 'POST' }).catch(() => {});
 }).catch(() => {});
 </script>
 </body>
