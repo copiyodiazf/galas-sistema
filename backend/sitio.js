@@ -89,8 +89,10 @@ const rutaArchivo = x => { const r = String(x || '').trim(); return RUTA.test(r)
 function galeriaDe(g) {
   if (!g) return null
   const items = (Array.isArray(g) ? g : g.items || []).slice(0, 30)
-    .map(i => ({ foto: rutaArchivo(i.foto), video: rutaArchivo(i.video) || null, alt: limpio(i.alt, 140) })).filter(i => i.foto)
-  return items.length ? { titulo: limpio(g.titulo, 80) || 'Galería', texto: limpio(g.texto, 300), items } : null
+    .map(i => ({ foto: rutaArchivo(i.foto), mini: rutaArchivo(i.mini) || null, video: rutaArchivo(i.video) || null, alt: limpio(i.alt, 140) })).filter(i => i.foto)
+  // pasarela: las fotos corren en una tira y los videos van aparte, con su título (tituloVideos)
+  return items.length ? { titulo: limpio(g.titulo, 80) || 'Galería', texto: limpio(g.texto, 300), items,
+    pasarela: g.pasarela === true, tituloVideos: limpio(g.tituloVideos, 80) } : null
 }
 
 export function leerSitio(archivo = process.env.SITIO_ARCHIVO || 'sitio.json') {
