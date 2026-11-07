@@ -96,7 +96,8 @@ body{background:var(--noche);}
 /* Galería (sitio.json → galeria): fotos y videos del lugar; al tocar se abren en grande */
 .galeria{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:24px;}
 .galeria button{position:relative;padding:0;border:0;border-radius:14px;overflow:hidden;aspect-ratio:4/3;cursor:zoom-in;background:var(--noche-2);}
-@media (min-width:700px){.galeria{grid-template-columns:repeat(3,1fr);gap:14px;} .galeria button:first-child{grid-column:span 2;grid-row:span 2;aspect-ratio:auto;}}
+@media (min-width:700px){.galeria{grid-template-columns:repeat(3,1fr);gap:14px;} .galeria button:first-child{grid-column:span 2;grid-row:span 2;aspect-ratio:auto;}
+  .galeria button:first-child img{position:absolute;inset:0;}}  /* que una foto vertical no estire las dos filas */
 .galeria img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s;}
 .galeria button:hover img{transform:scale(1.04);}
 .galeria .play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;background:rgba(0,0,0,.55);
@@ -324,7 +325,8 @@ fetch('/api/config').then(r => r.json()).then(c => {
   if (s.galeria) galeria(s.galeria);
   if (s.portadaVideo && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
     const v = document.createElement('video');
-    Object.assign(v, { className: 'portada-video', src: s.portadaVideo, muted: true, loop: true, autoplay: true, playsInline: true });
+    const vertical = s.portadaVideoMovil && matchMedia('(orientation: portrait)').matches;
+    Object.assign(v, { className: 'portada-video', src: vertical ? s.portadaVideoMovil : s.portadaVideo, muted: true, loop: true, autoplay: true, playsInline: true });
     v.setAttribute('playsinline', ''); v.setAttribute('aria-hidden', 'true');
     $('.portada').prepend(v); $('.portada').classList.add('con-video');
   }

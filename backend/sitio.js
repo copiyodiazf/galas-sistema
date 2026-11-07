@@ -124,6 +124,8 @@ export function leerSitio(archivo = process.env.SITIO_ARCHIVO || 'sitio.json') {
       galeria: galeriaDe(s.galeria),
       // Video de fondo de la portada, mudo y en loop (mp4 liviano, sin sonido). La foto portada.webp queda debajo.
       portadaVideo: rutaArchivo(s.portadaVideo),
+      // Opcional: versión vertical del video para celulares (si no está, el celular usa portadaVideo recortado).
+      portadaVideoMovil: rutaArchivo(s.portadaVideoMovil),
       feriantes: s.feriantes?.whatsapp ? { titulo: limpio(s.feriantes.titulo || 'Feriantes y emprendedores', 80), texto: limpio(s.feriantes.texto, 600),
         whatsapp: String(s.feriantes.whatsapp).replace(/\D/g, ''), mensaje: limpio(s.feriantes.mensaje, 200) } : null,
     },
