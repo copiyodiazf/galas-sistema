@@ -10,6 +10,7 @@
   "ayudaWhatsapp": "",
   "menores": "",
   "modo": "cartelera",
+  "desgloseServicio": true,
   "sobre": {
     "titulo": "El patio",
     "parrafos": [
