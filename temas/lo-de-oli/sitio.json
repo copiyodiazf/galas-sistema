@@ -70,7 +70,7 @@
       "tipos": [ { "id": "general", "nombre": "Entrada general", "corto": "General", "precio": 10000, "cupo": 2000 } ] },
     { "nombre": "La Vuelta de Los Arcanos", "subtitulo": "Arcanos del Desierto · ¡La vuelta!", "fecha": "2026-11-14", "imagen": "assets/arcanos.webp",
       "artistas": ["Arcanos del Desierto", "Los Capis", "Dúo Lemos Bravo"],
-      "tipos": [ { "id": "anticipada", "nombre": "Primeras anticipadas", "corto": "Anticipada", "precio": 10000, "cupo": 2000 } ],
+      "tipos": [ { "id": "general", "nombre": "Entrada general", "corto": "General", "precio": 15000, "cupo": 2000 } ],
       "descripcion": "Arcanos del Desierto es una orquesta de guaracha santiagueña creada por el bajista Mariano Sarquiz: una docena de músicos que mezclan la guaracha con salsa, jazz y aires árabes, con un vestuario y una puesta en escena que no pasan desapercibidos.\nLa vuelta de Los Arcanos: una noche de baile, junto a Los Capis y el Dúo Lemos Bravo." },
     { "nombre": "Kijanoss 20 años", "subtitulo": "Los Kijanoss · 20 años", "fecha": "2026-11-22", "publicado": false,
       "artistas": ["Los Kijanoss", "Dany Hoyos", "Los Sacheros"], "tipos": [], "nota": "Cartelera a confirmar",
