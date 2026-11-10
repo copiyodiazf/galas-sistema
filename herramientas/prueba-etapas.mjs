@@ -81,6 +81,24 @@ ok(p.status === 200 && p.d.total === fin(2600) * 2, `la boletería vende al prec
 const ac = (await api('/api/admin/config', { token: T.venta })).d.eventos.find(e => e.id === ID2)
 ok(ac?.tipos[0].unidadPunto === fin(2600), 'el panel recibe el precio por entrada de la boletería')
 
+// 6b) La pantalla de pago no abrió y vuelve a tocar "Ir a pagar": se retoma el mismo cobro (09/11, Vanesa)
+const datosR = { evento: ID, tipo: 'general', nombre: 'Rita Retoma', email: 'retoma@ejemplo.com', dni: '30111999' }
+const r1 = await api('/api/orders', { metodo: 'POST', cuerpo: { ...datosR, cantidad: 1 } })
+const r2 = await api('/api/orders', { metodo: 'POST', cuerpo: { ...datosR, cantidad: 1 } })
+ok(r2.status === 200 && r2.d.retomada === true && r2.d.orderId === r1.d.orderId && r2.d.pago?.paymentId === r1.d.pago?.paymentId,
+  'la misma compra otra vez: retoma el mismo cobro, no crea otro')
+ok((await api('/api/orders', { metodo: 'POST', cuerpo: { ...datosR, cantidad: 2 } })).status === 200, 'otra cantidad: es otra compra')
+const r3 = await api('/api/orders', { metodo: 'POST', cuerpo: { ...datosR, cantidad: 3 } })
+ok(r3.status === 429 && /retomar/.test(r3.d.error || ''), 'tercera compra distinta sin pagar: frenada, y explica cómo retomar')
+// Traza de la pantalla de pago: el navegador una sola vez y después los pasos
+await api(`/api/orders/${r1.d.orderId}/traza`, { metodo: 'POST', cuerpo: { paso: 'SDK cargado 120ms' }, headers: { 'User-Agent': 'Prueba/1.0 (iPhone)' } })
+await espera(300)
+await api(`/api/orders/${r1.d.orderId}/traza`, { metodo: 'POST', cuerpo: { paso: 'pantalla: ready | inyectado\nx' } })
+await espera(300)
+const tz = (await Orden.findByPk(r1.d.orderId, { raw: true }))?.traza || ''
+ok(/^\[Prueba\/1\.0 \(iPhone\)\] \d\d:\d\d:\d\d SDK cargado 120ms \| \d\d:\d\d:\d\d pantalla: ready +inyectado x$/.test(tz), 'traza: navegador + pasos, sin poder colar separadores')
+ok((await api('/api/orders/orden_no-existe/traza', { metodo: 'POST', cuerpo: { paso: 'x' } })).status === 204, 'traza de una orden que no existe: se ignora')
+
 // 7) Sedes de Chytapay
 const cy = (await api('/api/admin/chytapay', { token: T.admin })).d
 ok(cy.sede === (env.CHYTAPAY_SEDE || process.env.CHYTAPAY_SEDE || cy.sede), `muestra la sede de esta gala (${cy.sede || 'sin sede'})`)

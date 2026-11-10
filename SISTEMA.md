@@ -107,6 +107,29 @@ sus colores y su servicio en Render (José eligió tres sistemas separados, 28/1
   `tenantKey`, se ignora).
 - **Dominios autorizados** del Portal: vacío, o TODAS las galas (si se carga una sola, el widget no anda en las demás).
 
+## Pantalla de pago: cuando no abre (09/11/2026)
+Motivo: en El Quinto Elemento, 3 de 8 compradores no pudieron pagar. La pantalla de Chytapay se les quedaba
+"pensando", y al reintentar los frenaba el tope de compras sin pagar. Vanesa, por ejemplo, intentó 3 veces.
+- **El SDK lo servimos nosotros:** `frontend/vendor/chytapay-sdk-1.7.0.js` es una copia de npm
+  `@chytapay/integration-widget`, `dist/sdk.iife.js`, con licencia MIT al lado. Ya no se pide a unpkg.
+  - **Para actualizarlo:** `npm pack @chytapay/integration-widget@X`, copiar el archivo y cambiar `SDK` en `comprar.html`.
+  - Antes de actualizar, leer su CHANGELOG: dice qué cambia en el SDK y qué en el iframe, que hostean ellos.
+- **Retomar en lugar de frenar:** si vuelve la misma compra con el mismo DNI, mail, fecha, tipo y cantidad, y le
+  quedan al menos 5 minutos al cobro, `/api/orders` devuelve EL MISMO cobro con `retomada: true`.
+  - El tope `MAX_PENDIENTES` (2) solo frena compras distintas, y su mensaje explica cómo retomar.
+- **Esperas:**
+  - Si el SDK no carga en 15 s, la página avisa.
+  - Si la pantalla de Chytapay no manda `chytapay:ready` en 25 s, se cierra. El comprador ve qué hacer:
+    tocar «Ir a pagar» de nuevo (se retoma), probar Chrome o Safari, otra conexión o una computadora.
+- **Navegador interno de Instagram, Facebook o TikTok:** la compra muestra un aviso para abrirla en el navegador.
+- **Traza** (`ordenes.traza`, `POST /api/orders/:id/traza`): `comprar.html` anota, sin datos personales:
+  - el navegador;
+  - los pasos (compra creada o retomada, SDK cargado, mensajes `chytapay:*` de la pantalla);
+  - cada pedido del SDK a `integration-api` con su estado y su demora;
+  - cómo terminó (pagó, cerró, error o "no abrió").
+
+  Así, cuando alguien no paga, se ve dónde se trabó. Se lee con un script contra la base de la gala (columna `traza`).
+
 ## Panel del organizador (02/11/2026)
 - **Cortesías (03/11/2026):** el organizador también las emite (pestaña "Cortesías y planilla"). Pide confirmación,
   acepta un DNI opcional (para "Mis entradas") y el mail dice "Tu invitación… te invita" en vez de "tu compra".
@@ -133,7 +156,8 @@ Todo se cobra por transferencia (Chytapay): el panel no desglosa por medio de pa
   https://copidiaz17.github.io/el-quinto-elemento/ (actualizar = correr el script, commit y push).
 
 ## Pruebas
-- `herramientas/prueba-etapas.mjs` (20 pruebas): etapas, precio final, ventaHasta, panel, boletería y sedes.
+- `herramientas/prueba-etapas.mjs` (25 pruebas): etapas, precio final, ventaHasta, panel, boletería, retomar la
+  compra, traza y sedes.
   `DB_NAME=gala_quinto node herramientas/prueba-etapas.mjs 3045 usuarios-panel-quinto.txt` con el servidor
   `TEMA=patin-fa DB_NAME=gala_quinto PORT=3045 CHYTAPAY_SEDE=patin-fa node server.js` (base LOCAL).
 - ⚠️ `prueba-gala.mjs` (las 39) quedó de antes de la cartelera: usa `EVENTO_ARCHIVO` y compra sin `evento`.
