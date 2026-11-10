@@ -84,8 +84,8 @@ ok(fila && !String(fila.refreshCifrado).includes('rt-secreto') && fila.refreshCi
 const c1 = await comprar('30200200')
 ok(c1.status === 200 && c1.d.pago.paymentId === 'pr-1' && c1.d.pago.pk === 'pk_test_prueba', 'compra: crea el cobro en Chytapay y devuelve lo que necesita el widget')
 const enviado = falso.ultimoCobro
-ok(enviado.type === 'checkout' && enviado.amount === 22000 && enviado.referenceId === c1.d.orderId && enviado.expiresInMinutes === 30 && enviado.metadata?.orden === c1.d.orderId,
-  'el cobro va como checkout, por el total ($22.000), con el número de compra y 30 minutos para pagar')
+ok(enviado.type === 'checkout' && enviado.amount === 22000 && enviado.referenceId === c1.d.orderId && enviado.expiresInMinutes === 60 && enviado.metadata?.orden === c1.d.orderId,
+  'el cobro va como checkout, por el total ($22.000), con el número de compra y 60 minutos para pagar')
 ok(!('webhookUrl' in enviado), 'en local (http) no manda webhookUrl; en Render (https) sí')
 ok((await api(`/api/orders/${c1.d.orderId}/confirmar`, { metodo: 'POST' })).d.estado === 'pendiente', 'antes de pagar: pendiente')
 pagar(c1.d.orderId)

@@ -1,6 +1,7 @@
 // Prueba de las novedades del molde (31/10/2026): etapas de precio, precio final con el cargo adentro
 // (precioIncluyeCargo), último día de venta online (ventaHasta), que el panel no borre las etapas,
-// boletería al precio del día y sedes de Chytapay (payment.unmatched de otra sede).
+// boletería al precio del día y sedes de Chytapay (payment.unmatched de otra sede). Desde el 09-10/11: retomar
+// la misma compra, traza de la pantalla de pago y transferencias que llegan después de vencer el cobro.
 // Servidor local con el tema de la gala y el pago SIMULADO, en una base LOCAL de prueba:
 //   (en backend) TEMA=patin-fa DB_NAME=gala_quinto PORT=3045 CHYTAPAY_SEDE=patin-fa node server.js
 //   DB_NAME=gala_quinto node herramientas/prueba-etapas.mjs 3045 usuarios-panel-quinto.txt
@@ -111,11 +112,43 @@ if (cy.sede) {
   ok(await SinImputar.count() === antes + 1 && nuevos[0]?.pagador === 'De Esta Sede', 'guarda el pago sin imputar de su sede e ignora el de otra')
 }
 
+// 7b) Transferencia que llega después de vencer el cobro (10/11, Alan: el banco la demoró 34 minutos)
+ok((await api('/api/config')).d.reservaMinutos === 60, 'el cobro dura 60 minutos (el máximo de Chytapay)')
+const tarde = async (nombre, dni) => {
+  const r = await api('/api/orders', { metodo: 'POST', cuerpo: { evento: ID, tipo: 'general', cantidad: 2, nombre, email: `${dni}@ejemplo.com`, dni } })
+  await aviso({ event: 'payment_request.expired', referenceId: r.d.orderId })
+  return { id: r.d.orderId, total: r.d.total }
+}
+const sinAsignar = (o, extra) => aviso({ event: 'payment.unmatched', ...(cy.sede ? { tenantKey: cy.sede } : {}), reason: 'expired', amount: o.total,
+  payerName: 'Pagó Tarde', paymentRequest: { referenceId: o.id }, operationDate: new Date().toISOString(), ...extra })
+const estado = async id => { await espera(500); const x = await Orden.findByPk(id, { raw: true }); return { estado: x?.estado, qr: await sequelize.query(`SELECT COUNT(*) n FROM entradas WHERE orden_id = ${sequelize.escape(id)}`, { plain: true }).then(f => Number(f.n)) } }
+const filaDe = id => SinImputar.findOne({ where: { orden_id: id }, order: [['id', 'DESC']], raw: true })
+const L = await tarde('Lara Tarde', '30111555')
+ok((await estado(L.id)).estado === 'abandonada', 'tardía: el cobro venció y la compra quedó sin pagar')
+await sinAsignar(L, { payerCuil: '27301115554' })
+let e1 = await estado(L.id), f1 = await filaDe(L.id)
+for (let i = 0; i < 20 && f1 && !Number(f1.emitida); i++) { await espera(250); f1 = await filaDe(L.id) }   // se marca después del mail
+ok(e1.estado === 'pagada' && e1.qr === 2, `tardía, mismo DNI y por el total: se emite sola (${e1.estado}, ${e1.qr} QR)`)
+ok(f1 && Boolean(Number(f1.emitida)) && !Number(f1.resuelto), 'queda en "sin asignar" marcada como emitida, para que la academia la asigne en Chytapay')
+await aviso({ event: 'payment_request.payment_received', referenceId: L.id, stateType: 'total_payment', paidAmount: L.total })
+e1 = await estado(L.id); f1 = await filaDe(L.id)
+ok(e1.qr === 2 && Boolean(Number(f1?.resuelto)), 'cuando la academia la asigna: no emite dos veces y la fila queda resuelta')
+const M = await tarde('Mario Otro', '30111666')
+await sinAsignar(M, { payerCuil: '20999999990' })
+const e2 = await estado(M.id), f2 = await filaDe(M.id)
+ok(e2.estado === 'abandonada' && e2.qr === 0 && f2 && !Number(f2.emitida), 'tardía desde la cuenta de otra persona: no se emite, la decide la academia')
+const N = await tarde('Nora Menos', '30111777')
+await sinAsignar(N, { payerCuil: '27301117774', amount: N.total - 500 })
+ok((await estado(N.id)).estado === 'abandonada', 'tardía por menos del total: no se emite')
+const P = await tarde('Pia SinCuil', '30111888')
+await sinAsignar(P)
+ok((await estado(P.id)).estado === 'abandonada', 'tardía sin CUIL del que pagó: no se emite')
+
 // Limpieza: borra lo que creó esta prueba
 await Orden.destroy({ where: { evento: [ID, ID2] } })
 await sequelize.query('DELETE FROM entradas WHERE orden_id NOT IN (SELECT id FROM ordenes)').catch(() => {})
 for (const id of [ID, ID2]) await api(`/api/admin/eventos/${id}`, { metodo: 'DELETE', token: T.admin })
-await SinImputar.destroy({ where: { pagador: 'De Esta Sede' } })
+await SinImputar.destroy({ where: { pagador: ['De Esta Sede', 'Pagó Tarde'] } })
 await sequelize.close()
 console.log(fallas ? `\n✗ ${fallas} fallas` : '\n✓ Todo OK')
 process.exit(fallas ? 1 : 0)

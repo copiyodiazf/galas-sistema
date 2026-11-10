@@ -129,6 +129,30 @@ Motivo: en El Quinto Elemento, 3 de 8 compradores no pudieron pagar. La pantalla
   - cómo terminó (pagó, cerró, error o "no abrió").
 
   Así, cuando alguien no paga, se ve dónde se trabó. Se lee con un script contra la base de la gala (columna `traza`).
+  - Desde el 10/11 lo que se repite seguido (la pantalla pregunta cada 5 s si llegó la plata) va resumido:
+    la primera vez entera y después `↻ … ×12`. Anota también "salió de la página" / "volvió" (ir a la app del banco).
+    Tope: 120 pasos por intento y ~12.000 letras por compra.
+
+## Transferencias que llegan tarde (10/11/2026)
+Motivo: Alan recibió el CVU a las 11:38 y la plata le llegó a Chytapay a las 12:12. El cobro vencía a los 30
+minutos, así que quedó "sin asignar" (`expired`) y hubo que darle una cortesía a mano. Cuando el pago anda, se
+acredita en 30-70 s, pero hay bancos que demoran la transferencia.
+- **El cobro dura 60 minutos**, el máximo que acepta Chytapay para un checkout (3 a 60). `RESERVA_MINUTOS`
+  ahora vale 60 por defecto: es también el lugar guardado, el tope de compras sin pagar y el "pagando ahora" del panel.
+- **El mail de recupero** sale a `RESERVA_MINUTOS + 15` (75 min), nunca antes de que venza el cobro. Ya no dice
+  "No se te cobró nada": dice "¿Ya transferiste? No lo hagas de nuevo… apenas se acredite te mandamos las entradas".
+- **Se emite sola** (`emitirTardia`) si llega un `payment.unmatched` con `reason: expired` y:
+  - `paymentRequest.referenceId` es una compra online nuestra sin pagar;
+  - el CUIL de quien transfirió lleva adentro el DNI de la compra (dígitos 3 a 10);
+  - el monto alcanza el total;
+  - todavía hay lugar en ese tipo de entrada.
+
+  Si falta algo, queda en "Transferencias sin asignar" para que decida la academia. La fila emitida queda marcada
+  (`sin_imputar.emitida`) y el panel dice que las entradas ya salieron. Igual conviene que la academia la asigne en
+  Chytapay, así se registra y se distribuye la comisión. Ese aviso no emite dos veces (la compra ya está pagada) y
+  marca la fila como resuelta.
+- **Aviso en la compra:** si Chytapay ya le dio el CVU (`POST /v1/payments/:id/payer` → 200) y cierra la pantalla
+  o se le vence, ve "¿Ya hiciste la transferencia? No la hagas de nuevo…", con su mail y WhatsApp.
 
 ## Panel del organizador (02/11/2026)
 - **Cortesías (03/11/2026):** el organizador también las emite (pestaña "Cortesías y planilla"). Pide confirmación,
@@ -156,8 +180,8 @@ Todo se cobra por transferencia (Chytapay): el panel no desglosa por medio de pa
   https://copidiaz17.github.io/el-quinto-elemento/ (actualizar = correr el script, commit y push).
 
 ## Pruebas
-- `herramientas/prueba-etapas.mjs` (25 pruebas): etapas, precio final, ventaHasta, panel, boletería, retomar la
-  compra, traza y sedes.
+- `herramientas/prueba-etapas.mjs` (33 pruebas): etapas, precio final, ventaHasta, panel, boletería, retomar la
+  compra, traza, sedes y transferencias tardías.
   `DB_NAME=gala_quinto node herramientas/prueba-etapas.mjs 3045 usuarios-panel-quinto.txt` con el servidor
   `TEMA=patin-fa DB_NAME=gala_quinto PORT=3045 CHYTAPAY_SEDE=patin-fa node server.js` (base LOCAL).
 - ⚠️ `prueba-gala.mjs` (las 39) quedó de antes de la cartelera: usa `EVENTO_ARCHIVO` y compra sin `evento`.
