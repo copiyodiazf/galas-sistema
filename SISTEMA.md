@@ -184,6 +184,10 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
   boletería y compras a tiempo de pagarse) y `apartarButacas`, siempre con el bloqueo del cupo tomado.
   - Con sala, la capacidad de cada tipo son sus butacas (sin las guardadas): el cupo cargado no cuenta.
   - Una compra es de **un solo tipo**: butacas de zonas con distinto precio se compran por separado.
+  - **Apartadas solo 10 minutos** (`RESERVA_BUTACAS_MINUTOS`, de 5 a 30; José, 11/11/2026: nada de butacas
+    reservadas sin la plata acreditada). Con sala, `RESERVA_MINUTOS` pasa a ser ese valor: el cobro de Chytapay
+    vence a la vez, el panel muestra "pagando" ese tiempo y retomar pide 3 minutos de margen. No se apartan cero
+    minutos: dos personas pagarían la misma butaca y a una le tocaría otra que no eligió.
   - La misma persona (DNI y email) que vuelve a elegir **libera** sus compras sin pagar de esa fecha. Con las mismas
     butacas, retoma el mismo cobro.
   - El navegador guarda su compra sin pagar (`sessionStorage`) y el plano le muestra esas butacas como suyas
@@ -195,7 +199,7 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
   está en cada butaca y si ya entró. La organización **guarda** butacas (no salen a la venta: familia, cámaras,
   invitados; `eventos.bloqueadas`) y da **cortesías** marcando butacas en el plano (pueden ser guardadas).
   La boletería vende tocando el plano y ve lo ocupado, no de quién. En la puerta, al escanear, sale la butaca en grande.
-- **Prueba:** `herramientas/prueba-butacas.mjs` (57 pruebas) con el servidor
+- **Prueba:** `herramientas/prueba-butacas.mjs` (62 pruebas) con el servidor
   `TEMA=santiago-ritmica DB_NAME=gala_ritmica PORT=3047 node server.js` y
   `DB_NAME=gala_ritmica node ../herramientas/prueba-butacas.mjs 3047` (desde `backend`, base LOCAL).
 - **Santiago Rítmica** (tema `santiago-ritmica`): Paraninfo, Av. Belgrano (S) 1912. 337 butacas: filas 1 (22),

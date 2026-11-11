@@ -83,7 +83,12 @@ const CARGO_PUNTO_PCT = numEnv('CARGO_PUNTO_PCT', 10)  // en los puntos de venta
 const MAX_ENTRADAS = numEnv('MAX_ENTRADAS', 10)
 // También es el vencimiento del cobro en Chytapay, que acepta de 3 a 60 minutos. Va el máximo: hay bancos que
 // demoran la transferencia (en El Quinto Elemento una llegó a los 34 minutos y, con 30, quedó sin asignar).
-const RESERVA_MINUTOS = Math.min(60, Math.max(10, numEnv('RESERVA_MINUTOS', 60)))
+// Con butacas numeradas, mucho menos (10 minutos): una butaca apartada por alguien que no paga es una butaca que
+// nadie más puede elegir, y José no quiere butacas reservadas sin la plata acreditada (11/11/2026). Si la
+// transferencia llega después, se emite igual (emitirTardia): con sus butacas si siguen libres o, si no, con las
+// mejores que queden juntas.
+const RESERVA_MINUTOS = SALA ? Math.min(30, Math.max(5, numEnv('RESERVA_BUTACAS_MINUTOS', 10)))
+  : Math.min(60, Math.max(10, numEnv('RESERVA_MINUTOS', 60)))
 const POCAS = numEnv('AVISO_POCAS', 30)                // desde cuántas libres se avisa "quedan pocas" (el cupo nunca se muestra)
 const SIN_TOPE = 100000                                 // un cupo así de grande = "sin tope": el panel no muestra barra ni libres
 const VENTA_ABIERTA = String(process.env.VENTA_ABIERTA || 'true') !== 'false'   // llave general de la venta online
@@ -702,7 +707,7 @@ async function demasiadasPendientes(v, ip) {
 // La misma compra de la misma persona (DNI y email), todavía pendiente y con tiempo para pagar: se
 // retoma ese cobro en vez de crear otro. Pasa cuando la pantalla de pago no abrió y vuelve a tocar
 // "Ir a pagar": antes quedaba frenada por el tope de compras sin pagar.
-const RETOMAR_MINIMO = 5   // minutos que le tienen que quedar al cobro para retomarlo
+const RETOMAR_MINIMO = Math.min(5, Math.floor(RESERVA_MINUTOS / 3))   // minutos que le tienen que quedar al cobro para retomarlo (3 con butacas)
 const compraParaRetomar = v => Orden.findOne({ where: { estado: 'pendiente', metodo: 'chytapay', paymentId: { [Op.ne]: null },
   createdAt: { [Op.gte]: new Date(Date.now() - (RESERVA_MINUTOS - RETOMAR_MINIMO) * 60000) },
   evento: v.evento, tipo: v.tipo, cantidad: v.cantidad, dni: v.dni, email: v.email, butacas: v.butacas || null }, order: [['createdAt', 'DESC']] })

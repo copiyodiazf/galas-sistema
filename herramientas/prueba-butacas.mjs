@@ -29,6 +29,8 @@ function aviso(cuerpo, id = 'wh_' + Math.random().toString(36).slice(2)) {
 const espera = ms => new Promise(r => setTimeout(r, ms))
 const comprar = (butacas, dni, email = `c${dni}@ejemplo.com`) => api('/api/orders', { metodo: 'POST', cuerpo: { evento: EV, butacas, nombre: 'Ana Prueba', email, dni } })
 const ocupadas = async (orden) => new Set((await api(`/api/sala?evento=${EV}${orden ? '&orden=' + orden : ''}`)).d.ocupadas || [])
+// El plano público tiene 3 segundos de caché: para ver lo que cambió recién por la base, se espera a que venza.
+const ocupacion10 = async () => { await espera(3100); return ocupadas() }
 
 // 0) Base limpia, usuarios de prueba y el evento como lo deja la ficha
 await Entrada.destroy({ where: {} }); await Orden.destroy({ where: {} }); await SinImputar.destroy({ where: {} })
@@ -79,6 +81,28 @@ r = await comprar(Array.from({ length: 11 }, (_, i) => `8-${i + 1}`), '30222333'
 ok(r.status === 400 && /hasta 10/.test(r.d.error), 'más de 10 butacas por compra se rechaza', JSON.stringify(r.d))
 r = await comprar([], '30222333')
 ok(r.status === 400, 'sin butacas no se puede comprar')
+
+// 2b) Apartadas solo 10 minutos: sin la plata acreditada, las butacas no quedan reservadas
+ok(cfg.reservaMinutos === 10 && c1.d.pago?.minutos === 10, 'con butacas se apartan 10 minutos, y el cobro de Chytapay vence a los 10 (no la hora de las otras galas)')
+const lenta = await comprar(['10-1', '10-2'], '31000111')
+await Orden.update({ createdAt: new Date(Date.now() - 11 * 60000) }, { where: { id: lenta.d.orderId } })   // el aviso de vencido todavía no llegó
+oc = await ocupacion10()
+ok(!oc.has('10-1') && !oc.has('10-2'), 'a los 11 minutos sin acreditarse, sus butacas ya están libres (aunque no haya llegado el aviso de vencido)')
+const rapida = await comprar(['10-2', '10-3'], '31000222')
+ok(rapida.status === 200, 'y otra persona puede tomarlas')
+await aviso({ event: 'payment.unmatched', reason: 'expired', amount: 20000, payerName: 'LENTA', payerCuil: 20310001115,
+  paymentRequest: { referenceId: lenta.d.orderId }, operationDate: new Date().toISOString() })
+await espera(900)
+const oLenta = await Orden.findByPk(lenta.d.orderId)
+ok(oLenta.estado === 'pagada' && !String(oLenta.butacas).split(',').includes('10-2') && String(oLenta.butacas).split(',').length === 2,
+  'su transferencia llega tarde desde su cuenta: se emite sola, con otras 2 juntas (la 10-2 ya la tomó otra persona)', `${oLenta.estado} ${oLenta.butacas}`)
+const lenta2 = await comprar(['11-5'], '31000333')
+await Orden.update({ createdAt: new Date(Date.now() - 11 * 60000) }, { where: { id: lenta2.d.orderId } })
+await aviso({ event: 'payment.unmatched', reason: 'expired', amount: 10000, payerName: 'LENTA DOS', payerCuil: 27310003334,
+  paymentRequest: { referenceId: lenta2.d.orderId }, operationDate: new Date().toISOString() })
+await espera(900)
+const oLenta2 = await Orden.findByPk(lenta2.d.orderId)
+ok(oLenta2.estado === 'pagada' && oLenta2.butacas === '11-5', 'si sus butacas siguen libres cuando llega, se queda con las que eligió', `${oLenta2.estado} ${oLenta2.butacas}`)
 
 // 3) Zonas con otro precio: un tipo "zona-verde" en el evento y la fila 14 pasa sola a ese tipo
 r = await api(`/api/admin/eventos/${EV}`, { metodo: 'PUT', token: T.admin, cuerpo: { tipos: [
@@ -134,7 +158,7 @@ ok(r.status === 409, 'la boletería tampoco puede vender una ya vendida')
 const sOrg = (await api(`/api/admin/sala?evento=${EV}`, { token: T.org })).d
 ok(sOrg.butacas['6-1']?.estado === 'vendida' && sOrg.butacas['6-1'].nombre === 'Ana Prueba' && sOrg.butacas['6-1'].entro === true, 'panel: la 6-1 vendida, de quién es y que ya entró')
 ok(sOrg.butacas['7-1']?.estado === 'cortesia' && sOrg.butacas['14-1']?.estado === 'pagando' && sOrg.butacas['8-5']?.metodo === 'punto', 'panel: cortesías, pagándose y vendidas en la boletería')
-ok(sOrg.cuentas.vendida === 4 && sOrg.cuentas.cortesia === 2 && sOrg.cuentas.pagando === 2 && sOrg.cuentas.libres === 337 - 8, 'panel: las cuentas (4 vendidas, 2 cortesías, 2 pagándose, 329 libres)', JSON.stringify(sOrg.cuentas))
+ok(sOrg.cuentas.vendida === 7 && sOrg.cuentas.cortesia === 2 && sOrg.cuentas.pagando === 4 && sOrg.cuentas.libres === 337 - 13, 'panel: las cuentas (7 vendidas, 2 cortesías, 4 pagándose, 324 libres)', JSON.stringify(sOrg.cuentas))
 const sVenta = (await api(`/api/admin/sala?evento=${EV}`, { token: T.venta })).d
 ok(sVenta.butacas['6-1']?.estado === 'vendida' && !sVenta.butacas['6-1'].nombre, 'la boletería ve qué está ocupado, pero no de quién')
 const res = (await api(`/api/admin/resumen?evento=${EV}`, { token: T.org })).d

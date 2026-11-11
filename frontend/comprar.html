@@ -378,7 +378,8 @@ function avisoTransferencia() {
   const wa = CFG?.sitio?.ayudaWhatsapp;
   const texto = `Hola, transferí para las entradas de ${CFG?.sitio?.nombre || 'la gala'} a nombre de ${$('#nombre').value.trim()} y todavía no me llegaron.`;
   $('#ya-transferi').innerHTML = `<b>¿Ya hiciste la transferencia?</b> No la hagas de nuevo. A veces el banco tarda en acreditarla:
-    apenas llegue, las entradas te llegan solas a <b>${esc($('#email').value.trim())}</b> (mirá también en spam).
+    apenas llegue, las entradas te llegan solas a <b>${esc($('#email').value.trim())}</b> (mirá también en spam).${SALA() ? `
+    Si llega cuando tus butacas ya se liberaron, te damos las mejores que queden libres y te lo decimos en el mail.` : ''}
     Si todavía no transferiste, tocá «Ir a pagar» de nuevo.${wa ? ` Si en una hora no te llegaron,
     <a href="https://wa.me/${encodeURIComponent(wa)}?text=${encodeURIComponent(texto)}" target="_blank" rel="noopener">escribinos por WhatsApp</a>.` : ''}`;
   $('#ya-transferi').hidden = false;
@@ -482,7 +483,9 @@ fetch('/api/config').then(r => r.json()).then(c => {
   if (c.sandbox) $('#sandbox').hidden = false;
   if (EN_APP) $('#en-app').hidden = false;
   EV = lista.find(e => e.id === pedidoEvento) || (lista.length === 1 ? lista[0] : null);
-  $('#reserva').textContent = `Te guardamos el lugar ${c.reservaMinutos} minutos mientras pagás.`;
+  $('#reserva').textContent = c.sitio.sala
+    ? `Tus butacas quedan apartadas ${c.reservaMinutos} minutos mientras pagás. Si la transferencia no se acredita en ese tiempo, se liberan para otros.`
+    : `Te guardamos el lugar ${c.reservaMinutos} minutos mientras pagás.`;
   pintarFechas(); pintarTipos(); actualizar();
 }).catch(() => error('No pudimos cargar los precios. Revisá tu conexión y recargá la página.'));
 </script>
