@@ -172,6 +172,37 @@ Todo se cobra por transferencia (Chytapay): el panel no desglosa por medio de pa
 - El organizador puede **reenviar el QR** a otro mail.
 - En modo `gala` no ve la pestaña Cartelera, y sin varias fechas no aparece el selector de fecha.
 
+## Butacas numeradas (11/11/2026, gala de Santiago Rítmica en el Paraninfo de la UNSE)
+Una gala con `sala` en su `sitio.json` vende **butacas**: el público las elige en un plano y cada QR lleva la suya.
+Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pasan igual).
+- **El plano** (`sitio.json → sala`, lo lee `sitio.js`): cada fila con `asientos`, o con `bloques` si tiene huecos
+  (`[9, { "hueco": "Cabina", "ancho": 8 }, 9]`). Los números corren de corrido por la fila, saltando los huecos.
+  `asiento1`: de qué lado del plano (escenario arriba) está el asiento 1. Una fila con `zona` sale rotulada y con
+  `tipo` pasa a ese tipo de entrada si el evento lo tiene (otro precio); si no, es del primer tipo del evento.
+  El id de cada butaca es `fila-número` ("13-10").
+- **Las cuentas** sin base van en `backend/butacas.js`; en `server.js`, `butacasTomadas` (pagadas, cortesías,
+  boletería y compras a tiempo de pagarse) y `apartarButacas`, siempre con el bloqueo del cupo tomado.
+  - Con sala, la capacidad de cada tipo son sus butacas (sin las guardadas): el cupo cargado no cuenta.
+  - Una compra es de **un solo tipo**: butacas de zonas con distinto precio se compran por separado.
+  - La misma persona (DNI y email) que vuelve a elegir **libera** sus compras sin pagar de esa fecha. Con las mismas
+    butacas, retoma el mismo cobro.
+  - El navegador guarda su compra sin pagar (`sessionStorage`) y el plano le muestra esas butacas como suyas
+    (`/api/sala?orden=`): si cerró la pantalla de pago, puede volver a pagarlas.
+  - **Pago que llega tarde** y sus butacas ya no están libres: se emite con las mejores que queden juntas
+    (`elegirMejores`) y el mail lo explica. Si no queda ninguna de su zona, no se emite: queda en "Transferencias
+    sin asignar" (`sin_butacas`) y la próxima repesca o aviso la emite si se libera una.
+- **Panel → Sala** (admin, organizador y puerta): el plano con lo vendido, pagándose, cortesías y guardadas, quién
+  está en cada butaca y si ya entró. La organización **guarda** butacas (no salen a la venta: familia, cámaras,
+  invitados; `eventos.bloqueadas`) y da **cortesías** marcando butacas en el plano (pueden ser guardadas).
+  La boletería vende tocando el plano y ve lo ocupado, no de quién. En la puerta, al escanear, sale la butaca en grande.
+- **Prueba:** `herramientas/prueba-butacas.mjs` (57 pruebas) con el servidor
+  `TEMA=santiago-ritmica DB_NAME=gala_ritmica PORT=3047 node server.js` y
+  `DB_NAME=gala_ritmica node ../herramientas/prueba-butacas.mjs 3047` (desde `backend`, base LOCAL).
+- **Santiago Rítmica** (tema `santiago-ritmica`): Paraninfo, Av. Belgrano (S) 1912. 337 butacas: filas 1 (22),
+  2 (21), 3 a 12 (26), 13 (9 + cabina de musicalización + 9) y 14, zona verde, detrás de la cabina (8 + 8).
+  José: "la numeración comienza mirando desde el escenario, de izquierda a derecha" → en el plano, el 1 a la
+  derecha. **Fecha, hora y precio de la ficha son provisorios.** Sin servicio en Render todavía.
+
 ## Vista previa para el cliente (sin sistema)
 - `node herramientas/vista-previa.mjs <tema> <url pública> <carpeta> [servidor local]` arma una copia estática de la
   portada propia del tema (con el servidor local andando, para copiar los precios de `/api/config`): marcas
@@ -210,5 +241,8 @@ Un servicio de Render por gala, todos del mismo código (en la cuenta de eventos
   - Scripts contra esa base: `ENV_RENDER=render-env-quinto.txt USUARIOS_ARCHIVO=usuarios-panel-render-quinto.txt node herramientas/con-env-render.mjs <script>`.
 
 ## Pendiente
+- Santiago Rítmica: que José confirme la numeración (el 1 a la derecha mirando al escenario), fecha, hora, precio
+  (¿la zona verde vale distinto?), pasillos si hay, butacas a guardar y la comisión; después base, servicio en Render,
+  usuarios y la cuenta de Chytapay de la escuela. El flyer, cuando esté, para una portada propia.
 - Adaptar `prueba-gala.mjs` a la cartelera.
 - Datos, logos y fotos de las otras galas del 13/12/2026.

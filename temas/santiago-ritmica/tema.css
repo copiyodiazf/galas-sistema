@@ -1,0 +1,18 @@
+/* Tema de la gala de Santiago Rítmica: noche magenta y el rosa del logo de la escuela (#E91E8C, el mismo
+   del sistema de la escuela). Tipografía redonda y moderna, como el logo. */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
+:root{
+  --noche:#1a081e; --noche-2:#2a0b2e; --noche-3:#3a1040; --oro:#ff5cb0; --oro-vivo:#ffb3dc; --crema:#fff4fa;
+  --gris:#d6b5c8; --tierra:#b0126a;
+  --oro-degrade:linear-gradient(90deg,#ffb3dc,#ff5cb0 45%,#e91e8c);
+  --f-display:'Poppins',system-ui,sans-serif; --f-texto:'Poppins',system-ui,sans-serif;
+}
+body{background:radial-gradient(ellipse 80% 45% at 0% 0%,rgba(233,30,140,.28),transparent 70%),
+                radial-gradient(ellipse 80% 45% at 100% 40%,rgba(124,58,237,.16),transparent 70%),
+                radial-gradient(ellipse 90% 50% at 50% 100%,rgba(176,18,106,.35),transparent 70%),var(--noche);}
+h1{font-weight:800;letter-spacing:-.02em;}
+.tarjeta{background:linear-gradient(180deg,rgba(58,16,64,.92),rgba(42,11,46,.92));border-color:rgba(255,92,176,.25);}
+.btn{color:#fff;background:linear-gradient(180deg,#ff5cb0,#e91e8c);box-shadow:0 10px 26px rgba(233,30,140,.32);}
+.paso span{color:#fff;}
+th{background:rgba(42,11,46,.97) !important;}
+.cabeza img{background:#fff;}

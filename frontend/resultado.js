@@ -8,7 +8,8 @@
   let intentos = 0;
 
   function exito(d) {
-    const qrs = d.qrs.map(q => `<div class="qr"><b>${esc(d.tipoNombre)}</b><small>${q.indice} de ${d.qrs.length}</small>
+    try { sessionStorage.removeItem('gala_compra'); } catch {}
+    const qrs = d.qrs.map(q => `<div class="qr"><b>${esc(d.tipoNombre)}</b><small>${q.indice} de ${d.qrs.length}</small>${q.butaca ? `<span class="butaca">${esc(q.butaca)}</span>` : ''}
       <img src="${esc(q.url)}" width="250" height="250" alt="Código QR ${q.indice}"></div>`).join('');
     $('#contenido').innerHTML = `
       <h1>¡Listo, <em>${esc(d.nombre)}</em>!</h1>
