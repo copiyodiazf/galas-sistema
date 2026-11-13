@@ -459,7 +459,7 @@ footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;marg
         <img class="arte" src="assets/arte-divas-900.webp" srcset="assets/arte-divas-600.webp 600w, assets/arte-divas-900.webp 900w"
           sizes="(min-width:900px) 560px, 100vw" width="900" height="910" loading="lazy" decoding="async"
           alt="Silueta de una gimnasta con su pelota, frente a seis paneles con vestuarios de grandes divas del pop">
-        <video class="arte-video" muted loop playsinline preload="none" poster="assets/divas-ia.webp" aria-hidden="true"></video>
+        <video class="arte-video" muted loop playsinline preload="none" poster="assets/divas-ia-2.webp" aria-hidden="true"></video>
         <div class="luces" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
         <div class="haz uno" aria-hidden="true"></div><div class="haz dos" aria-hidden="true"></div>
         <div class="piso" aria-hidden="true"></div>
@@ -761,11 +761,13 @@ function mirarEscena(escena, mundo, clase, susNubes) {
 }
 mirarEscena($('#escena-divas'), $('#divas'), 'encendida', [brillos]);
 mirarEscena($('#escena-origen'), $('#origen'), 'abierta', [plumas, brasas]);
+// Cada versión nueva de un video va con OTRO nombre (divas-ia-2, -3…): el servidor deja que el navegador guarde
+// videos e imágenes un día, y con el mismo nombre se seguía viendo el viejo (13/11/2026).
 // Los dos flyers animados con IA (Kling 2.5 Turbo Pro por fal.ai, 13/11/2026): en Divas la gimnasta mueve el brazo
 // y la pelota; en El Origen vuelan las palomas, caen plumas, el demonio se mueve y arde el fuego. Cada video se pide
 // recién al acercarse, corre solo mientras se ve y se frena con la pausa. Con él andando, las copias que movía el
 // CSS (.capa) y los destellos se apagan: el video ya lo hace.
-const videosIA = [['escena-divas', 'assets/divas-ia.mp4'], ['escena-origen', 'assets/origen-ia.mp4']].map(([id, src]) => {
+const videosIA = [['escena-divas', 'assets/divas-ia-2.mp4'], ['escena-origen', 'assets/origen-ia.mp4']].map(([id, src]) => {
   const escena = $('#' + id), v = escena.querySelector('.arte-video'), x = { v, visible: false };
   v.addEventListener('playing', () => { v.classList.add('lista'); escena.classList.add('con-video'); }, { once: true });
   new IntersectionObserver(([en]) => {

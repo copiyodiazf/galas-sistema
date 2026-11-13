@@ -254,7 +254,8 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
     Se pide al acercarse, corre solo visible, se frena con la pausa; con "reducir movimiento" o "ahorro de datos"
     queda el arte quieto. Sobre el video siguen las luces, los reflectores, el brillo y las candilejas.
     **Segunda versión** (José pidió más movimiento, otros US$ 0,35): lanza la pelota al aire, la sigue con los brazos
-    arriba y la atrapa, la pasa de mano y se arquea. Loop de IDA Y VUELTA (adelante y en reversa, 10 s, 574 KB): las
+    arriba y la atrapa, la pasa de mano y se arquea. `assets/divas-ia-2.mp4`: cada versión va con OTRO nombre, porque el
+    navegador guarda videos e imágenes un día y con el mismo nombre se seguía viendo el viejo. Loop de IDA Y VUELTA (adelante y en reversa, 10 s, 574 KB): las
     poses del principio y del final son distintas y un fundido mostraba dos gimnastas superpuestas. La primera versión
     quedó en `C:\ritmica-gala\material\ia\divas-ia-loop-v1.mp4`.
   - **El Origen de Ser animado con IA** (13/11, mismo método, otros US$ 0,35): vuelan las palomas, caen plumas, el
