@@ -240,6 +240,10 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
     `assets/divas-ia.mp4` (457 KB, 720x728) y su cuadro `.webp`; el original en `C:\ritmica-gala\material\ia\`.
     Se pide al acercarse, corre solo visible, se frena con la pausa; con "reducir movimiento" o "ahorro de datos"
     queda el arte quieto. Sobre el video siguen las luces, los reflectores, el brillo y las candilejas.
+  - **El Origen de Ser animado con IA** (13/11, mismo método, otros US$ 0,35): vuelan las palomas, caen plumas, el
+    demonio se mueve, arde el fuego y la mujer queda de espaldas. `assets/origen-ia.mp4` (442 KB, 820x716, loop con
+    fundido de 1 s). Con el video andando se apagan las copias que movía el CSS (`.capa`); siguen el telón que se abre,
+    el rayo, el corazón, el brillo del fuego y las partículas. Saldo de fal de José después de los dos: unos US$ 1,04.
   - **Material del Instagram** (@santiago.ritmica, público): bajado con **Instaloader** (sin sesión) a
     `C:\ritmica-gala\material\instagram\santiago.ritmica\` (fuera del repo; 454 publicaciones desde 2022). Lo elegido
     se pasó a `assets/instagram/` (fotos `-600`/`-1200.webp`) y los clips a `assets/video/`. No se usaron gimnastas que

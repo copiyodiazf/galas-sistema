@@ -140,7 +140,7 @@ section{scroll-margin-top:12px;}
 /* Divas animada con IA: el video (mismo encuadre que el arte) aparece encima cuando ya está andando */
 .arte-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease;pointer-events:none;}
 .arte-video.lista{opacity:1;}
-.con-video .destellos{display:none;}
+.con-video .destellos,.con-video .capa{display:none;}
 .mundo .texto{max-width:52ch;}
 .mundo .texto>p{margin-top:12px;color:var(--tinta);}
 .cuando{font-family:var(--display);font-weight:600;font-size:24px;color:var(--acento);}
@@ -477,6 +477,7 @@ footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;marg
         <img class="arte" src="assets/arte-origen-720.webp" srcset="assets/arte-origen-480.webp 480w, assets/arte-origen-720.webp 720w"
           sizes="(min-width:900px) 560px, 100vw" width="720" height="628" loading="lazy" decoding="async"
           alt="Una mujer de espaldas, con un corazón de luz, entre dos cortinas luminosas: a la izquierda el cielo con palomas y plumas, a la derecha el fuego y un demonio alado">
+        <video class="arte-video" muted loop playsinline preload="none" poster="assets/origen-ia.webp" aria-hidden="true"></video>
         <div class="capa pluma-grande" aria-hidden="true"></div>
         <div class="capa paloma uno" aria-hidden="true"></div>
         <div class="capa paloma dos" aria-hidden="true"></div>
@@ -748,23 +749,27 @@ function mirarEscena(escena, mundo, clase, susNubes) {
   }, { threshold: [0, .35] }).observe(escena);
 }
 mirarEscena($('#escena-divas'), $('#divas'), 'encendida', [brillos]);
-// Divas animada con IA (Kling, fal.ai, 13/11/2026): la gimnasta mueve el brazo y la pelota, el boa vuela.
-// Se pide recién al acercarse, corre solo mientras se ve y se frena con la pausa.
-const vidDivas = $('#escena-divas .arte-video');
-let divasVisible = false;
-const moverVideo = () => { if (!vidDivas.getAttribute('src')) return; if (divasVisible && !pausado) vidDivas.play().catch(() => {}); else vidDivas.pause(); };
-vidDivas.addEventListener('playing', () => { vidDivas.classList.add('lista'); $('#escena-divas').classList.add('con-video'); }, { once: true });
-new IntersectionObserver(([en]) => {
-  divasVisible = en.isIntersecting;
-  if (divasVisible && !vidDivas.getAttribute('src') && !QUIETO && !AHORRO) vidDivas.setAttribute('src', 'assets/divas-ia.mp4');
-  moverVideo();
-}, { rootMargin: '150px 0px' }).observe($('#escena-divas'));
 mirarEscena($('#escena-origen'), $('#origen'), 'abierta', [plumas, brasas]);
+// Los dos flyers animados con IA (Kling 2.5 Turbo Pro por fal.ai, 13/11/2026): en Divas la gimnasta mueve el brazo
+// y la pelota; en El Origen vuelan las palomas, caen plumas, el demonio se mueve y arde el fuego. Cada video se pide
+// recién al acercarse, corre solo mientras se ve y se frena con la pausa. Con él andando, las copias que movía el
+// CSS (.capa) y los destellos se apagan: el video ya lo hace.
+const videosIA = [['escena-divas', 'assets/divas-ia.mp4'], ['escena-origen', 'assets/origen-ia.mp4']].map(([id, src]) => {
+  const escena = $('#' + id), v = escena.querySelector('.arte-video'), x = { v, visible: false };
+  v.addEventListener('playing', () => { v.classList.add('lista'); escena.classList.add('con-video'); }, { once: true });
+  new IntersectionObserver(([en]) => {
+    x.visible = en.isIntersecting;
+    if (x.visible && !v.getAttribute('src') && !QUIETO && !AHORRO) v.setAttribute('src', src);
+    moverVideos();
+  }, { rootMargin: '150px 0px' }).observe(escena);
+  return x;
+});
+function moverVideos() { for (const { v, visible } of videosIA) { if (!v.getAttribute('src')) continue; if (visible && !pausado) v.play().catch(() => {}); else v.pause(); } }
 $$('.pausa').forEach(b => b.addEventListener('click', () => {
   pausado = !pausado;
   raiz.classList.toggle('quieto', pausado);
   $$('.pausa').forEach(x => { x.setAttribute('aria-pressed', String(pausado)); x.textContent = pausado ? 'Reanudar efectos' : 'Pausar efectos'; });
-  nubes.forEach(moverNube); moverVideo();
+  nubes.forEach(moverNube); moverVideos();
 }));
 
 // ───── La escuela: la pasarela de fotos y el visor ─────
