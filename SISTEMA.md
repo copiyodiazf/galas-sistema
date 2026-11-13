@@ -217,8 +217,13 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
     de Chytapay, 0,8 % + IVA = 0,968 % del total, sale de la parte de José, como en El Quinto Elemento):
     d = (servicio − 0,968 % × total) / total = (2.000 − 212,96) / 22.000 = 8,12 % → José $1.786,40, la escuela $20.213,60
     − $212,96 = $20.000,64. Zona verde: José $893,20, la escuela $10.000. Cargarla ANTES de que Eugenia conecte su
-    cuenta (cada comercio conserva la Distribución que había al conectarse). Si la comisión fuera 0,08 % + IVA: 8,99 %.
-    Verificar con la primera compra de prueba cuánto llega a cada cuenta.
+    cuenta (cada comercio conserva la Distribución que había al conectarse).
+    Verificado el 13/11 en chytapay.com.ar: cobros por integraciones 0,8 % + IVA (directo 1 % + IVA; con factura
+    automática en ARCA 1,75 % + IVA, según llms.txt); la comisión de la integración se calcula "sobre el bruto" y la paga
+    el comercio (Chytapay la pasa de su cuenta al recaudador en el momento). No dice si el 0,968 % va sobre el total o
+    sobre lo que le queda al comercio: con 8,12 % la escuela recibe $20.000,64 o $20.017,93, nunca menos de $20.000.
+    Si la cuenta de la escuela factura sola en ARCA: Distribución ≈ 6,97 %. Confirmar con una venta real de El Quinto
+    Elemento ($24.000 → a José le tendrían que haber llegado $1.766,40).
     Los flyers están en `assets/flyer-*.webp`. Al de El Origen de Ser se le sacó la marca "CapCut AI" de arriba a
     la izquierda: se rellenó con el cielo de alrededor (OpenCV, inpaint).
   - **Segunda versión de la portada** (13/11/2026, pedido de José: "más contenido", logo más grande, el rosa de
