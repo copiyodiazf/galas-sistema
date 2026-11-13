@@ -284,11 +284,6 @@ section{scroll-margin-top:12px;}
 
 /* ── La sala ── */
 .sala{padding:64px 0;border-top:1px solid rgba(255,255,255,.07);--acento:var(--oro);}
-.elegir{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:22px;max-width:540px;}
-.elegir button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;font:500 12.5px/1.2 var(--texto);color:var(--tinta);text-align:left;
-  background:transparent;border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:9px 12px 10px;cursor:pointer;user-select:none;-webkit-user-select:none;}
-.elegir b{font-family:var(--display);font-weight:700;font-size:28px;line-height:1;}
-.elegir button[aria-pressed=true]{color:#22121b;background:var(--acento);border-color:transparent;}
 .mapa{--d:8px;--g:3px;margin:22px 0 0;padding:18px 0 4px;}
 .escenario{width:min(72%,420px);margin:0 auto 18px;text-align:center;font:500 12px var(--texto);letter-spacing:.06em;color:#fff;
   background:linear-gradient(180deg,var(--ritmica-vivo),var(--ritmica));border-radius:4px 4px 40% 40% / 4px 4px 14px 14px;padding:6px 0 8px;}
@@ -298,14 +293,13 @@ section{scroll-margin-top:12px;}
 .fila .asientos,.tramo{display:flex;gap:var(--g);}
 .tramo i{width:var(--d);height:var(--d);border-radius:50%;background:var(--plata);}
 .verde .tramo i{background:var(--verde);}
-.tramo i.o{background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);}
 .hueco{width:calc(var(--n) * (var(--d) + var(--g)) - var(--g));font-size:9px;line-height:var(--d);text-align:center;color:var(--gris);overflow:hidden;white-space:nowrap;}
 .fila.verde{margin-top:6px;}
 .leyenda{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center;margin-top:16px;font-size:13.5px;color:var(--gris);}
 .leyenda i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px;background:var(--plata);}
 .leyenda .z{background:var(--verde);}
-.leyenda .o{background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,255,.4);}
-.cuenta-sala{text-align:center;margin-top:10px;font-size:15px;font-variant-numeric:tabular-nums;}
+.cuenta-sala{text-align:center;margin-top:10px;font-size:14px;color:var(--gris);}
+.talon .aviso-funcion{display:inline-block;margin-top:8px;padding:3px 11px;border-radius:999px;font-size:13px;font-weight:600;color:var(--acento);border:1px solid var(--acento);}
 .sala .btn{display:flex;width:fit-content;margin:22px auto 0;}
 @media (min-width:760px){.mapa{--d:12px;--g:4px;}.fila .n{font-size:12px;width:22px;}}
 @media (max-width:359px){.mapa{--d:7px;--g:2px;}.fila{gap:4px;}.fila .n{width:13px;font-size:9px;}}
@@ -547,18 +541,17 @@ footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;marg
 
   <section class="sala" id="sala" aria-labelledby="t-sala">
     <div class="marco">
-      <h2 id="t-sala">Mirá qué butacas quedan</h2>
-      <p class="bajada">El plano del Paraninfo, función por función: tu entrada vale solo para la hora que elegiste.</p>
-      <div class="elegir" id="elegir-sala"></div>
+      <h2 id="t-sala">Así es la sala</h2>
+      <p class="bajada">El Paraninfo de la UNSE tiene 337 butacas numeradas. Las elegís al comprar, en el plano de la función que quieras: ahí ves cuáles quedan libres en ese momento.</p>
       <figure class="mapa">
         <div class="escenario">Escenario</div>
-        <div class="filas" id="mapa" role="img" aria-label="Plano de la sala"></div>
+        <div class="filas" id="mapa" role="img" aria-label="Plano de la sala: escenario adelante, platea en las filas 1 a 13, la cabina de sonido en el medio de la fila 13 y la zona verde en la fila 14, al fondo"></div>
         <figcaption>
-          <p class="cuenta-sala" id="cuenta-sala" aria-live="polite"></p>
-          <p class="leyenda"><span><i></i>Platea libre</span><span><i class="z"></i>Zona verde libre</span><span><i class="o"></i>Ocupada</span></p>
+          <p class="leyenda"><span><i></i>Platea · filas 1 a 13</span><span><i class="z"></i>Zona verde · fila 14</span></p>
+          <p class="cuenta-sala">Los números de cada fila empiezan del lado derecho, mirando hacia el escenario.</p>
         </figcaption>
       </figure>
-      <a class="btn" id="btn-sala" href="/comprar">Elegir butacas</a>
+      <a class="btn" id="btn-sala" href="#funciones">Elegir función y butacas</a>
     </div>
   </section>
 
@@ -868,50 +861,25 @@ function prepararBotones() {
     if (PREVIA) { a.href = '#'; a.addEventListener('click', ev => { ev.preventDefault(); try { $('#p-previa').showPopover(); } catch {} }); }
   }
 }
-// La sala de cada función: las butacas ocupadas vienen de /api/sala (la misma que usa la compra).
-let salaEv = null;
-const cacheSala = new Map();
-async function ocupadasDe(id) {
-  if (PREVIA) return [];
-  const c = cacheSala.get(id);
-  if (c && Date.now() - c.t < 20000) return c.v;
-  const r = await fetch('/api/sala?evento=' + encodeURIComponent(id));
-  if (!r.ok) throw new Error('sala');
-  const v = (await r.json()).ocupadas || [];
-  cacheSala.set(id, { t: Date.now(), v });
-  return v;
-}
-function pintarMapa(ocupadas) {
-  const s = CFG.sitio.sala, oc = new Set(ocupadas), der = s.asiento1 === 'derecha';
-  let libres = 0;
-  // En el plano, el escenario arriba: si el asiento 1 está a la derecha, cada fila se dibuja al revés.
+// "Así es la sala": la forma del Paraninfo (escenario, filas, cabina y zona verde), SIN disponibilidad. Lo libre
+// cambia a cada segundo en la apertura de la venta y se ve solo en la compra (José, 13/11/2026).
+function pintarSala() {
+  const s = CFG.sitio.sala, der = s.asiento1 === 'derecha';
   $('#mapa').innerHTML = s.filas.map(f => {
     const bloques = der ? [...f.bloques].reverse() : f.bloques;
-    const partes = bloques.map(b => {
-      if (b.hueco) return `<span class="hueco" style="--n:${b.ancho}">${esc(b.texto || '')}</span>`;
-      const puntos = [];
-      for (let k = 0; k <= b.hasta - b.desde; k++) {
-        const num = der ? b.hasta - k : b.desde + k, o = oc.has(`${f.fila}-${num}`);
-        if (!o) libres++;
-        puntos.push(o ? '<i class="o"></i>' : '<i></i>');
-      }
-      return `<span class="tramo">${puntos.join('')}</span>`;
-    }).join('');
+    const partes = bloques.map(b => b.hueco ? `<span class="hueco" style="--n:${b.ancho}">${esc(b.texto || '')}</span>`
+      : `<span class="tramo">${'<i></i>'.repeat(b.hasta - b.desde + 1)}</span>`).join('');
     return `<div class="fila${f.tipo === 'zona-verde' ? ' verde' : ''}"><span class="n">${esc(f.fila)}</span><span class="asientos">${partes}</span><span class="n" aria-hidden="true"></span></div>`;
   }).join('');
-  $('#cuenta-sala').innerHTML = `<b>${libres}</b> butacas libres de ${s.total} a las ${esc(hora(eventoDe(salaEv)))}`;
-  $('#mapa').setAttribute('aria-label', `Plano de la sala a las ${hora(eventoDe(salaEv))}: ${libres} butacas libres de ${s.total}`);
 }
-async function verSala(id) {
-  salaEv = id;
-  const e = eventoDe(id);
-  $$('#elegir-sala button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.ev === id)));
-  $('#sala').style.setProperty('--acento', id === 'divas-del-pop' ? 'var(--rosa)' : 'var(--oro)');
-  const btn = $('#btn-sala');
-  btn.textContent = `Elegir butacas para las ${hora(e)}`;
-  btn.href = PREVIA ? '#' : '/comprar?evento=' + encodeURIComponent(id);
-  try { pintarMapa(await ocupadasDe(id)); }
-  catch { pintarMapa([]); $('#cuenta-sala').textContent = 'No pudimos ver la sala de esta función. Probá de nuevo en un rato.'; }
+// En la entrada de cada función, un aviso que no se desactualiza: "Últimas butacas" (quedan pocas) o "Agotada".
+function avisosDeFunciones() {
+  for (const p of $$('[data-desde]')) {
+    const e = eventoDe(p.dataset.desde); if (!e) continue;
+    const estados = Object.values(e.tipos).map(t => t.estado);
+    const aviso = estados.every(x => x === 'agotado') ? 'Agotada' : estados.some(x => x === 'pocas' || x === 'agotado') ? 'Últimas butacas' : '';
+    if (aviso) p.insertAdjacentHTML('afterend', `<p class="aviso-funcion">${aviso}</p>`);
+  }
 }
 
 (PREVIA ? Promise.resolve(PREVIA) : fetch('/api/config').then(r => r.json())).then(c => {
@@ -941,11 +909,9 @@ async function verSala(id) {
     $('#paso-pago').textContent = txt;
     $('#faq-pago').textContent = `Por transferencia, desde una cuenta a tu nombre. Tus butacas quedan apartadas ${c.reservaMinutos} minutos mientras pagás: si la transferencia no llega en ese tiempo, se liberan para otros.`;
   }
-  const lista = ['divas-del-pop', 'el-origen-de-ser-18', 'el-origen-de-ser-21'].map(eventoDe).filter(Boolean);
-  if (!c.sitio?.sala || !lista.length) { $('#sala').hidden = true; return; }
-  $('#elegir-sala').innerHTML = lista.map(e => `<button type="button" data-ev="${esc(e.id)}" aria-pressed="false"><b>${esc(hora(e))}</b>${e.id === 'divas-del-pop' ? 'Divas del Pop' : 'El Origen de Ser'}</button>`).join('');
-  $$('#elegir-sala button').forEach(b => b.addEventListener('click', () => verSala(b.dataset.ev)));
-  verSala((gala || lista[0]).id);
+  avisosDeFunciones();
+  if (!c.sitio?.sala) { $('#sala').hidden = true; return; }
+  pintarSala();
 }).catch(() => { $('#nota-precios').textContent = 'No pudimos cargar los precios. Revisá tu conexión y recargá la página.'; $('#sala').hidden = true; });
 if (!PREVIA) fetch('/api/visita', { method: 'POST' }).catch(() => {});
 
