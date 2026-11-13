@@ -92,7 +92,7 @@ section{scroll-margin-top:12px;}
 .portada h1{font-size:clamp(64px,19vw,128px);font-weight:600;color:#fff;margin-top:14px;text-shadow:0 4px 30px rgba(90,0,45,.4);}
 .portada .cuando-gala{font-size:clamp(18px,5vw,23px);font-weight:500;margin-top:10px;}
 .portada .cuando-gala,.faltan,.portada .btn.borde{text-shadow:0 1px 14px rgba(70,0,35,.6);}
-.portada .cuando-gala span{display:block;font-weight:400;opacity:.92;}
+.portada .cuando-gala span{display:block;font-weight:400;opacity:.92;text-wrap:balance;}
 .faltan{display:inline-block;margin-top:18px;padding:7px 16px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);
   font-weight:500;font-size:15.5px;}
 .faltan:empty{display:none;}
@@ -275,7 +275,8 @@ section{scroll-margin-top:12px;}
 @keyframes correr{to{transform:translateX(-50%);}}
 .pista button{flex:none;margin-right:10px;padding:0;border:0;background:#2b0a1f;cursor:zoom-in;border-radius:14px;overflow:hidden;}
 .pista img{width:auto;height:200px;border-radius:14px;}
-.pasarela:hover .pista,.pasarela:focus-within .pista,.pasarela.pausada .pista,.pasarela.fuera .pista{animation-play-state:paused;}
+.pasarela:has(:focus-visible) .pista,.pasarela.pausada .pista,.pasarela.fuera .pista{animation-play-state:paused;}
+@media (hover:hover) and (pointer:fine){.pasarela:hover .pista{animation-play-state:paused;}}
 .ayuda-galeria{font-size:13.5px;color:var(--gris);margin-top:10px;}
 @media (min-width:760px){.pista img{height:260px;}}
 
@@ -307,6 +308,22 @@ section{scroll-margin-top:12px;}
 .cuenta-sala{text-align:center;margin-top:10px;font-size:15px;font-variant-numeric:tabular-nums;}
 .sala .btn{display:flex;width:fit-content;margin:22px auto 0;}
 @media (min-width:760px){.mapa{--d:12px;--g:4px;}.fila .n{font-size:12px;width:22px;}}
+@media (max-width:359px){.mapa{--d:7px;--g:2px;}.fila{gap:4px;}.fila .n{width:13px;font-size:9px;}}
+@media (max-width:380px){
+  .funcion{gap:10px;padding:10px 12px;}
+  .funcion b{font-size:32px;}
+  .funcion span{font-size:14px;line-height:1.2;}
+  .funcion em{font-size:13px;padding:7px 11px;}
+  .entrada{grid-template-columns:96px 1fr;
+    -webkit-mask:radial-gradient(circle 11px at 96px 0,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 11px at 96px 100%,transparent 98%,#000) bottom/100% 51% no-repeat;
+            mask:radial-gradient(circle 11px at 96px 0,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 11px at 96px 100%,transparent 98%,#000) bottom/100% 51% no-repeat;}
+  .talon{padding:14px 14px 14px 16px;}
+  .talon .hora{font-size:38px;}
+  .talon h3{font-size:22px;}
+  .barra .que .largo{display:none;}
+  .barra .que .corto{display:inline;}
+  .barra .btn{padding:10px 14px;font-size:15px;}
+}
 
 /* ── Cómo se compra, preguntas y cómo llegar ── */
 .pasos,.preguntas,.lugar{padding:56px 0;border-top:1px solid rgba(255,255,255,.07);}
@@ -341,6 +358,7 @@ footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;marg
 .barra .que{flex:1;min-width:0;}
 .barra b{display:block;font-family:var(--display);font-size:20px;line-height:1.1;}
 .barra small{display:block;font-size:13px;color:var(--gris);}
+.barra .corto{display:none;}
 .barra .btn{min-height:44px;padding:10px 18px;font-size:16px;}
 .barra .wa{width:44px;min-height:44px;padding:0;background:#1faa59;}
 .barra .wa svg{width:24px;height:24px;}
@@ -599,7 +617,7 @@ footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;marg
 
 <div class="barra" id="barra" aria-hidden="true">
   <div class="marco">
-    <div class="que"><b>13 de diciembre</b><small>16, 18 y 21 h</small></div>
+    <div class="que"><b><span class="largo">13 de diciembre</span><span class="corto">Dom 13/12</span></b><small>16, 18 y 21 h</small></div>
     <a class="btn wa" data-wa hidden href="#" aria-label="Consultas por WhatsApp" tabindex="-1"><svg aria-hidden="true"><use href="#i-wa"/></svg></a>
     <a class="btn" id="btn-barra" href="#funciones" tabindex="-1">Elegir función</a>
   </div>
@@ -818,6 +836,12 @@ if (PREVIA) {
     <button class="btn" type="button" style="margin-top:16px" popovertarget="p-previa" popovertargetaction="hide">Entendido</button></div>
     <p style="position:fixed;top:10px;right:10px;z-index:30;margin:0;font:600 11px var(--texto);letter-spacing:.08em;color:var(--ritmica);background:#fff;padding:5px 11px;border-radius:99px;">Vista previa</p>`);
   $('#ya').hidden = true;
+  document.addEventListener('click', ev => {
+    const a = ev.target.closest('a[href^="/"], a[href="#"]');
+    if (!a || a.closest('[popover]')) return;
+    ev.preventDefault();
+    try { $('#p-previa').showPopover(); } catch {}
+  });
 }
 const eventoDe = id => CFG?.eventos?.find(e => e.id === id) || null;
 const agotado = e => Object.values(e.tipos || {}).every(t => t.estado === 'agotado');
