@@ -217,18 +217,27 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
     la izquierda: se rellenó con el cielo de alrededor (OpenCV, inpaint).
   - **Segunda versión de la portada** (13/11/2026, pedido de José: "más contenido", logo más grande, el rosa de
     Rítmica, el mapa, WhatsApp e Instagram). La portada es **rosa Rítmica** (`#CE086D`, la tinta del logo): el logo
-    grande en blanco (`assets/logo-blanco.webp`; `logo-rosa.webp` para el pie), un **video de fondo teñido de rosa**
-    (`assets/video/portada-cel|pc.mp4`, 0,3 y 0,4 MB: una gimnasta con su pelota y, en la compu, tres columnas;
-    hecho con ffmpeg, filtro `curves`, con botón de pausa y sin cargarse con "reducir movimiento"), una cinta que
-    se dibuja sola, la cuenta regresiva y el **WhatsApp de José** (`ayudaWhatsapp`, el mismo de El Quinto Elemento).
-    Después: las funciones como **entradas de teatro** con talón; los dos mundos; **Somos Santiago Rítmica**
-    (datos, logros, 14 fotos con visor y 4 videos; la tarjeta de Eugenia con el Premio Gaviota se sacó a pedido de José); el plano; cómo se compra;
-    **preguntas frecuentes**; **cómo llegar con el mapa de Google** (iframe, la dirección con pin) y el pie.
+    grande en blanco (`assets/logo-blanco.webp`; `logo-rosa.webp` para el pie), **seis clips de las gimnastas teñidos
+    de rosa** (`assets/video/clip-*.mp4`, 900 KB entre los seis, 432x768, ffmpeg con filtro `curves`): en la compu,
+    tres recuadros que alternan dos clips cada uno; en el celular, uno solo que pasa por los seis (dos `<video>` por
+    recuadro que se pasan la posta con un fundido). Botón de pausa; con "reducir movimiento" o "ahorro de datos" no
+    se cargan (queda el cuadro `.webp`). Una cinta que se dibuja sola, la cuenta regresiva y el **WhatsApp de José**
+    (`ayudaWhatsapp`, el mismo de El Quinto Elemento). Después: las funciones como **entradas de teatro**; los dos
+    mundos; **Somos Santiago Rítmica** (datos y la **pasarela**: 30 fotos en dos filas que corren solas, se frenan
+    con el mouse encima, con el botón o con el visor abierto, y se agrandan con anterior/siguiente); el plano; cómo
+    se compra; **preguntas frecuentes**; **cómo llegar con el mapa de Google** y el pie. A pedido de José se sacaron la
+    tarjeta de Eugenia (Premio Gaviota), "Orgullos de la escuela" y la sección de videos.
+  - **Divas del Pop es la gala de las más pequeñas** (José, 13/11): así se llama el evento de las 16 h
+    ("Divas del Pop · Gala de las más pequeñas") y así lo presenta la portada.
+  - **Más movimiento en los flyers** (13/11): en Divas, candilejas del borde del escenario que se prenden en cadena,
+    destellos en las lentejuelas, la corona y el corsé, y un reflejo que recorre el piso; en El Origen, las palomas
+    vuelan, la pluma grande se mece, el demonio respira y bate las alas (copias del arte recortadas con máscaras
+    suaves que se mueven unos píxeles), el fuego titila, la luz del centro respira y hay más plumas y brasas.
+    Todo con transform/opacity, frenado fuera de pantalla, con la pausa y sin nada con "reducir movimiento".
   - **Material del Instagram** (@santiago.ritmica, público): bajado con **Instaloader** (sin sesión) a
-    `C:\ritmica-gala\material\instagram\santiago.ritmica\` (fuera del repo). Lo elegido se pasó a
-    `assets/instagram/` (fotos `-600`/`-1200.webp`, videos de 480–540 de ancho con su cuadro `.webp`, 9 MB en total;
-    los dos largos recortados a 60 y 45 s). Los textos de la portada salen de los posts (no se inventó nada:
-    Energym, Bellatrix, Madre de Ciudades, Gabriela Vega jueza nacional).
+    `C:itmica-gala\material\instagram\santiago.ritmica\` (fuera del repo; 454 publicaciones desde 2022). Lo elegido
+    se pasó a `assets/instagram/` (fotos `-600`/`-1200.webp`) y los clips a `assets/video/`. No se usaron gimnastas que
+    no son de la escuela (selección nacional, el video de stock de 2022).
   - Primera versión (misma fecha), diseñada con las skills de `.claude/skills` (ver abajo): cada mundo se
     enciende una vez al verse (Divas: las luces de los paneles y dos reflectores; El Origen: el rayo, el telón que se
     abre, el corazón, plumas y brasas); el plano de la sala con lo libre de cada función (lee `/api/sala`, la

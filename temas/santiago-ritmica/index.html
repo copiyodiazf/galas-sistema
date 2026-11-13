@@ -74,8 +74,10 @@ section{scroll-margin-top:12px;}
 .portada{position:relative;isolation:isolate;min-height:100svh;display:grid;align-content:center;text-align:center;overflow:hidden;
   padding:calc(30px + env(safe-area-inset-top,0px)) 0 64px;
   background:radial-gradient(ellipse 90% 70% at 50% 30%,var(--ritmica-vivo),var(--ritmica) 55%,var(--ritmica-hondo));}
-.fondo{position:absolute;inset:0;z-index:-2;background-size:cover;background-position:center;}
-.fondo video{width:100%;height:100%;object-fit:cover;}
+.fondo{position:absolute;inset:0;z-index:-2;display:flex;}
+.fondo .col{position:relative;flex:1;background-size:cover;background-position:center;overflow:hidden;}
+.fondo video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .9s ease;}
+.fondo video.activo{opacity:1;}
 .portada::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
   background:radial-gradient(ellipse 70% 55% at 50% 38%,rgba(206,8,109,.55),rgba(206,8,109,.15) 70%),
              linear-gradient(180deg,rgba(142,7,80,.25),transparent 30%,transparent 62%,rgba(23,6,15,.9));}
@@ -167,6 +169,45 @@ section{scroll-margin-top:12px;}
 @keyframes barrer{from{transform:rotate(-12deg);}to{transform:rotate(16deg);}}
 @keyframes barrer-dos{from{transform:rotate(12deg);}to{transform:rotate(-15deg);}}
 .particulas{position:absolute;inset:0;pointer-events:none;}
+/* Divas: las candilejas del borde del escenario se prenden en cadena, las lentejuelas destellan y un reflejo recorre el piso */
+.candilejas i,.destellos i{position:absolute;left:var(--x);top:var(--y,88.4%);translate:-50% -50%;pointer-events:none;opacity:0;}
+.candilejas i{width:2.2%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#fff 0,#ffd6ea 30%,rgba(255,140,198,0) 70%);}
+.encendida .candilejas i{animation:candileja 2.4s ease-in-out calc(1.6s + var(--n) * .28s) infinite;}
+@keyframes candileja{0%,100%{opacity:.15;transform:scale(.7);}45%{opacity:1;transform:scale(1.5);}}
+.destellos i{width:4.2%;aspect-ratio:1;
+  background:linear-gradient(90deg,transparent 46%,#fff 50%,transparent 54%),linear-gradient(0deg,transparent 46%,#fff 50%,transparent 54%),radial-gradient(circle,#fff 0,rgba(255,255,255,.6) 12%,rgba(255,255,255,0) 32%);}
+.encendida .destellos i{animation:destello 4.2s ease-in-out calc(2s + var(--d)) infinite;}
+@keyframes destello{0%,62%,100%{opacity:0;transform:scale(.2) rotate(0deg);}74%{opacity:1;transform:scale(1) rotate(40deg);}86%{opacity:0;transform:scale(.3) rotate(80deg);}}
+.piso{position:absolute;left:-40%;bottom:0;width:80%;height:14%;pointer-events:none;opacity:0;
+  background:radial-gradient(ellipse 50% 60% at 50% 60%,rgba(255,214,234,.38),rgba(244,163,204,.12) 50%,transparent 75%);}
+.encendida .piso{animation:piso 7s ease-in-out 2.2s infinite alternate;}
+@keyframes piso{0%{opacity:.2;transform:translateX(0);}50%{opacity:.85;}100%{opacity:.25;transform:translateX(125%);}}
+/* El Origen: las palomas vuelan, la pluma grande se mece, el demonio respira y bate las alas, el fuego titila.
+   Cada parte es una copia del arte recortada con una máscara suave, que se mueve unos pocos píxeles sobre el original. */
+.capa{position:absolute;inset:0;pointer-events:none;background:url(assets/arte-origen-720.webp) center/100% 100% no-repeat;}
+.paloma.uno{-webkit-mask-image:radial-gradient(ellipse 14% 16% at 15% 11%,#000 58%,transparent 100%);mask-image:radial-gradient(ellipse 14% 16% at 15% 11%,#000 58%,transparent 100%);transform-origin:15% 11%;}
+.paloma.dos{-webkit-mask-image:radial-gradient(ellipse 9% 10% at 20% 26%,#000 55%,transparent 100%);mask-image:radial-gradient(ellipse 9% 10% at 20% 26%,#000 55%,transparent 100%);transform-origin:20% 26%;}
+.pluma-grande{-webkit-mask-image:radial-gradient(ellipse 22% 46% at 16% 50%,#000 60%,transparent 100%);mask-image:radial-gradient(ellipse 22% 46% at 16% 50%,#000 60%,transparent 100%);transform-origin:28% 94%;}
+.demonio{-webkit-mask-image:radial-gradient(ellipse 19% 34% at 76% 38%,#000 55%,transparent 100%);mask-image:radial-gradient(ellipse 19% 34% at 76% 38%,#000 55%,transparent 100%);transform-origin:76% 72%;}
+.alas{-webkit-mask-image:radial-gradient(ellipse 17% 17% at 85% 15%,#000 50%,transparent 100%);mask-image:radial-gradient(ellipse 17% 17% at 85% 15%,#000 50%,transparent 100%);transform-origin:76% 32%;}
+.abierta .paloma.uno{animation:vuelo 3.2s ease-in-out 2.6s infinite alternate;}
+.abierta .paloma.dos{animation:vuelo-chico 2.6s ease-in-out 2.9s infinite alternate;}
+.abierta .pluma-grande{animation:mecer 5.5s ease-in-out 2.4s infinite alternate;}
+.abierta .demonio{animation:respirar 3.8s ease-in-out 2.6s infinite alternate;}
+.abierta .alas{animation:aletear 2.4s ease-in-out 2.6s infinite alternate;}
+@keyframes vuelo{from{transform:translate(0,0) rotate(0deg);}to{transform:translate(.8%,-2.4%) rotate(-2.5deg);}}
+@keyframes vuelo-chico{from{transform:translate(0,0) rotate(0deg);}to{transform:translate(-.6%,-1.8%) rotate(3deg);}}
+@keyframes mecer{from{transform:rotate(-1.2deg);}to{transform:rotate(1.4deg);}}
+@keyframes respirar{from{transform:scale(1);}to{transform:scale(1.04) translateY(-.8%);}}
+@keyframes aletear{from{transform:rotate(-2.5deg);}to{transform:rotate(3.5deg);}}
+.fuego{position:absolute;left:45%;right:0;top:52%;bottom:0;pointer-events:none;opacity:0;
+  background:radial-gradient(ellipse 55% 50% at 62% 88%,rgba(255,120,40,.6),rgba(255,60,20,.22) 45%,transparent 72%);}
+.abierta .fuego{animation:llama 2.3s linear 2.4s infinite;}
+@keyframes llama{0%{opacity:.35;}14%{opacity:.75;}28%{opacity:.45;}46%{opacity:.9;}60%{opacity:.5;}78%{opacity:.8;}100%{opacity:.35;}}
+.luz-centro{position:absolute;left:36%;width:28%;top:0;bottom:8%;pointer-events:none;opacity:0;
+  background:radial-gradient(ellipse 50% 60% at 50% 45%,rgba(255,240,205,.45),transparent 70%);}
+.abierta .luz-centro{animation:luz 5s ease-in-out 3s infinite alternate;}
+@keyframes luz{from{opacity:.1;}to{opacity:.7;}}
 .particulas canvas{display:block;}
 .t-origen{font-size:clamp(54px,15vw,96px);font-weight:600;
   background:linear-gradient(180deg,#fff4d9 0%,var(--oro) 50%,var(--oro-hondo) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;}
@@ -207,7 +248,8 @@ section{scroll-margin-top:12px;}
   border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:7px 13px;cursor:pointer;}
 .sin-efectos .pausa{display:none;}
 .pausa-video{top:auto;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));background:rgba(90,0,45,.45);border-color:rgba(255,255,255,.35);}
-.quieto .haz,.fuera .haz{animation-play-state:paused;}
+.quieto .haz,.fuera .haz,.quieto .candilejas i,.fuera .candilejas i,.quieto .destellos i,.fuera .destellos i,.quieto .piso,.fuera .piso,
+.quieto .capa,.fuera .capa,.quieto .fuego,.fuera .fuego,.quieto .luz-centro,.fuera .luz-centro{animation-play-state:paused;}
 
 /* ── La escuela: quiénes son, fotos y videos de su Instagram ── */
 .escuela{padding:64px 0;background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(206,8,109,.28),transparent 70%),var(--sala);}
@@ -217,22 +259,23 @@ section{scroll-margin-top:12px;}
 .datos b{display:block;font-family:var(--display);font-weight:700;font-size:26px;line-height:1.05;color:var(--ritmica-claro);}
 .datos span{font-size:15px;color:var(--tinta);}
 @media (min-width:760px){.datos{grid-template-columns:repeat(3,minmax(0,1fr));}}
-.tira{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:28px -16px 0;padding:0 16px 8px;scrollbar-width:thin;overscroll-behavior-x:contain;}
-.tira>*{flex:none;scroll-snap-align:start;}
-.tira button{padding:0;border:0;background:none;cursor:zoom-in;border-radius:14px;overflow:hidden;}
-.tira img{width:auto;height:240px;border-radius:14px;}
-.tira h3{flex:none;}
-.videos{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin:14px -16px 0;padding:0 16px 8px;overscroll-behavior-x:contain;}
-.videos figure{flex:none;scroll-snap-align:start;margin:0;width:min(62vw,250px);}
-.videos video{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:16px;background:#2b0a1f;}
-.videos figcaption{font-size:13.5px;color:var(--gris);margin-top:6px;}
-.titulito{font-family:var(--display);font-weight:600;font-size:30px;margin-top:40px;}
-.logros{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:4px;max-width:760px;}
-.logros li{padding:12px 0 12px 22px;border-bottom:1px solid rgba(255,255,255,.08);position:relative;color:var(--gris);font-size:15.5px;}
-.logros li::before{content:"";position:absolute;left:2px;top:20px;width:9px;height:9px;border-radius:50%;background:var(--ritmica-claro);}
-.logros b{display:block;color:var(--tinta);font-weight:500;font-size:17px;}
+.titulito{font-family:var(--display);font-weight:600;font-size:30px;}
+/* La pasarela: dos filas que corren solas (una para cada lado), se frenan con el mouse encima o al tocar, y cada
+   foto se agranda. Cada fila lleva sus fotos dos veces: al llegar a la mitad vuelve al principio sin salto. */
+.cabeza-galeria{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:40px;}
+.cabeza-galeria button{font:500 13px var(--texto);color:var(--tinta);background:transparent;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:7px 13px;cursor:pointer;flex:none;}
+.pasarela{display:grid;gap:10px;margin:18px calc(50% - 50vw) 0;overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);}
+.pista{display:flex;width:max-content;animation:correr var(--dur,90s) linear infinite;}
+.pista.vuelta{animation-direction:reverse;}
+@keyframes correr{to{transform:translateX(-50%);}}
+.pista button{flex:none;margin-right:10px;padding:0;border:0;background:#2b0a1f;cursor:zoom-in;border-radius:14px;overflow:hidden;}
+.pista img{width:auto;height:200px;border-radius:14px;}
+.pasarela:hover .pista,.pasarela:focus-within .pista,.pasarela.pausada .pista,.pasarela.fuera .pista{animation-play-state:paused;}
+.ayuda-galeria{font-size:13.5px;color:var(--gris);margin-top:10px;}
+@media (min-width:760px){.pista img{height:260px;}}
+
 .escuela .acciones{justify-content:flex-start;margin-top:26px;}
-@media (min-width:1120px){.tira,.videos{margin-inline:0;padding-inline:0;}}
 
 /* ── La sala ── */
 .sala{padding:64px 0;border-top:1px solid rgba(255,255,255,.07);--acento:var(--oro);}
@@ -302,11 +345,14 @@ footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;marg
   .btn:hover{transform:translateY(-1px);filter:brightness(1.06);}
   .funcion:hover{background:rgba(231,196,127,.13);}
   .pausa:hover{background:rgba(18,11,20,.85);}
-  .tira button:hover img{opacity:.9;}
+  .pista button:hover img{opacity:.88;}
   .preguntas summary:hover{color:#fff;}
 }
 @media (prefers-reduced-motion:reduce){
-  .js .luces,.js .telon,.rayo,.corazon,.haz{display:none;}
+  .js .luces,.js .telon,.rayo,.corazon,.haz,.candilejas,.destellos,.piso,.capa,.fuego,.luz-centro{display:none;}
+  .pista{animation:none;}
+  .pasarela{overflow-x:auto;-webkit-mask-image:none;mask-image:none;}
+  .pista .copia{display:none;}
   .js .cinta path{animation:none;stroke-dashoffset:0;}
   .btn,.funcion,.barra{transition:none;}
 }
@@ -316,8 +362,12 @@ footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;marg
 [popover]::backdrop{background:rgba(10,2,7,.8);}
 [popover] h3{font-size:28px;color:var(--ritmica-claro);margin-bottom:8px;}
 #visor{max-width:min(920px,calc(100% - 24px));padding:0;background:transparent;box-shadow:none;}
-#visor img{max-height:84svh;width:auto;margin:0 auto;border-radius:14px;}
-#visor button{display:block;margin:12px auto 0;font:600 15px var(--texto);color:#fff;background:rgba(255,255,255,.14);border:0;border-radius:999px;padding:10px 20px;cursor:pointer;}
+#visor figure{margin:0;}
+#visor img{max-height:78svh;width:auto;margin:0 auto;border-radius:14px;}
+#visor figcaption{text-align:center;font-size:14.5px;color:#fff;margin-top:10px;}
+.visor-botones{display:flex;justify-content:center;gap:10px;margin-top:12px;}
+.visor-botones button{font:600 15px var(--texto);color:#fff;background:rgba(255,255,255,.14);border:0;border-radius:999px;padding:10px 20px;cursor:pointer;min-width:52px;}
+.visor-botones button[aria-label]{font-size:22px;line-height:1;padding:8px 18px;}
 </style>
 </head>
 <body>
@@ -357,7 +407,7 @@ footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;marg
           <div class="talon">
             <p class="hora">16 h</p>
             <h3><em>Divas</em> del Pop</h3>
-            <p>La muestra</p>
+            <p>La gala de las más pequeñas</p>
             <p class="desde" data-desde="divas-del-pop"></p>
             <a class="btn" data-ev="divas-del-pop" href="/comprar?evento=divas-del-pop">Elegir butacas</a>
           </div>
@@ -395,12 +445,20 @@ footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;marg
           alt="Silueta de una gimnasta con su pelota, frente a seis paneles con vestuarios de grandes divas del pop">
         <div class="luces" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
         <div class="haz uno" aria-hidden="true"></div><div class="haz dos" aria-hidden="true"></div>
+        <div class="piso" aria-hidden="true"></div>
+        <div class="candilejas" aria-hidden="true"><i style="--x:2.6%;--n:0"></i><i style="--x:6.6%;--n:1"></i><i style="--x:10.6%;--n:2"></i><i style="--x:88.6%;--n:3"></i><i style="--x:92.6%;--n:4"></i><i style="--x:96.6%;--n:5"></i></div>
+        <div class="destellos" aria-hidden="true">
+          <i style="--x:55%;--y:22%;--d:0s"></i><i style="--x:61%;--y:31%;--d:.7s"></i><i style="--x:57%;--y:40%;--d:1.6s"></i><i style="--x:63%;--y:46%;--d:2.4s"></i>
+          <i style="--x:53%;--y:33%;--d:3.1s"></i><i style="--x:22%;--y:9%;--d:1.1s"></i><i style="--x:27%;--y:13%;--d:2.8s"></i><i style="--x:25%;--y:38%;--d:.4s"></i>
+          <i style="--x:90%;--y:27%;--d:1.9s"></i><i style="--x:95%;--y:36%;--d:3.5s"></i><i style="--x:92%;--y:46%;--d:.9s"></i><i style="--x:6%;--y:10%;--d:2.2s"></i>
+          <i style="--x:9%;--y:31%;--d:3.8s"></i><i style="--x:79%;--y:21%;--d:1.4s"></i>
+        </div>
         <div class="particulas" id="brillos" aria-hidden="true"></div>
         <button class="pausa" type="button" aria-pressed="false">Pausar efectos</button>
       </div>
       <div class="texto">
         <h2 class="t-divas" id="t-divas"><em>Divas</em><small>del</small><span>Pop</span></h2>
-        <p>La muestra de la tarde, con la música de las grandes divas del pop.</p>
+        <p>La gala de las más pequeñas: las alumnas más chiquitas de Santiago Rítmica suben al escenario con la música de las grandes divas del pop.</p>
         <p class="cuando">Domingo 13 de diciembre, 16 h</p>
         <p class="precios" data-precios="divas-del-pop"></p>
         <a class="btn" data-ev="divas-del-pop" href="/comprar?evento=divas-del-pop">Elegir butacas para las 16 h</a>
@@ -414,6 +472,13 @@ footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;marg
         <img class="arte" src="assets/arte-origen-720.webp" srcset="assets/arte-origen-480.webp 480w, assets/arte-origen-720.webp 720w"
           sizes="(min-width:900px) 560px, 100vw" width="720" height="628" loading="lazy" decoding="async"
           alt="Una mujer de espaldas, con un corazón de luz, entre dos cortinas luminosas: a la izquierda el cielo con palomas y plumas, a la derecha el fuego y un demonio alado">
+        <div class="capa pluma-grande" aria-hidden="true"></div>
+        <div class="capa paloma uno" aria-hidden="true"></div>
+        <div class="capa paloma dos" aria-hidden="true"></div>
+        <div class="capa demonio" aria-hidden="true"></div>
+        <div class="capa alas" aria-hidden="true"></div>
+        <div class="luz-centro" aria-hidden="true"></div>
+        <div class="fuego" aria-hidden="true"></div>
         <div class="corazon" aria-hidden="true"></div>
         <div class="particulas plumas" id="plumas" aria-hidden="true"></div>
         <div class="particulas brasas" id="brasas" aria-hidden="true"></div>
@@ -445,20 +510,10 @@ footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;marg
         <li><b>De lunes a sábados</b><span>Coordinación, flexibilidad, disciplina y expresión corporal</span></li>
         <li><b>Dos sedes</b><span>Suárez 207 y la Sede Sur, en Independencia 6.100</span></li>
       </ul>
-      <h3 class="titulito">Orgullos de la escuela</h3>
-      <ul class="logros">
-        <li><b>Torneo Madre de Ciudades</b>Lo organiza la escuela, en el Club Quimsa: dúos, tríos y conjuntos.</li>
-        <li><b>Primer puesto en el Torneo Energym</b>Todas nuestras gimnastas subieron al podio más alto.</li>
-        <li><b>Podios en el Torneo Bellatrix</b>En Monteros, Tucumán, en las categorías Mini, AC2 y AC3.</li>
-        <li><b>Primera jueza nacional de la provincia</b>Nuestra profe Gabriela Vega Manzano es la primera jueza nacional de gimnasia rítmica de Santiago del Estero.</li>
-      </ul>
       <div id="galeria" hidden>
-        <h3 class="titulito">En la escuela y en el escenario</h3>
-        <div class="tira" id="fotos"></div>
-      </div>
-      <div id="clips" hidden>
-        <h3 class="titulito">Videos</h3>
-        <div class="videos" id="videos"></div>
+        <div class="cabeza-galeria"><h3 class="titulito">En la escuela y en el escenario</h3><button type="button" id="pausa-fotos" aria-pressed="false">Pausar fotos</button></div>
+        <div class="pasarela" id="pasarela"></div>
+        <p class="ayuda-galeria">Tocá una foto para verla grande.</p>
       </div>
       <div class="acciones">
         <a class="linea" href="https://www.instagram.com/santiago.ritmica/" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-ig"/></svg>Seguinos en Instagram</a>
@@ -544,7 +599,10 @@ footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;marg
   </div>
 </div>
 
-<div popover id="visor"><img id="visor-img" alt=""><button type="button" popovertarget="visor" popovertargetaction="hide">Cerrar</button></div>
+<div popover id="visor">
+  <figure><img id="visor-img" alt=""><figcaption id="visor-txt"></figcaption></figure>
+  <div class="visor-botones"><button type="button" id="visor-ant" aria-label="Foto anterior">‹</button><button type="button" popovertarget="visor" popovertargetaction="hide">Cerrar</button><button type="button" id="visor-sig" aria-label="Foto siguiente">›</button></div>
+</div>
 
 <script>
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
@@ -576,37 +634,68 @@ const FOTOS = [
   ['energym-grupo', 'Torneo Energym: todo el equipo'],
   ['energym-podio-2', 'Torneo Energym: otro podio de la escuela'],
   ['bellatrix-segundas', 'Torneo Bellatrix: segundo puesto'],
+  ['clase-elongacion', 'Una clase de elongación en la escuela'],
+  ['podio-bandera', 'En el podio, con la bandera de la escuela'],
+  ['clase-chiquitas', 'Una clase de las más chiquitas'],
+  ['cuatro-mallas', 'Cuatro gimnastas de la escuela con sus mallas de competencia'],
+  ['energym-escuela', 'Torneo Energym: el podio'],
+  ['chiquitas-bandera', 'Las más chiquitas con la bandera de Santiago Rítmica'],
+  ['mallas-rojas', 'Gimnastas de la escuela en un torneo'],
+  ['torneo-profes', 'Las gimnastas con sus profes en un torneo'],
+  ['mallas-coronas', 'Gimnastas de la escuela listas para competir'],
+  ['equipo-santiago', 'El equipo de Santiago del Estero en un torneo'],
+  ['podio-chiquitas', 'Las más chiquitas en el podio'],
+  ['podio-bandera-2', 'Otro podio con la bandera de la escuela'],
+  ['dos-gimnastas', 'Dos gimnastas de la escuela en un torneo'],
+  ['podio-infantil', 'Podio de las más chiquitas'],
+  ['equipo-monteros', 'El equipo en Monteros, Tucumán'],
+  ['conjunto-mallas', 'Un conjunto de la escuela'],
 ];
-const CLIPS = [   // [archivo sin extensión, epígrafe]: assets/instagram/<archivo>.mp4 y .webp (el cuadro de muestra)
-  ['gala25-estaciones', 'Gala 2025: La Danza de las Estaciones'],
-  ['gala25-princesas', 'Gala 2025: las más chiquitas en Princesas vs. Villanas'],
-  ['gala25-primavera', 'Gala 2025: la primavera'],
-  ['entrenamiento-torneo', 'Entrenando para el torneo Madre de Ciudades'],
-];
-// La portada: una gimnasta con su pelota (celular) y tres columnas (compu), teñidas del rosa de Rítmica con ffmpeg.
-const VIDEO_PORTADA = { cel: 'assets/video/portada-cel', pc: 'assets/video/portada-pc' };
+// La portada: seis clips de las gimnastas teñidos del rosa de Rítmica con ffmpeg (assets/video/clip-*.mp4 y su cuadro
+// .webp). En la compu, tres recuadros que alternan dos clips cada uno; en el celular, uno solo que pasa por los seis.
+const CLIPS_COMPU = [['gimnasio', 'chiquitas'], ['pelota', 'cierre'], ['mazas', 'peluches']];
+const CLIPS_CELU = [['pelota', 'chiquitas', 'gimnasio', 'cierre', 'mazas', 'peluches']];
 
 // ───── Portada: el video de fondo (sin sonido) y la cuenta regresiva ─────
-if (VIDEO_PORTADA) {
-  const base = COMPU ? VIDEO_PORTADA.pc : VIDEO_PORTADA.cel;
-  const fondo = $('#fondo');
-  fondo.style.backgroundImage = `url(${base}.webp)`;
-  if (!QUIETO && !AHORRO) {
-    const v = document.createElement('video');
-    Object.assign(v, { muted: true, loop: true, playsInline: true, autoplay: true, preload: 'auto', poster: base + '.webp', src: base + '.mp4' });
-    v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
-    fondo.appendChild(v);
-    // Botón para frenarlo (se repite sin fin: WCAG 2.2.2). Además solo corre mientras se ve la portada.
-    let quieto = false;
+{
+  const fondo = $('#fondo'), recuadros = [];
+  const clip = (n, ext) => `assets/video/clip-${n}.${ext}`;
+  for (const lista of COMPU ? CLIPS_COMPU : CLIPS_CELU) {
+    const col = document.createElement('div');
+    col.className = 'col'; col.style.backgroundImage = `url(${clip(lista[0], 'webp')})`;
+    fondo.appendChild(col);
+    if (QUIETO || AHORRO) continue;   // sin video: queda el cuadro de muestra del primero
+    // Dos videos por recuadro que se pasan la posta: mientras uno se ve, el otro ya tiene cargado el que sigue.
+    const vs = [0, 1].map(() => {
+      const v = document.createElement('video');
+      Object.assign(v, { muted: true, playsInline: true, preload: 'auto' });
+      v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+      col.appendChild(v); return v;
+    });
+    let k = 0, cual = 0;
+    const poner = (v, i) => { const s = clip(lista[i % lista.length], 'mp4'); if (!v.src.endsWith(s)) v.src = s; v.currentTime = 0; };
+    poner(vs[0], 0); poner(vs[1], 1); vs[0].classList.add('activo');
+    const rec = { quieto: false, play: () => vs[cual].play().catch(() => {}), pause: () => vs.forEach(v => v.pause()) };
+    vs.forEach(v => v.addEventListener('ended', () => {
+      if (v !== vs[cual]) return;
+      const prox = vs[1 - cual];
+      k++; cual = 1 - cual;
+      prox.classList.add('activo'); v.classList.remove('activo');
+      if (!rec.quieto) prox.play().catch(() => {});
+      setTimeout(() => poner(v, k + 1), 1000);   // después del fundido, el que terminó carga el siguiente
+    }));
+    recuadros.push(rec);
+  }
+  if (recuadros.length) {
+    // Botón para frenarlos (se repiten sin fin: WCAG 2.2.2). Además solo corren mientras se ve la portada.
+    let quieto = false, visible = true;
     const b = document.createElement('button');
     Object.assign(b, { type: 'button', className: 'pausa pausa-video', textContent: 'Pausar video' });
     b.setAttribute('aria-pressed', 'false');
-    b.addEventListener('click', () => {
-      quieto = !quieto; b.setAttribute('aria-pressed', String(quieto)); b.textContent = quieto ? 'Ver video' : 'Pausar video';
-      if (quieto) v.pause(); else v.play().catch(() => {});
-    });
+    const mover = () => recuadros.forEach(r => { r.quieto = quieto || !visible; if (r.quieto) r.pause(); else r.play(); });
+    b.addEventListener('click', () => { quieto = !quieto; b.setAttribute('aria-pressed', String(quieto)); b.textContent = quieto ? 'Ver video' : 'Pausar video'; mover(); });
     $('#portada').appendChild(b);
-    new IntersectionObserver(([en]) => { if (en.isIntersecting && !quieto) v.play().catch(() => {}); else v.pause(); }).observe($('#portada'));
+    new IntersectionObserver(([en]) => { visible = en.isIntersecting; mover(); }).observe($('#portada'));
   }
 }
 (() => {
@@ -640,12 +729,12 @@ async function encenderNube(n) {
 const brillos = nube($('#brillos'), { count: COMPU ? 70 : 34, speed: 1.4, direction: 180, xVariance: 4, yVariance: 2, rotate: true, rotation: .6,
   shape: ['star', 'diamond'], color: ['#e5e8ef', '#f4a3cc', '#e7c47f', '#ffffff'], minSize: 1, maxSize: COMPU ? 5 : 4,
   alphaSpeed: 8, minAlpha: .15, maxAlpha: .95, twinkle: true, drift: 1 });
-const plumas = nube($('#plumas'), { count: COMPU ? 20 : 12, speed: 1.1, direction: 175, xVariance: 3, yVariance: 1, rotate: true, rotation: .35,
-  shape: 'image', imageUrl: 'assets/pluma.svg', color: ['#ffffff', '#fff3dc'], minSize: 10, maxSize: COMPU ? 20 : 16,
-  alphaSpeed: 2, minAlpha: .35, maxAlpha: .85, drift: 3 });
-const brasas = nube($('#brasas'), { count: COMPU ? 46 : 28, speed: 3.2, direction: 0, xVariance: 3, yVariance: 1, rotate: false,
-  shape: 'circle', color: ['#ff7a2a', '#ff3b1f', '#ffb347', '#ffd27a'], minSize: 1, maxSize: 3,
-  alphaSpeed: 10, minAlpha: .2, maxAlpha: 1, twinkle: true, drift: 2 });
+const plumas = nube($('#plumas'), { count: COMPU ? 36 : 22, speed: 1.4, direction: 172, xVariance: 4, yVariance: 1.5, rotate: true, rotation: .5,
+  shape: 'image', imageUrl: 'assets/pluma.svg', color: ['#ffffff', '#fff3dc'], minSize: 9, maxSize: COMPU ? 26 : 20, parallax: 30,
+  alphaSpeed: 2, minAlpha: .35, maxAlpha: .9, drift: 4 });
+const brasas = nube($('#brasas'), { count: COMPU ? 80 : 48, speed: 4.2, direction: 0, xVariance: 4, yVariance: 1.5, rotate: false,
+  shape: 'circle', color: ['#ff7a2a', '#ff3b1f', '#ffb347', '#ffd27a'], minSize: 1, maxSize: COMPU ? 4 : 3.5, parallax: 40,
+  alphaSpeed: 12, minAlpha: .2, maxAlpha: 1, twinkle: true, drift: 3 });
 function mirarEscena(escena, mundo, clase, susNubes) {
   new IntersectionObserver(([en]) => {
     if (en.isIntersecting && en.intersectionRatio >= .35) escena.classList.add(clase);
@@ -662,24 +751,39 @@ $$('.pausa').forEach(b => b.addEventListener('click', () => {
   nubes.forEach(moverNube);
 }));
 
-// ───── La escuela: fotos (con visor) y videos de su Instagram ─────
+// ───── La escuela: la pasarela de fotos y el visor ─────
 if (FOTOS.length) {
-  $('#fotos').innerHTML = FOTOS.map(([f, alt], i) => `<button type="button" data-i="${i}" aria-label="Ver foto grande: ${esc(alt)}">`
-    + `<img src="assets/instagram/${esc(f)}-600.webp" alt="${esc(alt)}" height="240" loading="lazy" decoding="async"></button>`).join('');
+  // Dos filas (las fotos se alternan); cada fila va dos veces seguidas (la copia, oculta para lectores) para el loop.
+  const filas = [FOTOS.map((f, i) => [f, i]).filter((_, i) => i % 2 === 0), FOTOS.map((f, i) => [f, i]).filter((_, i) => i % 2 === 1)];
+  const foto = ([[f, alt], i], copia) => `<button type="button" data-i="${i}"${copia ? ' class="copia" aria-hidden="true" tabindex="-1"' : ` aria-label="Ver grande: ${esc(alt)}"`}>`
+    + `<img src="assets/instagram/${esc(f)}-600.webp" alt="${copia ? '' : esc(alt)}" height="200" loading="lazy" decoding="async"></button>`;
+  $('#pasarela').innerHTML = filas.map((fila, n) => `<div class="pista${n ? ' vuelta' : ''}" style="--dur:${fila.length * 6}s">`
+    + fila.map(x => foto(x)).join('') + fila.map(x => foto(x, true)).join('') + '</div>').join('');
   $('#galeria').hidden = false;
-  $('#fotos').addEventListener('click', ev => {
+  let actual = 0;
+  const mostrar = i => {
+    actual = (i + FOTOS.length) % FOTOS.length;
+    const [f, alt] = FOTOS[actual];
+    $('#visor-img').src = `assets/instagram/${f}-1200.webp`; $('#visor-img').alt = alt; $('#visor-txt').textContent = alt;
+  };
+  $('#pasarela').addEventListener('click', ev => {
     const b = ev.target.closest('button[data-i]'); if (!b) return;
-    const [f, alt] = FOTOS[b.dataset.i];
-    $('#visor-img').src = `assets/instagram/${f}-1200.webp`; $('#visor-img').alt = alt;
+    mostrar(Number(b.dataset.i));
     try { $('#visor').showPopover(); } catch {}
   });
-}
-if (CLIPS.length) {
-  $('#videos').innerHTML = CLIPS.map(([f, txt]) => `<figure><video controls playsinline preload="none" poster="assets/instagram/${esc(f)}.webp" src="assets/instagram/${esc(f)}.mp4"></video>`
-    + `<figcaption>${esc(txt)}</figcaption></figure>`).join('');
-  $('#clips').hidden = false;
-  // Uno a la vez: al dar play a uno se frena el otro.
-  $('#videos').addEventListener('play', ev => $$('#videos video').forEach(v => { if (v !== ev.target) v.pause(); }), true);
+  $('#visor-ant').addEventListener('click', () => mostrar(actual - 1));
+  $('#visor-sig').addEventListener('click', () => mostrar(actual + 1));
+  $('#visor').addEventListener('keydown', ev => { if (ev.key === 'ArrowLeft') mostrar(actual - 1); if (ev.key === 'ArrowRight') mostrar(actual + 1); });
+  // Con el visor abierto, la pasarela se queda quieta; también fuera de pantalla y con el botón (WCAG 2.2.2).
+  let pausaFotos = false;
+  const quietaPasarela = () => $('#pasarela').classList.toggle('pausada', pausaFotos || $('#visor').matches(':popover-open'));
+  $('#visor').addEventListener('toggle', quietaPasarela);
+  $('#pausa-fotos').addEventListener('click', ev => {
+    pausaFotos = !pausaFotos; ev.currentTarget.setAttribute('aria-pressed', String(pausaFotos));
+    ev.currentTarget.textContent = pausaFotos ? 'Mover fotos' : 'Pausar fotos'; quietaPasarela();
+  });
+  if (QUIETO) $('#pausa-fotos').hidden = true;
+  new IntersectionObserver(([en]) => $('#pasarela').classList.toggle('fuera', !en.isIntersecting)).observe($('#pasarela'));
 }
 
 // ───── Precios, horas a la venta, WhatsApp y la sala (de /api/config) ─────

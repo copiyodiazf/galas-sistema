@@ -1,5 +1,5 @@
 {
-  "_ayuda": "Gala 2026 de Santiago Rítmica (escuela de gimnasia rítmica de Eugenia Molina) en el Paraninfo de la UNSE, con BUTACAS NUMERADAS. Datos de José (13/11/2026): domingo 13/12, tres funciones con la MISMA sala y cada una con sus propias butacas: 16 h la muestra 'Divas del Pop', 18 h y 21 h 'El Origen de Ser · entre ángeles y demonios'. Platea (filas 1 a 13) $20.000 y zona verde (fila 14, la última) $10.000, más el 10 % de costo de servicio encima (desgloseServicio). Plano: escenario, filas 1 (22), 2 (21), 3 a 12 (26 cada una); detrás de la 12, en el medio, la cabina de musicalización con 9 asientos a cada lado (fila 13); al fondo, detrás de la cabina, la fila 14 (zona verde) con 8 y 8. Numeración: mirando desde el escenario, de izquierda a derecha → en el plano (escenario arriba) el asiento 1 queda a la DERECHA (asiento1). Total 337 butacas: 321 de platea y 16 de zona verde.",
+  "_ayuda": "Gala 2026 de Santiago Rítmica (escuela de gimnasia rítmica de Eugenia Molina) en el Paraninfo de la UNSE, con BUTACAS NUMERADAS. Datos de José (13/11/2026): domingo 13/12, tres funciones con la MISMA sala y cada una con sus propias butacas: 16 h 'Divas del Pop', la gala de las más pequeñas, 18 h y 21 h 'El Origen de Ser · entre ángeles y demonios'. Platea (filas 1 a 13) $20.000 y zona verde (fila 14, la última) $10.000, más el 10 % de costo de servicio encima (desgloseServicio). Plano: escenario, filas 1 (22), 2 (21), 3 a 12 (26 cada una); detrás de la 12, en el medio, la cabina de musicalización con 9 asientos a cada lado (fila 13); al fondo, detrás de la cabina, la fila 14 (zona verde) con 8 y 8. Numeración: mirando desde el escenario, de izquierda a derecha → en el plano (escenario arriba) el asiento 1 queda a la DERECHA (asiento1). Total 337 butacas: 321 de platea y 16 de zona verde.",
   "nombre": "Gala 2026 · Santiago Rítmica",
   "lema": "Domingo 13 de diciembre",
   "organiza": "Santiago Rítmica",
@@ -124,7 +124,7 @@
   "eventos": [
     {
       "id": "divas-del-pop",
-      "nombre": "Divas del Pop · Muestra",
+      "nombre": "Divas del Pop · Gala de las más pequeñas",
       "subtitulo": "Santiago Rítmica · Gala 2026",
       "fecha": "2026-12-13",
       "hora": "16:00",
