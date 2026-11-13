@@ -253,6 +253,10 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
     `assets/divas-ia.mp4` (457 KB, 720x728) y su cuadro `.webp`; el original en `C:\ritmica-gala\material\ia\`.
     Se pide al acercarse, corre solo visible, se frena con la pausa; con "reducir movimiento" o "ahorro de datos"
     queda el arte quieto. Sobre el video siguen las luces, los reflectores, el brillo y las candilejas.
+    **Segunda versión** (José pidió más movimiento, otros US$ 0,35): lanza la pelota al aire, la sigue con los brazos
+    arriba y la atrapa, la pasa de mano y se arquea. Loop de IDA Y VUELTA (adelante y en reversa, 10 s, 574 KB): las
+    poses del principio y del final son distintas y un fundido mostraba dos gimnastas superpuestas. La primera versión
+    quedó en `C:\ritmica-gala\material\ia\divas-ia-loop-v1.mp4`.
   - **El Origen de Ser animado con IA** (13/11, mismo método, otros US$ 0,35): vuelan las palomas, caen plumas, el
     demonio se mueve, arde el fuego y la mujer queda de espaldas. `assets/origen-ia.mp4` (442 KB, 820x716, loop con
     fundido de 1 s). Con el video andando se apagan las copias que movía el CSS (`.capa`); siguen el telón que se abre,
