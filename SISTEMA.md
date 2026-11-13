@@ -215,8 +215,21 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
     servicio encima** (`precioIncluyeCargo: false`, `desgloseServicio: true`, `CARGO_PCT=10` → Distribución 9,09 %).
     Los flyers están en `assets/flyer-*.webp`. Al de El Origen de Ser se le sacó la marca "CapCut AI" de arriba a
     la izquierda: se rellenó con el cielo de alrededor (OpenCV, inpaint).
-  - **Portada propia** (`temas/santiago-ritmica/index.html`, 13/11/2026), diseñada con las skills de
-    `.claude/skills` (ver abajo): dos portales en arco con las horas como botones de compra; cada mundo se
+  - **Segunda versión de la portada** (13/11/2026, pedido de José: "más contenido", logo más grande, el rosa de
+    Rítmica, el mapa, WhatsApp e Instagram). La portada es **rosa Rítmica** (`#CE086D`, la tinta del logo): el logo
+    grande en blanco (`assets/logo-blanco.webp`; `logo-rosa.webp` para el pie), un **video de fondo teñido de rosa**
+    (`assets/video/portada-cel|pc.mp4`, 0,3 y 0,4 MB: una gimnasta con su pelota y, en la compu, tres columnas;
+    hecho con ffmpeg, filtro `curves`, con botón de pausa y sin cargarse con "reducir movimiento"), una cinta que
+    se dibuja sola, la cuenta regresiva y el **WhatsApp de José** (`ayudaWhatsapp`, el mismo de El Quinto Elemento).
+    Después: las funciones como **entradas de teatro** con talón; los dos mundos; **Somos Santiago Rítmica**
+    (datos, Eugenia con el Premio Gaviota, logros, 14 fotos con visor y 4 videos); el plano; cómo se compra;
+    **preguntas frecuentes**; **cómo llegar con el mapa de Google** (iframe, la dirección con pin) y el pie.
+  - **Material del Instagram** (@santiago.ritmica, público): bajado con **Instaloader** (sin sesión) a
+    `C:\ritmica-gala\material\instagram\santiago.ritmica\` (fuera del repo). Lo elegido se pasó a
+    `assets/instagram/` (fotos `-600`/`-1200.webp`, videos de 480–540 de ancho con su cuadro `.webp`, 9 MB en total;
+    los dos largos recortados a 60 y 45 s). Los textos de la portada salen de los posts (no se inventó nada:
+    Energym, Bellatrix, Madre de Ciudades, Gabriela Vega jueza nacional, Premio Gaviota 2026).
+  - Primera versión (misma fecha), diseñada con las skills de `.claude/skills` (ver abajo): cada mundo se
     enciende una vez al verse (Divas: las luces de los paneles y dos reflectores; El Origen: el rayo, el telón que se
     abre, el corazón, plumas y brasas); el plano de la sala con lo libre de cada función (lee `/api/sala`, la
     misma de la compra); cómo se compra y cómo llegar. El arte es el de los flyers recortado sin sus textos
