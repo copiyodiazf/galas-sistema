@@ -234,6 +234,12 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
     vuelan, la pluma grande se mece, el demonio respira y bate las alas (copias del arte recortadas con máscaras
     suaves que se mueven unos píxeles), el fuego titila, la luz del centro respira y hay más plumas y brasas.
     Todo con transform/opacity, frenado fuera de pantalla, con la pausa y sin nada con "reducir movimiento".
+  - **Divas animada con IA** (13/11, José pidió que la gimnasta y la pelota se muevan): Kling 2.5 Turbo Pro por fal.ai,
+    imagen a video de 5 s (US$ 0,35; la cuenta de fal es de José, clave FAL_KEY en sus variables de Windows). La
+    gimnasta mueve el brazo y lleva la pelota, el boa vuela. Loop con fundido entre el final y el principio:
+    `assets/divas-ia.mp4` (457 KB, 720x728) y su cuadro `.webp`; el original en `C:\ritmica-gala\material\ia\`.
+    Se pide al acercarse, corre solo visible, se frena con la pausa; con "reducir movimiento" o "ahorro de datos"
+    queda el arte quieto. Sobre el video siguen las luces, los reflectores, el brillo y las candilejas.
   - **Material del Instagram** (@santiago.ritmica, público): bajado con **Instaloader** (sin sesión) a
     `C:\ritmica-gala\material\instagram\santiago.ritmica\` (fuera del repo; 454 publicaciones desde 2022). Lo elegido
     se pasó a `assets/instagram/` (fotos `-600`/`-1200.webp`) y los clips a `assets/video/`. No se usaron gimnastas que

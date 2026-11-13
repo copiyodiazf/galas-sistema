@@ -137,6 +137,10 @@ section{scroll-margin-top:12px;}
 .escena{position:relative;overflow:hidden;width:min(100%,640px);margin-inline:auto;border-radius:6px;
   -webkit-mask-image:linear-gradient(180deg,#000 82%,transparent);mask-image:linear-gradient(180deg,#000 82%,transparent);}
 .escena .arte{width:100%;height:auto;}
+/* Divas animada con IA: el video (mismo encuadre que el arte) aparece encima cuando ya está andando */
+.arte-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease;pointer-events:none;}
+.arte-video.lista{opacity:1;}
+.con-video .destellos{display:none;}
 .mundo .texto{max-width:52ch;}
 .mundo .texto>p{margin-top:12px;color:var(--tinta);}
 .cuando{font-family:var(--display);font-weight:600;font-size:24px;color:var(--acento);}
@@ -349,7 +353,7 @@ footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;marg
   .preguntas summary:hover{color:#fff;}
 }
 @media (prefers-reduced-motion:reduce){
-  .js .luces,.js .telon,.rayo,.corazon,.haz,.candilejas,.destellos,.piso,.capa,.fuego,.luz-centro{display:none;}
+  .js .luces,.js .telon,.rayo,.corazon,.haz,.candilejas,.destellos,.piso,.capa,.fuego,.luz-centro,.arte-video{display:none;}
   .pista{animation:none;}
   .pasarela{overflow-x:auto;-webkit-mask-image:none;mask-image:none;}
   .pista .copia{display:none;}
@@ -443,6 +447,7 @@ footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;marg
         <img class="arte" src="assets/arte-divas-900.webp" srcset="assets/arte-divas-600.webp 600w, assets/arte-divas-900.webp 900w"
           sizes="(min-width:900px) 560px, 100vw" width="900" height="910" loading="lazy" decoding="async"
           alt="Silueta de una gimnasta con su pelota, frente a seis paneles con vestuarios de grandes divas del pop">
+        <video class="arte-video" muted loop playsinline preload="none" poster="assets/divas-ia.webp" aria-hidden="true"></video>
         <div class="luces" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
         <div class="haz uno" aria-hidden="true"></div><div class="haz dos" aria-hidden="true"></div>
         <div class="piso" aria-hidden="true"></div>
@@ -743,12 +748,23 @@ function mirarEscena(escena, mundo, clase, susNubes) {
   }, { threshold: [0, .35] }).observe(escena);
 }
 mirarEscena($('#escena-divas'), $('#divas'), 'encendida', [brillos]);
+// Divas animada con IA (Kling, fal.ai, 13/11/2026): la gimnasta mueve el brazo y la pelota, el boa vuela.
+// Se pide recién al acercarse, corre solo mientras se ve y se frena con la pausa.
+const vidDivas = $('#escena-divas .arte-video');
+let divasVisible = false;
+const moverVideo = () => { if (!vidDivas.getAttribute('src')) return; if (divasVisible && !pausado) vidDivas.play().catch(() => {}); else vidDivas.pause(); };
+vidDivas.addEventListener('playing', () => { vidDivas.classList.add('lista'); $('#escena-divas').classList.add('con-video'); }, { once: true });
+new IntersectionObserver(([en]) => {
+  divasVisible = en.isIntersecting;
+  if (divasVisible && !vidDivas.getAttribute('src') && !QUIETO && !AHORRO) vidDivas.setAttribute('src', 'assets/divas-ia.mp4');
+  moverVideo();
+}, { rootMargin: '150px 0px' }).observe($('#escena-divas'));
 mirarEscena($('#escena-origen'), $('#origen'), 'abierta', [plumas, brasas]);
 $$('.pausa').forEach(b => b.addEventListener('click', () => {
   pausado = !pausado;
   raiz.classList.toggle('quieto', pausado);
   $$('.pausa').forEach(x => { x.setAttribute('aria-pressed', String(pausado)); x.textContent = pausado ? 'Reanudar efectos' : 'Pausar efectos'; });
-  nubes.forEach(moverNube);
+  nubes.forEach(moverNube); moverVideo();
 }));
 
 // ───── La escuela: la pasarela de fotos y el visor ─────
