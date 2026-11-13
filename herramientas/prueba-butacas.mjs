@@ -10,7 +10,11 @@ import { sequelize, Orden, Entrada, SinImputar, Usuario, Evento } from '../backe
 if (process.env.DB_NAME !== 'gala_ritmica') { console.log('Esta prueba borra compras: solo corre contra la base local gala_ritmica (DB_NAME=gala_ritmica)'); process.exit(1) }
 const BASE = `http://localhost:${process.argv[2] || 3047}`
 const env = Object.fromEntries(readFileSync(new URL('../backend/.env', import.meta.url), 'utf8').split(/\r?\n/).map(l => l.match(/^([A-Z_0-9]+)=(.*)$/)).filter(Boolean).map(m => [m[1], m[2]]))
-const EV = 'gala-santiago-ritmica-2026'
+// Tres funciones el domingo 13/12 con la misma sala (16 h muestra, 18 h y 21 h): cada una con sus butacas.
+const EV = 'el-origen-de-ser-18', EV2 = 'el-origen-de-ser-21', MUESTRA = 'divas-del-pop'
+// Platea $20.000 y zona verde $10.000, más el 10 % de servicio encima (desgloseServicio)
+const TIPOS = [{ id: 'platea', nombre: 'Platea', corto: 'Platea', detalle: 'Filas 1 a 13 · butaca numerada', precio: 20000, cupo: 321 },
+  { id: 'zona-verde', nombre: 'Zona verde', corto: 'Zona verde', detalle: 'Fila 14, al fondo, detrás de la cabina', precio: 10000, cupo: 16 }]
 const CLAVE = 'prueba-local-' + randomBytes(4).toString('hex')
 
 let fallas = 0, n = 0, total = 0
@@ -27,8 +31,8 @@ function aviso(cuerpo, id = 'wh_' + Math.random().toString(36).slice(2)) {
   return api('/api/webhooks/chytapay', { metodo: 'POST', crudo, headers: { 'X-Chytapay-Signature': `t=${t},v1=${v1}`, 'X-Chytapay-Webhook-Id': id } })
 }
 const espera = ms => new Promise(r => setTimeout(r, ms))
-const comprar = (butacas, dni, email = `c${dni}@ejemplo.com`) => api('/api/orders', { metodo: 'POST', cuerpo: { evento: EV, butacas, nombre: 'Ana Prueba', email, dni } })
-const ocupadas = async (orden) => new Set((await api(`/api/sala?evento=${EV}${orden ? '&orden=' + orden : ''}`)).d.ocupadas || [])
+const comprar = (butacas, dni, email = `c${dni}@ejemplo.com`, evento = EV) => api('/api/orders', { metodo: 'POST', cuerpo: { evento, butacas, nombre: 'Ana Prueba', email, dni } })
+const ocupadas = async (orden, evento = EV) => new Set((await api(`/api/sala?evento=${evento}${orden ? '&orden=' + orden : ''}`)).d.ocupadas || [])
 // El plano público tiene 3 segundos de caché: para ver lo que cambió recién por la base, se espera a que venza.
 const ocupacion10 = async () => { await espera(3100); return ocupadas() }
 
@@ -39,16 +43,18 @@ for (const [rol, usuario] of [['admin', 'jose'], ['organizador', 'eugenia'], ['c
   const [u, nuevo] = await Usuario.findOrCreate({ where: { usuario }, defaults: { usuario, rol, salt, hash } })
   if (!nuevo) await u.update({ rol, salt, hash, activo: true })
 }
-const ev0 = await Evento.findByPk(EV)
-ev0.bloqueadas = []; ev0.publicado = false
-ev0.tipos = [{ id: 'platea', nombre: 'Platea', corto: 'Platea', detalle: 'Butaca numerada', precio: 10000, cupo: 337 }]
-await ev0.save()
+for (const id of [EV, EV2, MUESTRA]) {
+  const ev0 = await Evento.findByPk(id)
+  ev0.bloqueadas = []; ev0.publicado = false; ev0.tipos = TIPOS
+  await ev0.save()
+}
 const login = async u => (await api('/api/admin/login', { metodo: 'POST', cuerpo: { usuario: u, password: CLAVE } })).d.token
 const T = { admin: await login('jose'), org: await login('eugenia'), puerta: await login('puerta1'), venta: await login('boleteria') }
 // El panel recarga la cartelera en memoria al editar: se publica desde ahí.
-let r = await api(`/api/admin/eventos/${EV}`, { metodo: 'PUT', token: T.org, cuerpo: { publicado: true, ventaAbierta: true,
-  tipos: [{ id: 'platea', nombre: 'Platea', corto: 'Platea', detalle: 'Butaca numerada', precio: 10000, cupo: 337 }] } })
-ok(r.status === 200, 'la organización publica la gala desde el panel', JSON.stringify(r.d))
+let r = await api(`/api/admin/eventos/${EV}`, { metodo: 'PUT', token: T.org, cuerpo: { publicado: true, ventaAbierta: true, tipos: TIPOS } })
+ok(r.status === 200, 'la organización publica la función de las 18 h desde el panel', JSON.stringify(r.d))
+r = await api(`/api/admin/eventos/${EV2}`, { metodo: 'PUT', token: T.org, cuerpo: { publicado: true, ventaAbierta: true, tipos: TIPOS } })
+ok(r.status === 200, '…y la de las 21 h', JSON.stringify(r.d))
 
 // 1) El plano
 const cfg = (await api('/api/config')).d
@@ -57,12 +63,16 @@ ok(sala?.total === 337 && sala.filas.length === 14, 'config: la sala del Paranin
 ok(sala.filas[0].asientos === 22 && sala.filas[1].asientos === 21 && sala.filas.slice(2, 12).every(f => f.asientos === 26), 'filas 1 (22), 2 (21) y 3 a 12 (26)')
 ok(sala.filas[12].bloques[1].texto === 'Cabina' && sala.filas[12].asientos === 18 && sala.filas[13].asientos === 16 && sala.filas[13].zona === 'Zona verde', 'fila 13: 9 + cabina + 9 · fila 14 (zona verde): 8 + 8')
 ok(sala.asiento1 === 'derecha', 'el asiento 1 de cada fila, a la derecha del plano (mirando desde el escenario, a su izquierda)')
-ok(cfg.eventos[0]?.vendible && cfg.eventos[0].tipos.platea.final === 10000, 'la gala está a la venta: platea a $10.000 final')
+const e18 = cfg.eventos.find(e => e.id === EV)
+ok(e18?.vendible && e18.tipos.platea.precio === 20000 && e18.tipos.platea.final === 22000, 'la de las 18 h está a la venta: platea $20.000 + 10 % = $22.000', JSON.stringify(e18?.tipos))
+ok(e18.tipos['zona-verde']?.precio === 10000 && e18.tipos['zona-verde'].final === 11000, 'zona verde (fila 14): $10.000 + 10 % = $11.000')
+ok(cfg.sitio.desgloseServicio === true && cfg.cargoPct === 10, 'la página muestra el precio "+ costo de servicio" (10 %)')
+ok(!cfg.eventos.some(e => e.id === MUESTRA), 'la muestra, sin publicar, no aparece')
 ok((await ocupadas()).size === 0, 'al empezar no hay butacas ocupadas')
 
 // 2) Compra online con butacas
 const c1 = await comprar(['5-12', '5-13'], '30111222')
-ok(c1.status === 200 && c1.d.total === 20000 && c1.d.pago?.pk === 'simulado', 'compra de 2 butacas (fila 5: 12 y 13): $20.000', JSON.stringify(c1.d))
+ok(c1.status === 200 && c1.d.total === 44000 && c1.d.pago?.pk === 'simulado', 'compra de 2 butacas (fila 5: 12 y 13): $44.000 con el servicio', JSON.stringify(c1.d))
 let oc = await ocupadas()
 ok(oc.has('5-12') && oc.has('5-13') && oc.size === 2, 'mientras paga, sus butacas aparecen ocupadas para los demás')
 ok(!(await ocupadas(c1.d.orderId)).has('5-12'), '…pero libres para su propio navegador (puede volver a pagarlas)')
@@ -90,7 +100,7 @@ oc = await ocupacion10()
 ok(!oc.has('10-1') && !oc.has('10-2'), 'a los 11 minutos sin acreditarse, sus butacas ya están libres (aunque no haya llegado el aviso de vencido)')
 const rapida = await comprar(['10-2', '10-3'], '31000222')
 ok(rapida.status === 200, 'y otra persona puede tomarlas')
-await aviso({ event: 'payment.unmatched', reason: 'expired', amount: 20000, payerName: 'LENTA', payerCuil: 20310001115,
+await aviso({ event: 'payment.unmatched', reason: 'expired', amount: 44000, payerName: 'LENTA', payerCuil: 20310001115,
   paymentRequest: { referenceId: lenta.d.orderId }, operationDate: new Date().toISOString() })
 await espera(900)
 const oLenta = await Orden.findByPk(lenta.d.orderId)
@@ -98,21 +108,17 @@ ok(oLenta.estado === 'pagada' && !String(oLenta.butacas).split(',').includes('10
   'su transferencia llega tarde desde su cuenta: se emite sola, con otras 2 juntas (la 10-2 ya la tomó otra persona)', `${oLenta.estado} ${oLenta.butacas}`)
 const lenta2 = await comprar(['11-5'], '31000333')
 await Orden.update({ createdAt: new Date(Date.now() - 11 * 60000) }, { where: { id: lenta2.d.orderId } })
-await aviso({ event: 'payment.unmatched', reason: 'expired', amount: 10000, payerName: 'LENTA DOS', payerCuil: 27310003334,
+await aviso({ event: 'payment.unmatched', reason: 'expired', amount: 22000, payerName: 'LENTA DOS', payerCuil: 27310003334,
   paymentRequest: { referenceId: lenta2.d.orderId }, operationDate: new Date().toISOString() })
 await espera(900)
 const oLenta2 = await Orden.findByPk(lenta2.d.orderId)
 ok(oLenta2.estado === 'pagada' && oLenta2.butacas === '11-5', 'si sus butacas siguen libres cuando llega, se queda con las que eligió', `${oLenta2.estado} ${oLenta2.butacas}`)
 
-// 3) Zonas con otro precio: un tipo "zona-verde" en el evento y la fila 14 pasa sola a ese tipo
-r = await api(`/api/admin/eventos/${EV}`, { metodo: 'PUT', token: T.admin, cuerpo: { tipos: [
-  { id: 'platea', nombre: 'Platea', corto: 'Platea', detalle: 'Butaca numerada', precio: 10000, cupo: 337 },
-  { id: 'zona-verde', nombre: 'Zona verde', corto: 'Z. verde', detalle: 'Fila 14', precio: 8000, cupo: 16 }] } })
-ok(r.status === 200, 'se agrega el tipo "Zona verde" a $8.000', JSON.stringify(r.d))
+// 3) Zonas con otro precio: el evento tiene el tipo "zona-verde" y la fila 14 es de ese tipo
 r = await comprar(['14-1', '5-1'], '30333444')
 ok(r.status === 400 && /distinto precio/.test(r.d.error), 'butacas de zonas con distinto precio en la misma compra: se rechaza')
 const cVerde = await comprar(['14-1', '14-2'], '30333444')
-ok(cVerde.status === 200 && cVerde.d.total === 16000, 'dos de la zona verde: $16.000 (su precio)', JSON.stringify(cVerde.d))
+ok(cVerde.status === 200 && cVerde.d.total === 22000, 'dos de la zona verde: $22.000 (su precio con el servicio)', JSON.stringify(cVerde.d))
 ok((await Orden.findByPk(cVerde.d.orderId)).tipo === 'zona-verde', 'la compra queda con el tipo de la zona')
 
 // 4) Pago, QR con la butaca y puerta
@@ -150,7 +156,7 @@ ok(r.status === 200 && !(await ocupadas()).has('7-3'), 'la que queda se larga de
 
 // 6) Boletería
 r = await api('/api/admin/venta-punto', { metodo: 'POST', token: T.venta, cuerpo: { evento: EV, butacas: ['8-5', '8-6'], cobro: 'efectivo', nombre: 'Juan Boleteria', email: 'juan@ejemplo.com', dni: '30555666' } })
-ok(r.status === 200 && r.d.total === 20000 && r.d.qrs[0].butaca === 'Fila 8 · Asiento 5', 'la boletería vende 2 butacas elegidas en el plano y el QR sale con la butaca', JSON.stringify(r.d))
+ok(r.status === 200 && r.d.total === 44000 && r.d.qrs[0].butaca === 'Fila 8 · Asiento 5', 'la boletería vende 2 butacas elegidas en el plano y el QR sale con la butaca', JSON.stringify(r.d))
 r = await api('/api/admin/venta-punto', { metodo: 'POST', token: T.venta, cuerpo: { evento: EV, butacas: ['8-6'], cobro: 'efectivo', nombre: 'Pedro Boleteria', email: 'pedro@ejemplo.com', dni: '30555667' } })
 ok(r.status === 409, 'la boletería tampoco puede vender una ya vendida')
 
@@ -176,7 +182,7 @@ await Orden.update({ createdAt: new Date(Date.now() - 2 * 3600e3) }, { where: { 
 const gana = await comprar(['9-10'], '30777888')
 ok(gana.status === 200, 'su compra venció y otra persona toma la 9-10')
 await api(`/api/dev/confirmar/${gana.d.orderId}`, { metodo: 'POST' })
-await aviso({ event: 'payment_request.payment_received', referenceId: tarde.d.orderId, stateType: 'total_payment', paidAmount: 20000, reconciledPayerName: 'TARDE' })
+await aviso({ event: 'payment_request.payment_received', referenceId: tarde.d.orderId, stateType: 'total_payment', paidAmount: 44000, reconciledPayerName: 'TARDE' })
 await espera(900)
 const oTarde = await Orden.findByPk(tarde.d.orderId)
 const nuevas = String(oTarde.butacas).split(',')
@@ -192,26 +198,42 @@ await Orden.update({ createdAt: new Date(Date.now() - 2 * 3600e3) }, { where: { 
 const libresVerde = Array.from({ length: 16 }, (_, i) => `14-${i + 1}`).filter(id => !['14-1', '14-2'].includes(id))
 r = await api('/api/admin/sala/bloquear', { metodo: 'POST', token: T.org, cuerpo: { evento: EV, butacas: libresVerde, bloquear: true } })
 ok(r.status === 200, 'la organización guarda todas las de la zona verde que quedaban')
-await aviso({ event: 'payment_request.payment_received', referenceId: sinLugar.d.orderId, stateType: 'total_payment', paidAmount: 8000 })
+await aviso({ event: 'payment_request.payment_received', referenceId: sinLugar.d.orderId, stateType: 'total_payment', paidAmount: 11000 })
 await espera(800)
 ok((await Orden.findByPk(sinLugar.d.orderId)).estado === 'abandonada', 'paga, pero no queda ninguna butaca de su zona: NO se emite')
 const si = (await api('/api/admin/sin-imputar', { token: T.org })).d.pagos.find(p => p.orden === sinLugar.d.orderId)
 ok(si?.motivo === 'sin_butacas' && !si.resuelto, 'queda en "Transferencias sin asignar" para que lo resuelva la academia')
 await api('/api/admin/sala/bloquear', { metodo: 'POST', token: T.org, cuerpo: { evento: EV, butacas: ['14-16'], bloquear: false } })
-await aviso({ event: 'payment_request.payment_received', referenceId: sinLugar.d.orderId, stateType: 'total_payment', paidAmount: 8000 })
+await aviso({ event: 'payment_request.payment_received', referenceId: sinLugar.d.orderId, stateType: 'total_payment', paidAmount: 11000 })
 await espera(800)
 const oSin = await Orden.findByPk(sinLugar.d.orderId)
 ok(oSin.estado === 'pagada' && oSin.butacas === '14-16', 'se libera una y el aviso siguiente la emite con esa butaca', `${oSin.estado} ${oSin.butacas}`)
 ok((await SinImputar.findOne({ where: { avisoId: `sin_butacas_${sinLugar.d.orderId}` } }))?.resuelto, 'y la fila de "sin asignar" queda resuelta')
 
-// 10) Lo que no cambia
+// 10) Tres funciones el mismo día: cada una tiene sus propias butacas
+oc = await ocupadas(null, EV2)
+ok(oc.size === 0, 'a las 21 h la sala está entera libre, aunque a las 18 h ya se vendieron butacas')
+const c21 = await comprar(['6-1', '6-2'], '30999000', undefined, EV2)
+ok(c21.status === 200 && c21.d.total === 44000, 'la 6-1 y la 6-2, vendidas a las 18 h, se pueden comprar para las 21 h', JSON.stringify(c21.d))
+await api(`/api/dev/confirmar/${c21.d.orderId}`, { metodo: 'POST' })
+await espera(3100)
+oc = await ocupadas(null, EV2)
+ok(oc.has('6-1') && !oc.has('8-5'), 'el plano de las 21 h muestra solo lo suyo')
+r = await api('/api/admin/sala/bloquear', { metodo: 'POST', token: T.org, cuerpo: { evento: EV2, butacas: ['2-1'], bloquear: true } })
+ok(r.status === 200 && !(await ocupacion10()).has('2-1'), 'guardar una butaca a las 21 h no la guarda a las 18 h')
+const e21 = await Entrada.findOne({ where: { orden_id: c21.d.orderId } })
+const enLa18 = (await api('/api/validar', { metodo: 'POST', token: T.puerta, cuerpo: { codigo: e21.codigo, evento: EV } })).d
+ok(!enLa18.ok && enLa18.estado === 'otro_evento' && /de las 21:00 h: no es esta función/.test(enLa18.msg), 'en la puerta de las 18 h, una entrada de las 21 h: "no es esta función" (no "hoy no vale")', JSON.stringify(enLa18))
+ok((await api('/api/validar', { metodo: 'POST', token: T.puerta, cuerpo: { codigo: e21.codigo, evento: EV2 } })).d.ok, '…y a las 21 h entra')
+
+// 11) Lo que no cambia
 ok((await api('/api/admin/entrada-prueba', { metodo: 'POST', token: T.admin, cuerpo: { evento: EV } })).status === 200, 'la entrada de prueba (sin butaca) sigue andando')
 r = await api(`/api/sala?evento=no-existe`)
 ok(r.status === 404, 'el plano de un evento que no existe da 404')
 
 // Limpieza (base local): sin compras y sin guardadas; el evento queda oculto como en la ficha
 await Entrada.destroy({ where: {} }); await Orden.destroy({ where: {} }); await SinImputar.destroy({ where: {} })
-const evF = await Evento.findByPk(EV); evF.bloqueadas = []; await evF.save()
+for (const id of [EV, EV2, MUESTRA]) { const evF = await Evento.findByPk(id); evF.bloqueadas = []; evF.publicado = false; await evF.save() }
 console.log(`\n${total - fallas} de ${total} bien${fallas ? `, ${fallas} MAL` : ''}`)
 await sequelize.close()
 process.exit(fallas ? 1 : 0)

@@ -188,8 +188,10 @@ function pintarFechas() {
     const c = $('#cambiar'); if (c) c.onclick = e => { e.preventDefault(); EV = null; tipo = null; pintarFechas(); pintarTipos(); actualizar(); };
     return;
   }
+  // Varias funciones el mismo día (Rítmica: 16, 18 y 21 h): el talón muestra la hora, no tres veces "DIC 13".
+  const mismoDia = lista.every(x => x.fecha === lista[0].fecha && x.hora);
   $('#fechas').innerHTML = lista.map(e => {
-    const [mes, dia] = talon(e);
+    const [mes, dia] = mismoDia ? ['hs', e.hora.replace(/:00$/, '')] : talon(e);
     const desde = Math.min(...Object.values(e.tipos).map(aMostrar));
     return `<label class="tipo"><input type="radio" name="fecha" value="${esc(e.id)}">
       <span class="talon"><small>${esc(mes)}</small><b>${esc(dia)}</b></span>

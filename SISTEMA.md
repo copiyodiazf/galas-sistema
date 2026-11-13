@@ -199,13 +199,21 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
   está en cada butaca y si ya entró. La organización **guarda** butacas (no salen a la venta: familia, cámaras,
   invitados; `eventos.bloqueadas`) y da **cortesías** marcando butacas en el plano (pueden ser guardadas).
   La boletería vende tocando el plano y ve lo ocupado, no de quién. En la puerta, al escanear, sale la butaca en grande.
-- **Prueba:** `herramientas/prueba-butacas.mjs` (62 pruebas) con el servidor
+- **Varias funciones con la misma sala:** cada evento de la ficha tiene sus propias butacas (lo vendido, guardado
+  y pagándose es de ese evento). En la puerta, una entrada de otra función del mismo día dice "Es para … de las
+  21:00 h: no es esta función" (antes, "hoy no vale", que confundía si las funciones son el mismo día).
+- **Prueba:** `herramientas/prueba-butacas.mjs` (71 pruebas) con el servidor
   `TEMA=santiago-ritmica DB_NAME=gala_ritmica PORT=3047 node server.js` y
   `DB_NAME=gala_ritmica node ../herramientas/prueba-butacas.mjs 3047` (desde `backend`, base LOCAL).
 - **Santiago Rítmica** (tema `santiago-ritmica`): Paraninfo, Av. Belgrano (S) 1912. 337 butacas: filas 1 (22),
   2 (21), 3 a 12 (26), 13 (9 + cabina de musicalización + 9) y 14, zona verde, detrás de la cabina (8 + 8).
   José: "la numeración comienza mirando desde el escenario, de izquierda a derecha" → en el plano, el 1 a la
-  derecha. **Fecha, hora y precio de la ficha son provisorios.** Sin servicio en Render todavía.
+  derecha. Sin servicio en Render todavía.
+  - **13/11/2026, datos de José:** domingo 13/12, tres funciones: **16 h "Divas del Pop"** (la muestra, evento
+    `divas-del-pop`), **18 h y 21 h "El Origen de Ser · entre ángeles y demonios"** (`el-origen-de-ser-18` y `-21`).
+    Platea (filas 1 a 13, 321 butacas) **$20.000** y zona verde (fila 14, 16) **$10.000**, **más el 10 % de
+    servicio encima** (`precioIncluyeCargo: false`, `desgloseServicio: true`, `CARGO_PCT=10` → Distribución 9,09 %).
+    Los flyers están en `assets/flyer-*.webp` (el de El Origen de Ser trae la marca de agua de CapCut arriba a la izquierda).
 
 ## Vista previa para el cliente (sin sistema)
 - `node herramientas/vista-previa.mjs <tema> <url pública> <carpeta> [servidor local]` arma una copia estática de la
@@ -245,8 +253,9 @@ Un servicio de Render por gala, todos del mismo código (en la cuenta de eventos
   - Scripts contra esa base: `ENV_RENDER=render-env-quinto.txt USUARIOS_ARCHIVO=usuarios-panel-render-quinto.txt node herramientas/con-env-render.mjs <script>`.
 
 ## Pendiente
-- Santiago Rítmica: que José confirme la numeración (el 1 a la derecha mirando al escenario), fecha, hora, precio
-  (¿la zona verde vale distinto?), pasillos si hay, butacas a guardar y la comisión; después base, servicio en Render,
-  usuarios y la cuenta de Chytapay de la escuela. El flyer, cuando esté, para una portada propia.
+- Santiago Rítmica: que José confirme la numeración (el 1 a la derecha mirando al escenario), que la muestra sea
+  también el 13/12 y al mismo precio, la hora de apertura de puertas, pasillos si hay y butacas a guardar. La
+  portada propia (con los dos flyers), después de la investigación de skills de diseño en GitHub
+  (`investigacion/skills-diseno-github.md`). Después: base, servicio en Render, usuarios y la cuenta de Chytapay de la escuela.
 - Adaptar `prueba-gala.mjs` a la cartelera.
 - Datos, logos y fotos de las otras galas del 13/12/2026.

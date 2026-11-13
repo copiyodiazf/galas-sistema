@@ -1,6 +1,6 @@
 {
-  "_ayuda": "Gala de fin de año de Santiago Rítmica (escuela de gimnasia rítmica de Eugenia Molina) en el Paraninfo de la UNSE, con BUTACAS NUMERADAS (11/11/2026). FECHA, HORA Y PRECIO SON PROVISORIOS: los da José. Plano que pasó José: escenario, filas 1 (22), 2 (21), 3 a 12 (26 cada una); detrás de la 12, en el medio, la cabina de musicalización con 9 asientos a cada lado (fila 13); al fondo, detrás de la cabina, la fila 14 (zona verde) con 8 y 8. Numeración: mirando desde el escenario, de izquierda a derecha → en el plano (escenario arriba) el asiento 1 queda a la DERECHA (asiento1). Total 337 butacas. Si la zona verde lleva otro precio, se carga en el evento un tipo con id 'zona-verde' y la fila 14 pasa sola a ese tipo.",
-  "nombre": "Gala de fin de año · Santiago Rítmica",
+  "_ayuda": "Gala 2026 de Santiago Rítmica (escuela de gimnasia rítmica de Eugenia Molina) en el Paraninfo de la UNSE, con BUTACAS NUMERADAS. Datos de José (13/11/2026): domingo 13/12, tres funciones con la MISMA sala y cada una con sus propias butacas: 16 h la muestra 'Divas del Pop', 18 h y 21 h 'El Origen de Ser · entre ángeles y demonios'. Platea (filas 1 a 13) $20.000 y zona verde (fila 14, la última) $10.000, más el 10 % de costo de servicio encima (desgloseServicio). Plano: escenario, filas 1 (22), 2 (21), 3 a 12 (26 cada una); detrás de la 12, en el medio, la cabina de musicalización con 9 asientos a cada lado (fila 13); al fondo, detrás de la cabina, la fila 14 (zona verde) con 8 y 8. Numeración: mirando desde el escenario, de izquierda a derecha → en el plano (escenario arriba) el asiento 1 queda a la DERECHA (asiento1). Total 337 butacas: 321 de platea y 16 de zona verde.",
+  "nombre": "Gala 2026 · Santiago Rítmica",
   "lema": "Santiago Rítmica · Gala 2026",
   "organiza": "Santiago Rítmica",
   "lugar": "Paraninfo de la UNSE",
@@ -9,8 +9,8 @@
   "instagram": "",
   "ayudaWhatsapp": "",
   "menores": "",
-  "modo": "gala",
-  "precioIncluyeCargo": true,
+  "modo": "cartelera",
+  "precioIncluyeCargo": false,
   "mail": {
     "_ayuda": "Noche magenta y el rosa del logo de la escuela.",
     "encabezado": "#2a0b2e",
@@ -18,7 +18,12 @@
     "acento": "#e91e8c",
     "acentoTexto": "#ffffff",
     "titulos": "#b0126a",
-    "franja": ["#e91e8c", "#ff7ac0", "#b0126a", "#ffb3dc"]
+    "franja": [
+      "#e91e8c",
+      "#ff7ac0",
+      "#b0126a",
+      "#ffb3dc"
+    ]
   },
   "sala": {
     "nombre": "Paraninfo de la UNSE",
@@ -26,35 +31,167 @@
     "asiento1": "derecha",
     "nota": "Los números de cada fila empiezan del lado derecho, mirando hacia el escenario.",
     "filas": [
-      { "fila": "1", "asientos": 22 },
-      { "fila": "2", "asientos": 21 },
-      { "fila": "3", "asientos": 26 },
-      { "fila": "4", "asientos": 26 },
-      { "fila": "5", "asientos": 26 },
-      { "fila": "6", "asientos": 26 },
-      { "fila": "7", "asientos": 26 },
-      { "fila": "8", "asientos": 26 },
-      { "fila": "9", "asientos": 26 },
-      { "fila": "10", "asientos": 26 },
-      { "fila": "11", "asientos": 26 },
-      { "fila": "12", "asientos": 26 },
-      { "fila": "13", "bloques": [9, { "hueco": "Cabina", "ancho": 8 }, 9] },
-      { "fila": "14", "zona": "Zona verde", "tipo": "zona-verde", "bloques": [8, { "hueco": "", "ancho": 10 }, 8] }
+      {
+        "fila": "1",
+        "asientos": 22
+      },
+      {
+        "fila": "2",
+        "asientos": 21
+      },
+      {
+        "fila": "3",
+        "asientos": 26
+      },
+      {
+        "fila": "4",
+        "asientos": 26
+      },
+      {
+        "fila": "5",
+        "asientos": 26
+      },
+      {
+        "fila": "6",
+        "asientos": 26
+      },
+      {
+        "fila": "7",
+        "asientos": 26
+      },
+      {
+        "fila": "8",
+        "asientos": 26
+      },
+      {
+        "fila": "9",
+        "asientos": 26
+      },
+      {
+        "fila": "10",
+        "asientos": 26
+      },
+      {
+        "fila": "11",
+        "asientos": 26
+      },
+      {
+        "fila": "12",
+        "asientos": 26
+      },
+      {
+        "fila": "13",
+        "bloques": [
+          9,
+          {
+            "hueco": "Cabina",
+            "ancho": 8
+          },
+          9
+        ]
+      },
+      {
+        "fila": "14",
+        "zona": "Zona verde",
+        "tipo": "zona-verde",
+        "bloques": [
+          8,
+          {
+            "hueco": "",
+            "ancho": 10
+          },
+          8
+        ]
+      }
     ]
   },
+  "desgloseServicio": true,
   "eventos": [
     {
-      "id": "gala-santiago-ritmica-2026",
-      "nombre": "Gala de fin de año",
+      "id": "divas-del-pop",
+      "nombre": "Divas del Pop · Muestra",
       "subtitulo": "Santiago Rítmica · Gala 2026",
-      "fecha": "2026-12-19",
-      "hora": "",
+      "fecha": "2026-12-13",
+      "hora": "16:00",
       "puertas": "",
-      "nota": "Fecha y precio a confirmar",
+      "imagen": "/assets/flyer-divas-del-pop.webp",
       "publicado": false,
       "artistas": [],
       "tipos": [
-        { "id": "platea", "nombre": "Platea", "corto": "Platea", "detalle": "Butaca numerada: la elegís en el plano", "precio": 10000, "cupo": 337 }
+        {
+          "id": "platea",
+          "nombre": "Platea",
+          "corto": "Platea",
+          "detalle": "Filas 1 a 13 · butaca numerada",
+          "precio": 20000,
+          "cupo": 321
+        },
+        {
+          "id": "zona-verde",
+          "nombre": "Zona verde",
+          "corto": "Zona verde",
+          "detalle": "Fila 14, al fondo, detrás de la cabina",
+          "precio": 10000,
+          "cupo": 16
+        }
+      ]
+    },
+    {
+      "id": "el-origen-de-ser-18",
+      "nombre": "El Origen de Ser · 1.ª función",
+      "subtitulo": "Entre ángeles y demonios · Santiago Rítmica · Gala 2026",
+      "fecha": "2026-12-13",
+      "hora": "18:00",
+      "puertas": "",
+      "imagen": "/assets/flyer-el-origen-de-ser.webp",
+      "publicado": false,
+      "artistas": [],
+      "tipos": [
+        {
+          "id": "platea",
+          "nombre": "Platea",
+          "corto": "Platea",
+          "detalle": "Filas 1 a 13 · butaca numerada",
+          "precio": 20000,
+          "cupo": 321
+        },
+        {
+          "id": "zona-verde",
+          "nombre": "Zona verde",
+          "corto": "Zona verde",
+          "detalle": "Fila 14, al fondo, detrás de la cabina",
+          "precio": 10000,
+          "cupo": 16
+        }
+      ]
+    },
+    {
+      "id": "el-origen-de-ser-21",
+      "nombre": "El Origen de Ser · 2.ª función",
+      "subtitulo": "Entre ángeles y demonios · Santiago Rítmica · Gala 2026",
+      "fecha": "2026-12-13",
+      "hora": "21:00",
+      "puertas": "",
+      "imagen": "/assets/flyer-el-origen-de-ser.webp",
+      "publicado": false,
+      "artistas": [],
+      "tipos": [
+        {
+          "id": "platea",
+          "nombre": "Platea",
+          "corto": "Platea",
+          "detalle": "Filas 1 a 13 · butaca numerada",
+          "precio": 20000,
+          "cupo": 321
+        },
+        {
+          "id": "zona-verde",
+          "nombre": "Zona verde",
+          "corto": "Zona verde",
+          "detalle": "Fila 14, al fondo, detrás de la cabina",
+          "precio": 10000,
+          "cupo": 16
+        }
       ]
     }
   ]

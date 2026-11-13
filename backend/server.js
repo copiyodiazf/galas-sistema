@@ -943,8 +943,12 @@ app.post('/api/validar', rateLimit({ windowMs: 60000, max: 1500 }), async (req, 
     const suEv = eventoDe(entrada.evento)
     const tipo = tipoDe(suEv, entrada.tipo) || { nombre: entrada.tipo, corto: entrada.tipo }
     if (entrada.evento !== ev.id) {
+      // Varias funciones el mismo día (Rítmica: 16, 18 y 21 h): "hoy no vale" confundiría, sí es de hoy.
+      const mismoDia = suEv && suEv.fecha === ev.fecha
       return res.json({ ok: false, estado: 'otro_evento', nombre: orden.nombre, tipo: tipo.nombre,
-        msg: `Es para ${suEv ? `${suEv.nombre} (${fechaCorta(suEv)})` : 'otra fecha'}: hoy no vale` })
+        msg: !suEv ? 'Es para otra fecha: hoy no vale'
+          : mismoDia ? `Es para ${suEv.nombre}${suEv.hora ? ` de las ${suEv.hora} h` : ''}: no es esta función`
+          : `Es para ${suEv.nombre} (${fechaCorta(suEv)}): hoy no vale` })
     }
     if (filtro && entrada.tipo !== filtro) {
       return res.json({ ok: false, estado: 'otro_tipo', nombre: orden.nombre, tipo: tipo.nombre, msg: `Es una entrada de ${tipo.corto.toUpperCase()}: acá no vale` })
