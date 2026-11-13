@@ -270,6 +270,12 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
   reemplazadas, `noindex`, cartel "VISTA PREVIA" y botones de compra que avisan que la venta abre pronto.
 - La carpeta es un repo aparte publicado en GitHub Pages. Patín FA: `C:\patin-fa\gala-2026\publicar` →
   https://copidiaz17.github.io/el-quinto-elemento/ (actualizar = correr el script, commit y push).
+- Santiago Rítmica (13/11/2026, para mostrarle a Eugenia): `C:\ritmica-gala\vista-previa` (repo
+  copiyodiazf/gala-santiago-ritmica: se creó en copidiaz17 y se transfirió a copiyodiazf, a pedido de José) →
+  https://copiyodiazf.github.io/gala-santiago-ritmica/ . Se arma con el servidor local
+  de Rítmica andando (`... vista-previa.mjs santiago-ritmica https://copiyodiazf.github.io/gala-santiago-ritmica
+  C:/ritmica-gala/vista-previa http://localhost:3047`). En la copia, cualquier enlace a una página del sistema
+  (/comprar, /mis-entradas) abre el aviso "Vista previa" y el plano se ve todo libre.
 
 ## Pruebas
 - `herramientas/prueba-etapas.mjs` (33 pruebas): etapas, precio final, ventaHasta, panel, boletería, retomar la
