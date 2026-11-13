@@ -876,8 +876,9 @@ function pintarSala() {
 function avisosDeFunciones() {
   for (const p of $$('[data-desde]')) {
     const e = eventoDe(p.dataset.desde); if (!e) continue;
-    const estados = Object.values(e.tipos).map(t => t.estado);
-    const aviso = estados.every(x => x === 'agotado') ? 'Agotada' : estados.some(x => x === 'pocas' || x === 'agotado') ? 'Últimas butacas' : '';
+    // Lo dice la platea: la zona verde tiene solo 16 butacas y el sistema la marca siempre "quedan pocas".
+    const estados = Object.values(e.tipos).map(t => t.estado), principal = (e.tipos.platea || Object.values(e.tipos)[0]).estado;
+    const aviso = estados.every(x => x === 'agotado') ? 'Agotada' : principal === 'pocas' || principal === 'agotado' ? 'Últimas butacas' : '';
     if (aviso) p.insertAdjacentHTML('afterend', `<p class="aviso-funcion">${aviso}</p>`);
   }
 }
@@ -901,8 +902,9 @@ function avisosDeFunciones() {
   for (const p of $$('[data-precios]')) p.innerHTML = textoPrecios(eventoDe(p.dataset.precios) || ref);
   for (const p of $$('[data-desde]')) {
     const e = eventoDe(p.dataset.desde); if (!e) continue;
-    const vals = Object.values(e.tipos).map(t => desglose() ? t.precio : t.final);
-    p.innerHTML = `Desde <b class="n">${pesos(Math.min(...vals))}</b>${desglose() ? ' más servicio' : ''}`;
+    // El precio de la platea (José, 13/11: no "desde $10.000", que es la zona verde de la última fila)
+    const t = e.tipos.platea || Object.values(e.tipos)[0];
+    p.innerHTML = `<b class="n">${pesos(desglose() ? t.precio : t.final)}</b>${desglose() ? ' más servicio' : ''}`;
   }
   if (c.reservaMinutos) {
     const txt = `Desde una cuenta a tu nombre. Tus butacas quedan apartadas ${c.reservaMinutos} minutos: si la transferencia no llega en ese tiempo, se liberan para otros.`;

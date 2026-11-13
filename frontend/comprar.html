@@ -193,8 +193,11 @@ function pintarFechas() {
   const mismoDia = lista.every(x => x.fecha === lista[0].fecha && x.hora);
   $('#fechas').innerHTML = lista.map(e => {
     const [mes, dia] = mismoDia ? ['hs', e.hora.replace(/:00$/, '')] : talon(e);
-    const precios = Object.values(e.tipos).map(aMostrar), desde = Math.min(...precios);
-    const varios = new Set(precios).size > 1;   // con zonas de distinto precio, el más barato es "desde"
+    const precios = Object.values(e.tipos).map(aMostrar);
+    // Con butacas, el precio del primer tipo (la platea, la zona principal): "desde $10.000" era la última fila
+    // (Rítmica, 13/11/2026). Sin sala, como siempre: el más barato, con "desde" si hay varios.
+    const desde = SALA() ? precios[0] : Math.min(...precios);
+    const varios = !SALA() && new Set(precios).size > 1;
     return `<label class="tipo"><input type="radio" name="fecha" value="${esc(e.id)}">
       <span class="talon"><small>${esc(mes)}</small><b>${esc(dia)}</b></span>
       <span class="que"><b>${esc(e.nombre)}</b><small>${esc(e.artistas?.join(', ') || e.cuando)}</small></span>
