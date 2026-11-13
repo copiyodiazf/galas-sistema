@@ -235,7 +235,7 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
     suaves que se mueven unos píxeles), el fuego titila, la luz del centro respira y hay más plumas y brasas.
     Todo con transform/opacity, frenado fuera de pantalla, con la pausa y sin nada con "reducir movimiento".
   - **Material del Instagram** (@santiago.ritmica, público): bajado con **Instaloader** (sin sesión) a
-    `C:itmica-gala\material\instagram\santiago.ritmica\` (fuera del repo; 454 publicaciones desde 2022). Lo elegido
+    `C:\ritmica-gala\material\instagram\santiago.ritmica\` (fuera del repo; 454 publicaciones desde 2022). Lo elegido
     se pasó a `assets/instagram/` (fotos `-600`/`-1200.webp`) y los clips a `assets/video/`. No se usaron gimnastas que
     no son de la escuela (selección nacional, el video de stock de 2022).
   - Primera versión (misma fecha), diseñada con las skills de `.claude/skills` (ver abajo): cada mundo se
