@@ -12,9 +12,11 @@ sus colores y su servicio en Render (José eligió tres sistemas separados, 28/1
   El comprador ve **un solo precio** (precio + `CARGO_PCT` 10 %). Paga con el **widget de Chytapay**:
   pone su DNI, recibe un CVU, transfiere (o toca "Abrir en Mercado Pago"). Concilia por el CUIL de quien
   transfiere: **tiene que pagar desde una cuenta a su nombre** (la compra lo avisa en grande).
-- **Cupo por tipo**, con bloqueo en MySQL (`GET_LOCK('cupo_<DB_NAME>')`: varias galas pueden compartir el
-  mismo servidor de Aiven). Una compra sin pagar guarda lugar `RESERVA_MINUTOS` (30); el cobro de Chytapay
-  vence a la misma hora.
+- **Cupo por tipo (y butacas), una compra a la vez por función:** la fila del evento se traba con `SELECT … FOR UPDATE`
+  y la traba dura hasta el commit (`conCupo(eventoId, …)`). Hasta el 13/11/2026 era `GET_LOCK` y se soltaba ANTES
+  del commit: la prueba de carga (`herramientas/prueba-carga.mjs`) encontró 2 butacas vendidas dos veces con 300
+  compras a la vez. Corregido: 0 repetidas. Cuando dos eligen la misma butaca, gana la primera y la otra recibe
+  "ya no está libre" con el plano entero actualizado (`sala` en la respuesta 409) para elegir otra.
 - **Emisión**: SOLO por el aviso firmado de Chytapay (`payment_request.payment_received` con
   `total_payment` y el monto completo) o por la consulta del cobro (`GET /payment-request/{orden}`), que
   hace la página de resultado y la repesca cada 2 minutos. Firma HMAC-SHA256 de `{t}.{cuerpo crudo}`,
@@ -289,6 +291,11 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
   (/comprar, /mis-entradas) abre el aviso "Vista previa" y el plano se ve todo libre.
 
 ## Pruebas
+- `herramientas/prueba-carga.mjs` (13/11/2026): la apertura de una venta con butacas, con cientos de familias a la vez
+  (`DB_NAME=gala_ritmica node ../herramientas/prueba-carga.mjs 3047 <familias> <por IP compartida> <variedad>`).
+  Resultado con el arreglo: 300 familias, 296 de 321 butacas vendidas en 26 s, 0 repetidas, mediana 23 ms, peor 1,2 s.
+  Con 40 familias detrás de una misma IP (datos móviles) los límites por conexión frenan a la mitad: se suben con
+  `MAX_COMPRAS_IP_MINUTO` (30), `MAX_PENDIENTES_IP` (8) y `MAX_SALA_IP_MINUTO` (120).
 - `herramientas/prueba-etapas.mjs` (33 pruebas): etapas, precio final, ventaHasta, panel, boletería, retomar la
   compra, traza, sedes y transferencias tardías.
   `DB_NAME=gala_quinto node herramientas/prueba-etapas.mjs 3045 usuarios-panel-quinto.txt` con el servidor

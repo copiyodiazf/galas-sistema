@@ -456,6 +456,8 @@ $('#compra').addEventListener('submit', async ev => {
     const d = await r.json();
     if (!r.ok) {
       // Alguien eligió una de estas butacas recién: se marcan ocupadas y se sueltan.
+      // Chocó con otra familia: el servidor manda el plano entero de este momento (d.sala) y se repinta todo.
+      if (d.sala) OCUPADAS = new Set(d.sala);
       if (d.ocupadas?.length) { d.ocupadas.forEach(id => OCUPADAS.add(id)); ELEGIDAS = ELEGIDAS.filter(id => !OCUPADAS.has(id)); despuesDeElegir(); $('#plano').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
       throw new Error(d.error || 'No se pudo iniciar la compra.');
     }
