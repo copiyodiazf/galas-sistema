@@ -1,7 +1,7 @@
 {
   "_ayuda": "Gala 2026 de Santiago Rítmica (escuela de gimnasia rítmica de Eugenia Molina) en el Paraninfo de la UNSE, con BUTACAS NUMERADAS. Datos de José (13/11/2026): domingo 13/12, tres funciones con la MISMA sala y cada una con sus propias butacas: 16 h la muestra 'Divas del Pop', 18 h y 21 h 'El Origen de Ser · entre ángeles y demonios'. Platea (filas 1 a 13) $20.000 y zona verde (fila 14, la última) $10.000, más el 10 % de costo de servicio encima (desgloseServicio). Plano: escenario, filas 1 (22), 2 (21), 3 a 12 (26 cada una); detrás de la 12, en el medio, la cabina de musicalización con 9 asientos a cada lado (fila 13); al fondo, detrás de la cabina, la fila 14 (zona verde) con 8 y 8. Numeración: mirando desde el escenario, de izquierda a derecha → en el plano (escenario arriba) el asiento 1 queda a la DERECHA (asiento1). Total 337 butacas: 321 de platea y 16 de zona verde.",
   "nombre": "Gala 2026 · Santiago Rítmica",
-  "lema": "Santiago Rítmica · Gala 2026",
+  "lema": "Domingo 13 de diciembre",
   "organiza": "Santiago Rítmica",
   "lugar": "Paraninfo de la UNSE",
   "direccion": "Av. Belgrano (S) 1912",
@@ -11,18 +11,34 @@
   "menores": "",
   "modo": "cartelera",
   "precioIncluyeCargo": false,
+  "desgloseServicio": true,
   "mail": {
-    "_ayuda": "Noche magenta y el rosa del logo de la escuela.",
-    "encabezado": "#2a0b2e",
-    "sobrecabeza": "#ffb3dc",
-    "acento": "#e91e8c",
-    "acentoTexto": "#ffffff",
-    "titulos": "#b0126a",
+    "_ayuda": "Los colores de la portada (13/11/2026): la sala a oscuras, oro y la franja con el rosa de Divas del Pop y la brasa de El Origen de Ser.",
+    "encabezado": "#120b14",
+    "sobrecabeza": "#e7c47f",
+    "acento": "#e7c47f",
+    "acentoTexto": "#241606",
+    "titulos": "#8a6420",
     "franja": [
-      "#e91e8c",
-      "#ff7ac0",
-      "#b0126a",
-      "#ffb3dc"
+      "#f4a3cc",
+      "#e5e8ef",
+      "#e7c47f",
+      "#ee5a2b"
+    ]
+  },
+  "festejo": {
+    "_ayuda": "Confeti al confirmarse la compra, con los colores de cada función ('*' = las demás). Sin 'festejo' no hay confeti.",
+    "divas-del-pop": [
+      "#f4a3cc",
+      "#e5e8ef",
+      "#e7c47f",
+      "#d9568f"
+    ],
+    "*": [
+      "#e7c47f",
+      "#fff1d2",
+      "#ffffff",
+      "#ee5a2b"
     ]
   },
   "sala": {
@@ -105,7 +121,6 @@
       }
     ]
   },
-  "desgloseServicio": true,
   "eventos": [
     {
       "id": "divas-del-pop",

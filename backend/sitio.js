@@ -95,6 +95,16 @@ function galeriaDe(g) {
     pasarela: g.pasarela === true, tituloVideos: limpio(g.tituloVideos, 80) } : null
 }
 
+// Confeti de la compra confirmada (Rítmica, 13/11/2026): { "<id del evento>": ["#rrggbb", …], "*": [...] }
+// o directamente una lista de colores para todos. Sin colores válidos, no hay confeti.
+function festejoDe(f) {
+  if (!f) return null
+  const colores = x => (Array.isArray(x) ? x : []).filter(c => HEX.test(String(c))).slice(0, 8)
+  const mapa = Array.isArray(f) ? { '*': colores(f) } : Object.fromEntries(Object.entries(f).filter(([k]) => !k.startsWith('_')).map(([k, v]) => [k, colores(v)]))
+  for (const k of Object.keys(mapa)) if (!mapa[k].length) delete mapa[k]
+  return Object.keys(mapa).length ? mapa : null
+}
+
 // Sala con butacas numeradas (opcional: sin "sala", la venta es por cantidad, como siempre).
 // Cada fila: { "fila": "1", "asientos": 22 } o, si tiene huecos (una cabina, un pasillo),
 // { "fila": "13", "bloques": [9, { "hueco": "Cabina", "ancho": 8 }, 9] }. Los bloques van desde el lado del
@@ -174,6 +184,8 @@ export function leerSitio(archivo = process.env.SITIO_ARCHIVO || 'sitio.json') {
       // Opcional: versión vertical del video para celulares (si no está, el celular usa portadaVideo recortado).
       portadaVideoMovil: rutaArchivo(s.portadaVideoMovil),
       sala: salaDe(s.sala),
+      // Confeti al confirmarse la compra (opcional): colores por id de evento y "*" para los demás.
+      festejo: festejoDe(s.festejo),
       feriantes: s.feriantes?.whatsapp ? { titulo: limpio(s.feriantes.titulo || 'Feriantes y emprendedores', 80), texto: limpio(s.feriantes.texto, 600),
         whatsapp: String(s.feriantes.whatsapp).replace(/\D/g, ''), mensaje: limpio(s.feriantes.mensaje, 200) } : null,
     },

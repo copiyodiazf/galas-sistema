@@ -14,7 +14,8 @@
 <style>
 .precios-sala{display:grid;gap:6px;}
 .precios-sala div{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:14px;}
-.precios-sala b{font-family:var(--f-display);font-size:20px;}
+.precios-sala b{font-family:var(--f-display);font-size:20px;text-align:right;white-space:nowrap;}
+.precios-sala b small.serv{display:block;font-family:var(--f-texto);font-size:11px;font-weight:700;color:var(--gris);}
 .elegidas{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;min-height:34px;align-items:center;}
 .elegidas .chip{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:13px;padding:6px 6px 6px 12px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid var(--oro);}
 .elegidas .chip button{width:24px;height:24px;border-radius:50%;border:none;background:rgba(255,255,255,.18);color:var(--crema);font:800 14px var(--f-texto);cursor:pointer;line-height:1;}
@@ -192,11 +193,12 @@ function pintarFechas() {
   const mismoDia = lista.every(x => x.fecha === lista[0].fecha && x.hora);
   $('#fechas').innerHTML = lista.map(e => {
     const [mes, dia] = mismoDia ? ['hs', e.hora.replace(/:00$/, '')] : talon(e);
-    const desde = Math.min(...Object.values(e.tipos).map(aMostrar));
+    const precios = Object.values(e.tipos).map(aMostrar), desde = Math.min(...precios);
+    const varios = new Set(precios).size > 1;   // con zonas de distinto precio, el más barato es "desde"
     return `<label class="tipo"><input type="radio" name="fecha" value="${esc(e.id)}">
       <span class="talon"><small>${esc(mes)}</small><b>${esc(dia)}</b></span>
       <span class="que"><b>${esc(e.nombre)}</b><small>${esc(e.artistas?.join(', ') || e.cuando)}</small></span>
-      <span class="precio">${pesos(desde)}${SERV()}</span></label>`;
+      <span class="precio">${varios ? '<small class="serv">desde</small>' : ''}${pesos(desde)}${SERV()}</span></label>`;
   }).join('');
   document.querySelectorAll('input[name=fecha]').forEach(r => r.addEventListener('change', () => { EV = CFG.eventos.find(e => e.id === r.value); tipo = null; pintarFechas(); pintarTipos(); actualizar(); }));
 }
@@ -208,6 +210,16 @@ const tipoDeButaca = id => Plano.tipoDe(SALA(), tiposIds(), id);
 function avisoSala(msg) { $('#aviso-sala').textContent = msg || ''; }
 function leerMia() {
   try { const m = JSON.parse(sessionStorage.getItem('gala_compra') || 'null'); return m && m.evento === EV?.id ? m : null; } catch { return null; }
+}
+// ["1","2","3","5"] → "1 a 3 y 5". Las filas con letras quedan como vienen.
+function tramosDeFilas(filas) {
+  if (!filas.every(f => /^\d+$/.test(f))) return filas.join(', ');
+  const n = filas.map(Number), partes = [];
+  for (let i = 0; i < n.length;) {
+    let j = i; while (j + 1 < n.length && n[j + 1] === n[j] + 1) j++;
+    partes.push(j - i >= 2 ? `${n[i]} a ${n[j]}` : n.slice(i, j + 1).join(', ')); i = j + 1;
+  }
+  return partes.length > 1 ? partes.slice(0, -1).join(', ') + ' y ' + partes.at(-1) : partes[0];
 }
 function pintarSala() {
   const conSala = Boolean(SALA() && EV);
@@ -221,7 +233,8 @@ function pintarSala() {
   for (const f of SALA().filas) { const t = tipoDeButaca(`${f.fila}-1`); if (!zonas.has(t)) zonas.set(t, []); zonas.get(t).push(f); }
   $('#precios-sala').innerHTML = [...zonas].map(([k, fs]) => {
     const t = EV.tipos[k], dondeZona = fs.find(f => f.zona)?.zona;
-    const donde = zonas.size > 1 ? ` <small class="ayuda">(${dondeZona ? esc(dondeZona) + ' · ' : ''}fila${fs.length > 1 ? 's' : ''} ${fs.map(f => f.fila).join(', ')})</small>` : '';
+    // "filas 1 a 13" en vez de "filas 1, 2, 3, … 13" (Rítmica): las seguidas se juntan en un tramo.
+    const donde = zonas.size > 1 ? ` <small class="ayuda">(${dondeZona && dondeZona !== t.nombre ? esc(dondeZona) + ', ' : ''}fila${fs.length > 1 ? 's' : ''} ${esc(tramosDeFilas(fs.map(f => f.fila)))})</small>` : '';
     return `<div><span>${esc(t.nombre)}${donde}${t.estado === 'agotado' ? ' · <b style="font-size:13px;color:#ffb3b0">agotada</b>' : ''}</span><b>${pesos(aMostrar(t))}${SERV()}</b></div>`;
   }).join('') + (zonas.size === 1 ? '<p class="ayuda">por butaca</p>' : '<p class="ayuda">por butaca · las de distinto precio se compran por separado</p>');
   if (PLANO_EV !== EV.id) {

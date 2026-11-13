@@ -215,6 +215,22 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
     servicio encima** (`precioIncluyeCargo: false`, `desgloseServicio: true`, `CARGO_PCT=10` → Distribución 9,09 %).
     Los flyers están en `assets/flyer-*.webp`. Al de El Origen de Ser se le sacó la marca "CapCut AI" de arriba a
     la izquierda: se rellenó con el cielo de alrededor (OpenCV, inpaint).
+  - **Portada propia** (`temas/santiago-ritmica/index.html`, 13/11/2026), diseñada con las skills de
+    `.claude/skills` (ver abajo): dos portales en arco con las horas como botones de compra; cada mundo se
+    enciende una vez al verse (Divas: las luces de los paneles y dos reflectores; El Origen: el rayo, el telón que se
+    abre, el corazón, plumas y brasas); el plano de la sala con lo libre de cada función (lee `/api/sala`, la
+    misma de la compra); cómo se compra y cómo llegar. El arte es el de los flyers recortado sin sus textos
+    (`assets/arte-*.webp`); los títulos son texto. Fuentes propias en `assets/fuentes` (Cormorant y Jost, OFL).
+    Partículas con **Sparticles 2.2.0** (`assets/vendor`, MPL-2.0: no modificar el archivo) cargada solo al llegar a
+    un mundo, frenada fuera de pantalla, con botón de pausa, y nada con "reducir movimiento" o "ahorro de datos".
+    `tema.css` pasa la compra, el panel y los mails a los mismos colores y letras.
+- **Confeti al confirmarse la compra** (`festejo` en sitio.json: colores por id de evento y `"*"`): en
+  `pago-exitoso` (`resultado.js`), una sola vez por compra, con **canvas-confetti 1.9.4** (`frontend/vendor`, ISC),
+  que se carga recién ahí. Sin `festejo` (las otras galas) no cambia nada.
+- **Skills de diseño del proyecto** (`.claude/skills/`, 13/11/2026): frontend-design (Anthropic), animation-performance
+  y mobile-native (Emil Kowalski) y web-design-guidelines (Vercel, con las reglas fijadas en un archivo local). Se
+  cargan solas en las sesiones de Claude Code abiertas en esta carpeta. Cuáles y por qué, y cuáles NO instalar
+  (taste-skill, Impeccable como plugin: hooks y telemetría): `investigacion/skills-diseno-github.md`.
 
 ## Vista previa para el cliente (sin sistema)
 - `node herramientas/vista-previa.mjs <tema> <url pública> <carpeta> [servidor local]` arma una copia estática de la
@@ -255,8 +271,9 @@ Un servicio de Render por gala, todos del mismo código (en la cuenta de eventos
 
 ## Pendiente
 - Santiago Rítmica: que José confirme la numeración (el 1 a la derecha mirando al escenario), que la muestra sea
-  también el 13/12 y al mismo precio, la hora de apertura de puertas, pasillos si hay y butacas a guardar. La
-  portada propia (con los dos flyers), después de la investigación de skills de diseño en GitHub
-  (`investigacion/skills-diseno-github.md`). Después: base, servicio en Render, usuarios y la cuenta de Chytapay de la escuela.
+  al mismo precio que las funciones, la hora de apertura de puertas, pasillos si hay, butacas a guardar y los textos
+  de la portada ("La muestra de la tarde, con la música de las grandes divas del pop" es una suposición). Probar la
+  portada en un celular de verdad (gama media). Después: base, servicio en Render, usuarios y la cuenta de Chytapay
+  de la escuela.
 - Adaptar `prueba-gala.mjs` a la cartelera.
 - Datos, logos y fotos de las otras galas del 13/12/2026.

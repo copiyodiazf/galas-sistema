@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>%%NOMBRE%%</title>
+<meta name="description" content="%%DESCRIPCION%%">
+<meta property="og:type" content="website">
+<meta property="og:title" content="%%NOMBRE%%">
+<meta property="og:description" content="%%DESCRIPCION%%">
+<meta property="og:url" content="%%URL%%/">
+<meta property="og:image" content="%%URL%%/assets/compartir.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#120b14">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="assets/logo.webp">
+<link rel="preload" as="font" type="font/woff2" href="assets/fuentes/cormorant.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="assets/fuentes/jost.woff2" crossorigin>
+<script type="speculationrules">{"prerender":[{"where":{"href_matches":"/comprar*"},"eagerness":"moderate"}]}</script>
+<script>document.documentElement.classList.add('js')</script>
+<!--
+  Portada de la Gala 2026 de Santiago Rítmica (13/11/2026). Plan de diseño (skill frontend-design):
+  · Concepto: "un domingo, dos mundos". Arriba, dos portales en arco (uno por espectáculo) con sus horas como
+    botones de compra. Abajo, cada mundo se enciende UNA vez al llegar: en Divas del Pop las luces de los seis
+    paneles se prenden desde el dorado hacia afuera y barren dos reflectores; en El Origen de Ser un rayo y el
+    telón que se abre, el corazón late tres veces, caen plumas del lado del cielo y suben brasas del fuego.
+  · Colores de los flyers: rosa, plata, oro, cielo y brasa sobre la sala a oscuras. Cormorant (la serif dorada
+    del flyer) para títulos y horas; Jost para el texto.
+  · Efectos solo con transform/opacity (skill animation-performance), sin hover pegado ni zoom en celulares
+    (mobile-native). Partículas con Sparticles (5 KB, assets/vendor) solo mientras se ven, nunca sobre el plano
+    ni la compra; con "reducir movimiento" o "ahorro de datos" no se cargan, y hay botón de pausa (WCAG 2.2.2).
+  · Los precios y las horas a la venta salen de /api/config: nada de precios escritos acá.
+-->
+<style>
+@font-face{font-family:'Cormorant';src:url(assets/fuentes/cormorant.woff2) format('woff2');font-weight:300 700;font-style:normal;font-display:swap;}
+@font-face{font-family:'Cormorant';src:url(assets/fuentes/cormorant-italica.woff2) format('woff2');font-weight:300 700;font-style:italic;font-display:swap;}
+@font-face{font-family:'Jost';src:url(assets/fuentes/jost.woff2) format('woff2');font-weight:300 700;font-style:normal;font-display:swap;}
+:root{
+  --sala:#120b14; --terciopelo:#25101f; --rosa:#f4a3cc; --rosa-hondo:#d9568f; --plata:#e5e8ef;
+  --oro:#e7c47f; --oro-hondo:#b9893a; --cielo:#1b3363; --brasa:#ee5a2b; --verde:#86cfa0;
+  --tinta:#f7eff3; --gris:#bba9b5;
+  --display:'Cormorant',Georgia,'Times New Roman',serif; --texto:'Jost',system-ui,sans-serif;
+  --suave:cubic-bezier(.2,.7,.2,1);
+}
+*{box-sizing:border-box;}
+html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;scroll-behavior:smooth;}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+body{margin:0;background:var(--sala);color:var(--tinta);font:400 17px/1.55 var(--texto);overflow-x:clip;}
+img{display:block;max-width:100%;}
+a{color:inherit;}
+a,button{touch-action:manipulation;}
+:focus-visible{outline:2px solid var(--oro);outline-offset:3px;border-radius:6px;}
+.saltar{position:absolute;left:12px;top:-60px;z-index:50;background:var(--oro);color:#241606;padding:10px 14px;border-radius:10px;font-weight:600;text-decoration:none;}
+.saltar:focus{top:12px;}
+.marco{width:min(1120px,100% - 32px);margin-inline:auto;}
+h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1;margin:0;text-wrap:balance;}
+p{margin:0;}
+
+/* ── Portada: dos portales ── */
+.portada{position:relative;isolation:isolate;padding:calc(18px + env(safe-area-inset-top,0px)) 0 44px;overflow:hidden;}
+.portada::before{content:"";position:absolute;inset:-10% 0 auto;height:80%;z-index:-1;pointer-events:none;
+  background:radial-gradient(ellipse 46% 60% at 50% 0%,rgba(255,226,236,.13),transparent 70%),
+             radial-gradient(ellipse 40% 50% at 18% 30%,rgba(244,163,204,.10),transparent 70%),
+             radial-gradient(ellipse 40% 50% at 82% 30%,rgba(231,196,127,.10),transparent 70%);}
+.marca{display:flex;align-items:center;gap:10px;}
+.marca img{width:40px;height:40px;border-radius:50%;background:#fff;object-fit:contain;padding:3px;}
+.marca span{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.32em;text-transform:uppercase;color:var(--plata);}
+.portada h1{font-size:clamp(68px,22vw,150px);font-weight:600;letter-spacing:-.01em;margin-top:26px;
+  background:linear-gradient(180deg,#fff7e6 0%,var(--oro) 55%,var(--oro-hondo) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.portada .bajada{font-size:clamp(17px,4.6vw,21px);color:var(--tinta);max-width:34ch;margin-top:12px;}
+.portada .bajada b{font-weight:500;color:#fff;}
+.portales{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:30px;}
+.portal{display:flex;flex-direction:column;min-width:0;}
+.arco{display:block;position:relative;aspect-ratio:3/4;border-radius:999px 999px 16px 16px;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(255,255,255,.14),0 18px 50px -12px var(--halo);}
+.arco img{width:100%;height:100%;object-fit:cover;}
+.arco::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(18,11,20,.55));}
+.divas{--halo:rgba(244,163,204,.55);--acento:var(--rosa);}
+.origen{--halo:rgba(231,196,127,.55);--acento:var(--oro);}
+.divas .arco img{object-position:62% 50%;}
+.portal h2{font-size:clamp(25px,7vw,40px);margin-top:14px;}
+.portal .divas-t em{font-style:italic;font-weight:700;color:var(--rosa);}
+.portal .origen-t{color:var(--oro);}
+.portal p{font-size:14.5px;color:var(--gris);margin-top:4px;}
+.horas{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.horas{flex-direction:column;}
+.hora{display:flex;align-items:center;justify-content:space-between;gap:8px;text-decoration:none;color:#22121b;background:var(--acento);
+  border-radius:14px;padding:7px 12px 8px;user-select:none;-webkit-user-select:none;transition:transform .12s ease-out;}
+.hora b{font-family:var(--display);font-weight:700;font-size:30px;line-height:1;font-variant-numeric:lining-nums;}
+.hora small{font-size:12.5px;font-weight:500;white-space:nowrap;}
+.hora:active{transform:scale(.97);}
+.apagado{opacity:.55;pointer-events:none;}
+.nota-precios{margin-top:26px;font-size:15px;color:var(--gris);max-width:60ch;}
+.nota-precios b{color:var(--tinta);font-weight:500;font-variant-numeric:tabular-nums;}
+@media (min-width:760px){.portales{gap:clamp(28px,5vw,48px);}}
+@media (min-width:1000px){
+  .portada{padding-bottom:64px;}
+  .portada .marco{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-areas:"cab portales" "nota portales";
+    grid-template-rows:auto 1fr;column-gap:64px;align-items:start;}
+  .cabecera{grid-area:cab;padding-top:24px;}
+  .portales{grid-area:portales;margin-top:8px;}
+  .nota-precios{grid-area:nota;}
+  .portada h1{font-size:clamp(100px,9vw,140px);margin-top:36px;}
+}
+
+/* ── Los dos mundos ── */
+.mundo{position:relative;padding:56px 0 64px;}
+.mundo.divas{background:linear-gradient(180deg,var(--sala),var(--terciopelo) 30%,var(--terciopelo) 70%,var(--sala));}
+.mundo.origen{background:linear-gradient(90deg,rgba(27,51,99,.35),transparent 45%,transparent 55%,rgba(110,22,10,.32)),var(--sala);}
+.mundo .marco{display:grid;gap:28px;align-items:center;}
+.escena{position:relative;overflow:hidden;width:min(100%,640px);margin-inline:auto;border-radius:6px;
+  -webkit-mask-image:linear-gradient(180deg,#000 82%,transparent);mask-image:linear-gradient(180deg,#000 82%,transparent);}
+.escena .arte{width:100%;height:auto;}
+.mundo .texto{max-width:52ch;}
+.mundo .texto>p{margin-top:12px;color:var(--tinta);}
+.cuando{font-family:var(--display);font-weight:600;font-size:24px;color:var(--acento);font-variant-numeric:lining-nums;}
+@media (min-width:900px){
+  .mundo .marco{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:56px;}
+  .mundo.origen .escena{order:2;}
+}
+
+/* Divas: las luces de los paneles se prenden de a una y barren dos reflectores */
+.t-divas{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:.16em;font-size:clamp(66px,19vw,118px);}
+.t-divas em{font-style:italic;font-weight:700;color:var(--rosa);text-shadow:0 0 28px rgba(244,163,204,.35);}
+.t-divas small{font-style:italic;font-size:.42em;font-weight:600;color:#fff;}
+.t-divas span{font-weight:700;color:#fff;}
+.luces{position:absolute;inset:0;display:none;pointer-events:none;}
+.js .luces{display:block;}
+.luces i{position:absolute;top:0;bottom:0;background:#0b060b;opacity:.9;transition:opacity .9s var(--suave);}
+.luces i:nth-child(1){left:0;width:15%;transition-delay:.75s;}
+.luces i:nth-child(2){left:14.7%;width:18.2%;transition-delay:.45s;}
+.luces i:nth-child(3){left:32.6%;width:17.8%;transition-delay:.15s;}
+.luces i:nth-child(4){left:50.1%;width:18.1%;transition-delay:0s;}
+.luces i:nth-child(5){left:67.9%;width:18.1%;transition-delay:.3s;}
+.luces i:nth-child(6){left:85.7%;width:14.3%;transition-delay:.6s;}
+.encendida .luces i{opacity:0;}
+.haz{position:absolute;top:-6%;width:46%;height:112%;pointer-events:none;opacity:0;transform-origin:50% 0;
+  background:linear-gradient(180deg,rgba(255,236,246,.30),rgba(255,236,246,.06) 70%,transparent);
+  clip-path:polygon(46% 0,54% 0,100% 100%,0 100%);transition:opacity 1.2s ease 1s;}
+.haz.uno{left:4%;transform:rotate(-12deg);}
+.haz.dos{right:4%;transform:rotate(12deg);}
+.encendida .haz{opacity:1;animation:barrer 11s ease-in-out 2s infinite alternate;}
+.encendida .haz.dos{animation-name:barrer-dos;animation-duration:13s;}
+@keyframes barrer{from{transform:rotate(-12deg);}to{transform:rotate(16deg);}}
+@keyframes barrer-dos{from{transform:rotate(12deg);}to{transform:rotate(-15deg);}}
+.particulas{position:absolute;inset:0;pointer-events:none;}
+.particulas canvas{display:block;}
+
+/* El Origen de Ser: el rayo, el telón que se abre y el corazón */
+.t-origen{font-size:clamp(54px,15vw,96px);font-weight:600;
+  background:linear-gradient(180deg,#fff4d9 0%,var(--oro) 50%,var(--oro-hondo) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.sub{font-family:var(--display);font-style:italic;font-weight:600;font-size:clamp(25px,6.6vw,34px);color:var(--oro);margin-top:6px !important;}
+.ornamento{display:block;width:min(280px,80%);height:18px;margin-top:14px;color:var(--oro);}
+.lema{font-family:var(--display);font-style:italic;font-weight:600;font-size:23px;color:#fff3dc;margin-top:22px !important;}
+/* En la compu los títulos van en la columna de texto: más chicos, y Divas del Pop en una línea (va después de las reglas generales). */
+@media (min-width:900px){
+  .t-divas{font-size:clamp(72px,6.4vw,96px);flex-wrap:nowrap;}
+  .t-origen{font-size:clamp(64px,6vw,88px);}
+}
+.telon{position:absolute;top:0;bottom:0;width:50.5%;display:none;pointer-events:none;transition:transform 1.9s cubic-bezier(.65,0,.35,1) .55s;}
+.js .telon{display:block;}
+.telon.izq{left:0;background:linear-gradient(90deg,#070d1c 55%,#0f1d3a);}
+.telon.der{right:0;background:linear-gradient(270deg,#120403 55%,#2a0a06);}
+.abierta .telon.izq{transform:translateX(-101%);}
+.abierta .telon.der{transform:translateX(101%);}
+.rayo{position:absolute;left:calc(50% - 1px);top:0;bottom:0;width:2px;pointer-events:none;transform:scaleY(0);opacity:0;
+  background:linear-gradient(180deg,transparent,#fff3d6 30%,#fff3d6 70%,transparent);box-shadow:0 0 18px 4px rgba(255,236,200,.55);
+  transition:transform .6s var(--suave),opacity .8s ease 1.6s;}
+.abierta .rayo{transform:scaleY(1);opacity:0;animation:rayo 2.2s ease forwards;}
+@keyframes rayo{0%{opacity:0;}15%{opacity:1;}60%{opacity:1;}100%{opacity:0;}}
+.corazon{position:absolute;left:49.7%;top:64%;width:22%;aspect-ratio:1;translate:-50% -50%;pointer-events:none;opacity:0;
+  background:radial-gradient(circle,rgba(255,240,205,.95),rgba(255,206,130,.42) 32%,transparent 68%);}
+.abierta .corazon{animation:latido 1.5s ease-in-out 2.4s 3 both;}
+@keyframes latido{0%{opacity:0;transform:scale(.7);}45%{opacity:1;transform:scale(1.12);}100%{opacity:.25;transform:scale(.9);}}
+.plumas{inset:0 50% 0 0;}
+.brasas{inset:0 0 0 50%;}
+
+.funciones{display:grid;gap:10px;margin-top:22px;}
+.funcion{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;text-decoration:none;color:var(--tinta);
+  border:1px solid rgba(231,196,127,.45);border-radius:16px;padding:12px 16px;background:rgba(231,196,127,.06);
+  user-select:none;-webkit-user-select:none;transition:transform .12s ease-out,background-color .2s ease;}
+.funcion b{font-family:var(--display);font-weight:700;font-size:38px;line-height:1;color:var(--oro);font-variant-numeric:lining-nums;}
+.funcion span{font-size:16px;}
+.funcion em{font-style:normal;font-weight:600;font-size:14px;color:#241606;background:var(--oro);border-radius:999px;padding:7px 13px;white-space:nowrap;}
+.funcion:active{transform:scale(.98);}
+.precios{margin-top:16px;font-size:15px;color:var(--gris);}
+.precios b{color:var(--tinta);font-weight:500;font-variant-numeric:tabular-nums;}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;margin-top:22px;padding:12px 24px;border-radius:999px;
+  font:600 17px/1.2 var(--texto);text-decoration:none;color:#22121b;background:var(--acento,var(--oro));border:0;cursor:pointer;
+  user-select:none;-webkit-user-select:none;transition:transform .12s ease-out;}
+.btn:active{transform:scale(.97);}
+.pausa{position:absolute;right:16px;top:14px;z-index:2;font:500 13px var(--texto);color:var(--tinta);background:rgba(18,11,20,.62);
+  border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:7px 13px;cursor:pointer;}
+.sin-efectos .pausa{display:none;}
+@media (hover:hover) and (pointer:fine){
+  .hora:hover,.btn:hover{transform:translateY(-1px);filter:brightness(1.06);}
+  .funcion:hover{background:rgba(231,196,127,.13);}
+  .arco:hover img{transform:scale(1.03);}
+  .arco img{transition:transform .5s var(--suave);}
+  .pausa:hover{background:rgba(18,11,20,.85);}
+}
+
+/* Efectos quietos: con "reducir movimiento", con la pausa o mientras el mundo no se ve */
+.quieto .haz,.fuera .haz{animation-play-state:paused;}
+@media (prefers-reduced-motion:reduce){
+  .js .luces,.js .telon,.rayo,.corazon,.haz{display:none;}
+  .hora,.btn,.funcion{transition:none;}
+}
+
+/* ── La sala ── */
+.sala{padding:64px 0;border-top:1px solid rgba(255,255,255,.07);}
+.sala h2,.pasos h2,.lugar h2{font-size:clamp(40px,11vw,64px);}
+.sala .marco>p{color:var(--gris);margin-top:10px;max-width:52ch;}
+.elegir{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:22px;max-width:540px;}
+.elegir button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;font:500 12.5px/1.2 var(--texto);color:var(--tinta);text-align:left;
+  background:transparent;border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:9px 12px 10px;cursor:pointer;user-select:none;-webkit-user-select:none;}
+.elegir b{font-family:var(--display);font-weight:700;font-size:28px;line-height:1;font-variant-numeric:lining-nums;}
+.elegir button[aria-pressed=true]{color:#22121b;background:var(--acento);border-color:transparent;}
+.mapa{--d:8px;--g:3px;margin:22px 0 0;padding:18px 0 4px;}
+.escenario{width:min(72%,420px);margin:0 auto 18px;text-align:center;font:500 12px var(--texto);letter-spacing:.06em;color:#22121b;
+  background:linear-gradient(180deg,var(--oro),var(--oro-hondo));border-radius:4px 4px 40% 40% / 4px 4px 14px 14px;padding:6px 0 8px;}
+.filas{display:grid;gap:var(--g);justify-content:center;}
+.fila{display:flex;align-items:center;justify-content:center;gap:6px;}
+.fila .n{width:16px;text-align:right;font-size:10px;color:var(--gris);font-variant-numeric:tabular-nums;flex:none;}
+.fila .asientos{display:flex;gap:var(--g);}
+.tramo{display:flex;gap:var(--g);}
+.tramo i{width:var(--d);height:var(--d);border-radius:50%;background:var(--plata);}
+.verde .tramo i{background:var(--verde);}
+.tramo i.o{background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);}
+.hueco{width:calc(var(--n) * (var(--d) + var(--g)) - var(--g));font-size:9px;line-height:var(--d);text-align:center;color:var(--gris);overflow:hidden;white-space:nowrap;}
+.fila.verde{margin-top:6px;}
+.leyenda{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center;margin-top:16px;font-size:13.5px;color:var(--gris);}
+.leyenda i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px;background:var(--plata);}
+.leyenda .z{background:var(--verde);}
+.leyenda .o{background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,255,.4);}
+.cuenta-sala{text-align:center;margin-top:10px;font-size:15px;font-variant-numeric:tabular-nums;}
+.sala .btn{display:flex;width:fit-content;margin-inline:auto;}
+@media (min-width:760px){.mapa{--d:12px;--g:4px;}.fila .n{font-size:12px;width:22px;}}
+
+/* ── Cómo se compra y cómo llegar ── */
+.pasos,.lugar{padding:56px 0;border-top:1px solid rgba(255,255,255,.07);}
+.pasos ol{list-style:none;counter-reset:p;margin:24px 0 0;padding:0;display:grid;gap:18px;max-width:640px;}
+.pasos li{counter-increment:p;display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start;}
+.pasos li::before{content:counter(p);font-family:var(--display);font-weight:700;font-size:40px;line-height:.9;color:var(--oro);font-variant-numeric:lining-nums;}
+.pasos li b{display:block;font-weight:500;font-size:18px;}
+.pasos li span{color:var(--gris);font-size:15.5px;}
+.ya{margin-top:24px;font-size:15.5px;color:var(--gris);}
+.lugar p{margin-top:10px;font-size:18px;}
+.lugar small{display:block;color:var(--gris);font-size:15px;margin-top:2px;}
+.linea{display:inline-flex;margin-top:18px;padding:10px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.28);text-decoration:none;font-weight:500;}
+footer{padding:36px 0 calc(110px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(255,255,255,.07);color:var(--gris);font-size:14px;}
+footer .marco{display:flex;flex-wrap:wrap;gap:8px 22px;justify-content:space-between;}
+
+/* ── Barra de abajo (celular y compu): aparece cuando la portada pasó ── */
+.barra{position:fixed;left:0;right:0;bottom:0;z-index:20;transform:translateY(110%);transition:transform .35s var(--suave);
+  background:rgba(18,11,20,.94);border-top:1px solid rgba(231,196,127,.25);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));}
+.barra.visible{transform:none;}
+.barra .marco{display:flex;align-items:center;justify-content:space-between;gap:12px;width:min(1120px,100%);}
+.barra b{display:block;font-family:var(--display);font-size:20px;line-height:1.1;font-variant-numeric:lining-nums;}
+.barra small{display:block;font-size:13px;color:var(--gris);}
+.barra .btn{margin:0;min-height:44px;padding:10px 20px;font-size:16px;}
+@media (prefers-reduced-motion:reduce){.barra{transition:none;}}
+
+/* Vista previa (copia sin el sistema) */
+[popover]{max-width:min(420px,calc(100% - 32px));border:0;border-radius:18px;padding:22px;color:var(--tinta);background:#22131f;box-shadow:0 30px 80px rgba(0,0,0,.6);}
+[popover]::backdrop{background:rgba(8,4,8,.7);}
+[popover] h3{font-size:28px;color:var(--oro);margin-bottom:8px;}
+</style>
+</head>
+<body>
+<a class="saltar" href="#principal">Ir al contenido</a>
+
+<header class="portada" id="portada">
+  <div class="marco">
+    <div class="cabecera">
+      <p class="marca"><img src="assets/logo.webp" width="40" height="40" alt=""><span>Santiago Rítmica</span></p>
+      <h1>Gala 2026</h1>
+      <p class="bajada"><b>Domingo 13 de diciembre</b> en el Paraninfo de la UNSE. Dos espectáculos en tres funciones: elegí la tuya y tu butaca.</p>
+    </div>
+    <div class="portales">
+      <article class="portal divas">
+        <a class="arco" href="#divas" aria-label="Ver Divas del Pop">
+          <img src="assets/arte-divas-600.webp" width="600" height="607" alt="" fetchpriority="high"></a>
+        <h2 class="divas-t"><em>Divas</em> del Pop</h2>
+        <p>La muestra</p>
+        <div class="horas">
+          <a class="hora" data-ev="divas-del-pop" href="/comprar?evento=divas-del-pop"><b>16 h</b><small>Elegir butacas</small></a>
+        </div>
+      </article>
+      <article class="portal origen">
+        <a class="arco" href="#origen" aria-label="Ver El Origen de Ser">
+          <img src="assets/arte-origen-480.webp" width="480" height="419" alt="" fetchpriority="high"></a>
+        <h2 class="origen-t">El Origen de Ser</h2>
+        <p>Entre ángeles y demonios</p>
+        <div class="horas">
+          <a class="hora" data-ev="el-origen-de-ser-18" href="/comprar?evento=el-origen-de-ser-18"><b>18 h</b><small>Elegir butacas</small></a>
+          <a class="hora" data-ev="el-origen-de-ser-21" href="/comprar?evento=el-origen-de-ser-21"><b>21 h</b><small>Elegir butacas</small></a>
+        </div>
+      </article>
+    </div>
+    <p class="nota-precios" id="nota-precios">Butacas numeradas: elegís tu lugar en el plano de la sala.</p>
+  </div>
+</header>
+
+<main id="principal">
+  <section class="mundo divas" id="divas" aria-labelledby="t-divas">
+    <div class="marco">
+      <div class="escena" id="escena-divas">
+        <img class="arte" src="assets/arte-divas-900.webp" srcset="assets/arte-divas-600.webp 600w, assets/arte-divas-900.webp 900w"
+          sizes="(min-width:900px) 560px, 100vw" width="900" height="910" loading="lazy" decoding="async"
+          alt="Silueta de una gimnasta con su pelota, frente a seis paneles con vestuarios de grandes divas del pop">
+        <div class="luces" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="haz uno" aria-hidden="true"></div><div class="haz dos" aria-hidden="true"></div>
+        <div class="particulas" id="brillos" aria-hidden="true"></div>
+        <button class="pausa" type="button" aria-pressed="false">Pausar efectos</button>
+      </div>
+      <div class="texto">
+        <h2 class="t-divas" id="t-divas"><em>Divas</em><small>del</small><span>Pop</span></h2>
+        <p>La muestra de la tarde, con la música de las grandes divas del pop.</p>
+        <p class="cuando">Domingo 13 de diciembre, 16 h</p>
+        <p class="precios" data-precios="divas-del-pop"></p>
+        <a class="btn" data-ev="divas-del-pop" href="/comprar?evento=divas-del-pop">Elegir butacas para las 16 h</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="mundo origen" id="origen" aria-labelledby="t-origen">
+    <div class="marco">
+      <div class="escena" id="escena-origen">
+        <img class="arte" src="assets/arte-origen-720.webp" srcset="assets/arte-origen-480.webp 480w, assets/arte-origen-720.webp 720w"
+          sizes="(min-width:900px) 560px, 100vw" width="720" height="628" loading="lazy" decoding="async"
+          alt="Una mujer de espaldas, con un corazón de luz, entre dos cortinas luminosas: a la izquierda el cielo con palomas y plumas, a la derecha el fuego y un demonio alado">
+        <div class="corazon" aria-hidden="true"></div>
+        <div class="particulas plumas" id="plumas" aria-hidden="true"></div>
+        <div class="particulas brasas" id="brasas" aria-hidden="true"></div>
+        <div class="telon izq" aria-hidden="true"></div><div class="telon der" aria-hidden="true"></div>
+        <div class="rayo" aria-hidden="true"></div>
+        <button class="pausa" type="button" aria-pressed="false">Pausar efectos</button>
+      </div>
+      <div class="texto">
+        <h2 class="t-origen" id="t-origen">El Origen de Ser</h2>
+        <p class="sub">entre ángeles y demonios</p>
+        <svg class="ornamento" viewBox="0 0 280 18" aria-hidden="true"><path d="M0 9h118M162 9h118" stroke="currentColor" stroke-width="1"/><path d="M140 2l7 7-7 7-7-7z" fill="currentColor"/><circle cx="124" cy="9" r="2" fill="currentColor"/><circle cx="156" cy="9" r="2" fill="currentColor"/></svg>
+        <p>La gala de fin de año, en dos funciones.</p>
+        <div class="funciones">
+          <a class="funcion" data-ev="el-origen-de-ser-18" href="/comprar?evento=el-origen-de-ser-18"><b>18 h</b><span>Primera función</span><em>Elegir butacas</em></a>
+          <a class="funcion" data-ev="el-origen-de-ser-21" href="/comprar?evento=el-origen-de-ser-21"><b>21 h</b><span>Segunda función</span><em>Elegir butacas</em></a>
+        </div>
+        <p class="precios" data-precios="el-origen-de-ser-18"></p>
+        <p class="lema">El corazón sabe dónde volver.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sala" id="sala" aria-labelledby="t-sala">
+    <div class="marco">
+      <h2 id="t-sala">Mirá qué butacas quedan</h2>
+      <p>Cada función tiene su propia sala: tu entrada vale solo para la hora que elegiste.</p>
+      <div class="elegir" id="elegir-sala"></div>
+      <figure class="mapa">
+        <div class="escenario">Escenario</div>
+        <div class="filas" id="mapa" role="img" aria-label="Plano de la sala"></div>
+        <figcaption>
+          <p class="cuenta-sala" id="cuenta-sala" aria-live="polite"></p>
+          <p class="leyenda"><span><i></i>Platea libre</span><span><i class="z"></i>Zona verde libre</span><span><i class="o"></i>Ocupada</span></p>
+        </figcaption>
+      </figure>
+      <a class="btn" id="btn-sala" href="/comprar">Elegir butacas</a>
+    </div>
+  </section>
+
+  <section class="pasos" aria-labelledby="t-pasos">
+    <div class="marco">
+      <h2 id="t-pasos">Cómo se compra</h2>
+      <ol>
+        <li><div><b>Elegí la función y tus butacas</b><span>Tocás tus lugares en el plano de la sala. Hasta 10 por compra.</span></div></li>
+        <li><div><b>Pagá por transferencia</b><span id="paso-pago">Desde una cuenta a tu nombre. Mientras pagás, tus butacas quedan apartadas unos minutos.</span></div></li>
+        <li><div><b>Recibí tus entradas por mail</b><span>Una entrada con QR por butaca. En la puerta escanean el QR y te indican tu lugar.</span></div></li>
+      </ol>
+      <p class="ya" id="ya">¿Ya compraste? <a href="/mis-entradas">Buscá tus entradas con tu mail y tu DNI</a>.</p>
+    </div>
+  </section>
+
+  <section class="lugar" aria-labelledby="t-lugar">
+    <div class="marco">
+      <h2 id="t-lugar">Cómo llegar</h2>
+      <p>Paraninfo de la UNSE<small>Av. Belgrano (S) 1912, Santiago del Estero</small></p>
+      <a class="linea" href="https://www.google.com/maps/search/?api=1&amp;query=Paraninfo+UNSE+Av.+Belgrano+Sur+1912+Santiago+del+Estero" target="_blank" rel="noopener">Abrir en el mapa</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="marco">
+    <span>Santiago Rítmica, Gala 2026</span>
+    <a href="/mis-entradas">Mis entradas</a>
+  </div>
+</footer>
+
+<div class="barra" id="barra" aria-hidden="true">
+  <div class="marco">
+    <div><b>Domingo 13 de diciembre</b><small>16, 18 y 21 h en el Paraninfo</small></div>
+    <a class="btn" id="btn-barra" href="/comprar" tabindex="-1">Elegir función</a>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = x => String(x ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pesos = n => '$' + new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 }).format(n);
+const hora = ev => (ev?.hora || '').replace(/:00$/, '') + ' h';
+
+// ───── Efectos: solo si el celular no pidió "reducir movimiento" ni "ahorro de datos" ─────
+const QUIETO = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const AHORRO = Boolean(navigator.connection?.saveData);
+const COMPU = matchMedia('(min-width: 900px)').matches;
+const raiz = document.documentElement;
+if (QUIETO) raiz.classList.add('sin-efectos');
+let pausado = false, sparticles = null;
+const nubes = [];   // { el, opciones, inst, visible }
+
+function cargarSparticles() {
+  if (sparticles) return sparticles;
+  sparticles = new Promise((ok, mal) => {
+    const s = document.createElement('script');
+    s.src = 'assets/vendor/sparticles-2.2.0.min.js'; s.onload = () => ok(window.Sparticles); s.onerror = mal;
+    document.head.appendChild(s);
+  });
+  return sparticles;
+}
+function moverNube(n) {
+  if (!n.inst) return;
+  if (n.visible && !pausado) n.inst.start(); else n.inst.stop();
+}
+function nube(el, opciones) {
+  const n = { el, opciones, inst: null, visible: false };
+  nubes.push(n);
+  return n;
+}
+async function encenderNube(n) {
+  // "pidiendo": el aviso de que se ve puede llegar dos veces antes de que cargue la librería (dos lienzos).
+  if (n.inst || n.pidiendo || QUIETO || AHORRO) return;
+  n.pidiendo = true;
+  try {
+    const S = await cargarSparticles();
+    n.inst = new S(n.el, n.opciones);
+    moverNube(n);
+  } catch { /* sin partículas: la escena queda igual de linda */ }
+}
+
+const brillos = nube($('#brillos'), { count: COMPU ? 70 : 34, speed: 1.4, direction: 180, xVariance: 4, yVariance: 2, rotate: true, rotation: .6,
+  shape: ['star', 'diamond'], color: ['#e5e8ef', '#f4a3cc', '#e7c47f', '#ffffff'], minSize: 1, maxSize: COMPU ? 5 : 4,
+  alphaSpeed: 8, minAlpha: .15, maxAlpha: .95, twinkle: true, drift: 1 });
+const plumas = nube($('#plumas'), { count: COMPU ? 20 : 12, speed: 1.1, direction: 175, xVariance: 3, yVariance: 1, rotate: true, rotation: .35,
+  shape: 'image', imageUrl: 'assets/pluma.svg', color: ['#ffffff', '#fff3dc'], minSize: 10, maxSize: COMPU ? 20 : 16,
+  alphaSpeed: 2, minAlpha: .35, maxAlpha: .85, drift: 3 });
+const brasas = nube($('#brasas'), { count: COMPU ? 46 : 28, speed: 3.2, direction: 0, xVariance: 3, yVariance: 1, rotate: false,
+  shape: 'circle', color: ['#ff7a2a', '#ff3b1f', '#ffb347', '#ffd27a'], minSize: 1, maxSize: 3,
+  alphaSpeed: 10, minAlpha: .2, maxAlpha: 1, twinkle: true, drift: 2 });
+
+// Cada mundo se enciende una sola vez al llegar; las partículas corren solo mientras se ve.
+function mirarEscena(escena, mundo, clase, susNubes) {
+  new IntersectionObserver(([en]) => {
+    if (en.isIntersecting && en.intersectionRatio >= .35) escena.classList.add(clase);
+    mundo.classList.toggle('fuera', !en.isIntersecting);
+    for (const n of susNubes) {
+      n.visible = en.isIntersecting;
+      if (en.isIntersecting && !n.inst) encenderNube(n); else moverNube(n);
+    }
+  }, { threshold: [0, .35] }).observe(escena);
+}
+mirarEscena($('#escena-divas'), $('#divas'), 'encendida', [brillos]);
+mirarEscena($('#escena-origen'), $('#origen'), 'abierta', [plumas, brasas]);
+
+// Pausa (para quien no quiere movimiento en pantalla): frena reflectores y partículas en los dos mundos.
+$$('.pausa').forEach(b => b.addEventListener('click', () => {
+  pausado = !pausado;
+  raiz.classList.toggle('quieto', pausado);
+  $$('.pausa').forEach(x => { x.setAttribute('aria-pressed', String(pausado)); x.textContent = pausado ? 'Reanudar efectos' : 'Pausar efectos'; });
+  nubes.forEach(moverNube);
+}));
+
+// ───── Precios, horas a la venta y la sala (de /api/config) ─────
+// VISTA PREVIA (copia publicada sin el sistema, herramientas/vista-previa.mjs): los precios vienen de una
+// copia de /api/config y los botones no venden.
+const PREVIA = window.VISTA_PREVIA || null;
+let CFG = null;
+if (PREVIA) {
+  document.body.insertAdjacentHTML('beforeend', `<div popover id="p-previa"><h3>Vista previa</h3>
+    <p>Así se va a ver la página. La compra se habilita cuando abra la venta.</p>
+    <button class="btn" type="button" popovertarget="p-previa" popovertargetaction="hide">Entendido</button></div>
+    <p style="position:fixed;top:10px;right:10px;z-index:30;margin:0;font:600 11px var(--texto);letter-spacing:.08em;color:#241606;background:var(--oro);padding:5px 11px;border-radius:99px;">Vista previa</p>`);
+  $('#ya').hidden = true;
+}
+const eventoDe = id => CFG?.eventos?.find(e => e.id === id) || null;
+const agotado = e => Object.values(e.tipos || {}).every(t => t.estado === 'agotado');
+
+function textoPrecios(e) {
+  const t = e?.tipos || {}, p = t.platea, z = t['zona-verde'];
+  if (!p) return '';
+  const desglose = CFG.sitio?.desgloseServicio;
+  const base = x => desglose ? x.precio : x.final;
+  let s = `Platea <b>${pesos(base(p))}</b>` + (z ? ` y zona verde, la última fila, <b>${pesos(base(z))}</b>` : '');
+  if (desglose) s += `, más ${CFG.cargoPct} % de servicio: <b>${pesos(p.final)}</b>${z ? ` y <b>${pesos(z.final)}</b>` : ''} en total.`;
+  else s += '.';
+  return s;
+}
+
+function prepararBotones() {
+  for (const a of $$('[data-ev]')) {
+    const e = eventoDe(a.dataset.ev);
+    const sm = a.querySelector('small, em');
+    if (!e || !e.vendible) {
+      a.classList.add('apagado'); a.setAttribute('aria-disabled', 'true'); a.removeAttribute('href');
+      if (sm) sm.textContent = 'Muy pronto'; else a.textContent = 'Las entradas salen muy pronto';
+      continue;
+    }
+    if (agotado(e)) { a.classList.add('apagado'); a.removeAttribute('href'); if (sm) sm.textContent = 'Agotada'; else a.textContent = 'Agotada'; continue; }
+    if (PREVIA) { a.href = '#'; a.addEventListener('click', ev => { ev.preventDefault(); try { $('#p-previa').showPopover(); } catch {} }); }
+  }
+}
+
+// La sala de cada función: las butacas ocupadas vienen de /api/sala (la misma que usa la compra).
+let salaEv = null;
+const cacheSala = new Map();
+async function ocupadasDe(id) {
+  if (PREVIA) return [];
+  const c = cacheSala.get(id);
+  if (c && Date.now() - c.t < 20000) return c.v;
+  const r = await fetch('/api/sala?evento=' + encodeURIComponent(id));
+  if (!r.ok) throw new Error('sala');
+  const v = (await r.json()).ocupadas || [];
+  cacheSala.set(id, { t: Date.now(), v });
+  return v;
+}
+function pintarMapa(ocupadas) {
+  const s = CFG.sitio.sala, oc = new Set(ocupadas), der = s.asiento1 === 'derecha';
+  let libres = 0;
+  // En el plano, el escenario arriba: si el asiento 1 está a la derecha, cada fila se dibuja al revés.
+  $('#mapa').innerHTML = s.filas.map(f => {
+    const bloques = der ? [...f.bloques].reverse() : f.bloques;
+    const partes = bloques.map(b => {
+      if (b.hueco) return `<span class="hueco" style="--n:${b.ancho}">${esc(b.texto || '')}</span>`;
+      const puntos = [];
+      for (let k = 0; k <= b.hasta - b.desde; k++) {
+        const num = der ? b.hasta - k : b.desde + k, o = oc.has(`${f.fila}-${num}`);
+        if (!o) libres++;
+        puntos.push(o ? '<i class="o"></i>' : '<i></i>');
+      }
+      return `<span class="tramo">${puntos.join('')}</span>`;
+    }).join('');
+    return `<div class="fila${f.tipo === 'zona-verde' ? ' verde' : ''}"><span class="n">${esc(f.fila)}</span><span class="asientos">${partes}</span><span class="n" aria-hidden="true"></span></div>`;
+  }).join('');
+  $('#cuenta-sala').innerHTML = `<b>${libres}</b> butacas libres de ${s.total} a las ${esc(hora(eventoDe(salaEv)))}`;
+  $('#mapa').setAttribute('aria-label', `Plano de la sala a las ${hora(eventoDe(salaEv))}: ${libres} butacas libres de ${s.total}`);
+}
+async function verSala(id) {
+  salaEv = id;
+  const e = eventoDe(id);
+  $$('#elegir-sala button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.ev === id)));
+  $('#sala').style.setProperty('--acento', id === 'divas-del-pop' ? 'var(--rosa)' : 'var(--oro)');
+  const btn = $('#btn-sala');
+  btn.textContent = `Elegir butacas para las ${hora(e)}`;
+  if (PREVIA) btn.href = '#'; else btn.href = '/comprar?evento=' + encodeURIComponent(id);
+  try { pintarMapa(await ocupadasDe(id)); }
+  catch { pintarMapa([]); $('#cuenta-sala').textContent = 'No pudimos ver la sala de esta función. Probá de nuevo en un rato.'; }
+}
+
+(PREVIA ? Promise.resolve(PREVIA) : fetch('/api/config').then(r => r.json())).then(c => {
+  CFG = c;
+  prepararBotones();
+  const muestra = eventoDe('divas-del-pop'), gala = eventoDe('el-origen-de-ser-18') || eventoDe('el-origen-de-ser-21');
+  const ref = gala || muestra;
+  if (ref) $('#nota-precios').innerHTML = `Butacas numeradas: elegís tu lugar en el plano de la sala. ${textoPrecios(ref)}`;
+  for (const p of $$('[data-precios]')) p.innerHTML = textoPrecios(eventoDe(p.dataset.precios) || ref);
+  if (c.reservaMinutos) $('#paso-pago').textContent = `Desde una cuenta a tu nombre. Tus butacas quedan apartadas ${c.reservaMinutos} minutos: si la transferencia no llega en ese tiempo, se liberan para otros.`;
+  // La sala: un botón por función publicada.
+  const lista = ['divas-del-pop', 'el-origen-de-ser-18', 'el-origen-de-ser-21'].map(eventoDe).filter(Boolean);
+  if (!c.sitio?.sala || !lista.length) { $('#sala').hidden = true; return; }
+  $('#elegir-sala').innerHTML = lista.map(e => `<button type="button" data-ev="${esc(e.id)}" aria-pressed="false"><b>${esc(hora(e))}</b>${e.id === 'divas-del-pop' ? 'Divas del Pop' : 'El Origen de Ser'}</button>`).join('');
+  $$('#elegir-sala button').forEach(b => b.addEventListener('click', () => verSala(b.dataset.ev)));
+  verSala((gala || lista[0]).id);
+}).catch(() => { $('#nota-precios').textContent = 'No pudimos cargar los precios. Revisá tu conexión y recargá la página.'; $('#sala').hidden = true; });
+if (!PREVIA) fetch('/api/visita', { method: 'POST' }).catch(() => {});
+
+// ───── La barra de abajo aparece cuando la portada ya pasó ─────
+new IntersectionObserver(([en]) => {
+  const barra = $('#barra'), ver = !en.isIntersecting;
+  barra.classList.toggle('visible', ver); barra.setAttribute('aria-hidden', String(!ver)); $('#btn-barra').tabIndex = ver ? 0 : -1;
+}, { threshold: 0 }).observe($('#portada'));
+if (PREVIA) $('#btn-barra').addEventListener('click', ev => { ev.preventDefault(); try { $('#p-previa').showPopover(); } catch {} });
+</script>
+</body>
+</html>

@@ -18,6 +18,24 @@
       <div class="qrs">${qrs}</div>
       <p style="margin-top:18px;"><a class="btn" href="/mis-entradas">Ver mis entradas</a></p>
       <p style="margin-top:10px;"><a class="btn linea" href="/">Volver al evento</a></p>`;
+    festejar(d.evento);
+  }
+
+  // Confeti al confirmarse la compra, solo si la gala lo pide (sitio.json → festejo) y una vez por compra.
+  // canvas-confetti (ISC, frontend/vendor) se carga recién acá; con "reducir movimiento" no sale.
+  async function festejar(evento) {
+    try {
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const clave = 'festejo_' + orden;
+      if (sessionStorage.getItem(clave)) return;
+      const sitio = window.SITIO || (await fetch('/api/config').then(r => r.json())).sitio || {};
+      const colores = sitio.festejo?.[evento] || sitio.festejo?.['*'];
+      if (!colores) return;
+      sessionStorage.setItem(clave, '1');
+      await new Promise((ok, mal) => { const s = document.createElement('script'); s.src = '/vendor/canvas-confetti-1.9.4.js'; s.onload = ok; s.onerror = mal; document.head.appendChild(s); });
+      const tiro = (x, angulo) => window.confetti({ particleCount: 70, spread: 62, startVelocity: 42, angle: angulo, origin: { x, y: .35 }, colors: colores, disableForReducedMotion: true, ticks: 220 });
+      tiro(.2, 60); setTimeout(() => tiro(.8, 120), 180);
+    } catch { /* sin confeti: las entradas ya están en pantalla */ }
   }
 
   async function revisar() {
