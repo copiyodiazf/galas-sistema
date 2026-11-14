@@ -339,12 +339,24 @@ Un servicio de Render por gala, todos del mismo código (en la cuenta de eventos
     Para otra gala: `CARGO_PCT = 100 × d / (100 − d)` con `d` = el % de la Distribución.
   - Usuarios (jose admin, florencia organizador, puerta1 y puerta2 control) en `backend/usuarios-panel-render-quinto.txt`.
   - Scripts contra esa base: `ENV_RENDER=render-env-quinto.txt USUARIOS_ARCHIVO=usuarios-panel-render-quinto.txt node herramientas/con-env-render.mjs <script>`.
+- **Santiago Rítmica** (tema `santiago-ritmica`): servicio `gala-santiago-ritmica` →
+  https://gala-santiago-ritmica.onrender.com (el nombre estaba libre el 13/11/2026). El servicio lo crea José.
+  - Base `gala_santiago_ritmica` en el Aiven de Rítmica (13/11/2026), con las tablas creadas por `crear-usuarios.mjs`.
+  - Variables en `render-env-ritmica.txt` (git lo ignora): las de Oli con `QR_SECRET` y `CHYTAPAY_CLAVE_TOKENS`
+    nuevos, `CHYTAPAY_SEDE=santiago-ritmica`, `CARGO_PCT=CARGO_PUNTO_PCT=10` (el 10 % va encima: Distribución 8,12)
+    y `VENTA_ABIERTA=false` hasta que Eugenia conecte su cuenta.
+  - Usuarios (jose admin, eugenia organizador, puerta1 y puerta2 control, boleteria venta) en
+    `backend/usuarios-panel-render-ritmica.txt`.
+  - galas-web quedó con 5222a51 (13/11/2026, 33/33 pruebas de etapas OK). Se publicó el último commit mientras otra
+    ventana tenía sin commitear la portada con el video HD: al commitearla, publicar de nuevo y Manual Deploy.
+  - Falta (José): crear el servicio; en Chytapay, la redirect_uri `/chytapay/vuelta`, la sede `santiago-ritmica` con
+    `/api/webhooks/chytapay` y revisar que la Distribución siga en 8,12 ANTES de que Eugenia conecte.
 
 ## Pendiente
 - Santiago Rítmica: que José confirme la numeración (el 1 a la derecha mirando al escenario), que la muestra sea
   al mismo precio que las funciones, la hora de apertura de puertas, pasillos si hay, butacas a guardar y los textos
   de la portada ("La muestra de la tarde, con la música de las grandes divas del pop" es una suposición). Probar la
-  portada en un celular de verdad (gama media). Después: base, servicio en Render, usuarios y la cuenta de Chytapay
-  de la escuela.
+  portada en un celular de verdad (gama media). Base, usuarios y variables: hechos el 13/11/2026 (ver "En
+  producción"). Faltan el servicio en Render y la cuenta de Chytapay de la escuela.
 - Adaptar `prueba-gala.mjs` a la cartelera.
 - Datos, logos y fotos de las otras galas del 13/12/2026.
