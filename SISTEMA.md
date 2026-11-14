@@ -234,11 +234,17 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
     la izquierda: se rellenó con el cielo de alrededor (OpenCV, inpaint).
   - **Segunda versión de la portada** (13/11/2026, pedido de José: "más contenido", logo más grande, el rosa de
     Rítmica, el mapa, WhatsApp e Instagram). La portada es **rosa Rítmica** (`#CE086D`, la tinta del logo): el logo
-    grande en blanco (`assets/logo-blanco.webp`; `logo-rosa.webp` para el pie), **seis clips de las gimnastas teñidos
-    de rosa** (`assets/video/clip-*.mp4`, 900 KB entre los seis, 432x768, ffmpeg con filtro `curves`): en la compu,
-    tres recuadros que alternan dos clips cada uno; en el celular, uno solo que pasa por los seis (dos `<video>` por
-    recuadro que se pasan la posta con un fundido). Botón de pausa; con "reducir movimiento" o "ahorro de datos" no
-    se cargan (queda el cuadro `.webp`). Una cinta que se dibuja sola, la cuenta regresiva y el **WhatsApp de José**
+    grande en blanco (`assets/logo-blanco.webp`; `logo-rosa.webp` para el pie) y de fondo, **a pantalla completa, el
+    video de danza fusión** (13/11, pedido de José: es de lo que más va a haber en la gala; antes eran seis clips
+    teñidos de rosa en tres recuadros). José mandó un video vertical de 36 s con 12 fotos (3 s cada una, corte seco,
+    bandas negras); se recortaron las fotos y se rearmó con movimiento lento y fundidos, en loop sin salto, en dos
+    versiones con su encuadre por foto: `assets/video/fusion-compu.mp4` (1280x720) y `fusion-celu.mp4` (720x1280),
+    1,6 MB cada uno, con su primer cuadro `.webp`. La página elige por la forma de la pantalla (más alta que ancha →
+    celular) y cambia si se gira. Se rehace con `herramientas/fondo-fusion-ritmica.py` (Pillow arma los cuadros y
+    ffmpeg los comprime; el encuadre de cada foto está ahí) desde `C:\ritmica-gala\material\fusion\` (las 12 fotos
+    recortadas y el video original). El rosa lo pone la capa de encima, no el video. Botón de pausa; con "reducir
+    movimiento" o "ahorro de datos" no se carga (queda el cuadro `.webp`). Si se cambia el video, **cambiarle el
+    nombre** (el navegador guarda los assets un día). Una cinta que se dibuja sola, la cuenta regresiva y el **WhatsApp de José**
     (`ayudaWhatsapp`, el mismo de El Quinto Elemento). Después: las funciones como **entradas de teatro**; los dos
     mundos; **Somos Santiago Rítmica** (datos y la **pasarela**: 30 fotos en dos filas que corren solas, se frenan
     con el mouse encima, con el botón o con el visor abierto, y se agrandan con anterior/siguiente); el plano; cómo

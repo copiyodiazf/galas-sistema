@@ -74,10 +74,8 @@ section{scroll-margin-top:12px;}
 .portada{position:relative;isolation:isolate;min-height:100svh;display:grid;align-content:center;text-align:center;overflow:hidden;
   padding:calc(30px + env(safe-area-inset-top,0px)) 0 64px;
   background:radial-gradient(ellipse 90% 70% at 50% 30%,var(--ritmica-vivo),var(--ritmica) 55%,var(--ritmica-hondo));}
-.fondo{position:absolute;inset:0;z-index:-2;display:flex;}
-.fondo .col{position:relative;flex:1;background-size:cover;background-position:center;overflow:hidden;}
-.fondo video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .9s ease;}
-.fondo video.activo{opacity:1;}
+.fondo{position:absolute;inset:0;z-index:-2;background:center/cover no-repeat;}
+.fondo video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
 .portada::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
   background:radial-gradient(ellipse 70% 55% at 50% 38%,rgba(206,8,109,.55),rgba(206,8,109,.15) 70%),
              linear-gradient(180deg,rgba(142,7,80,.25),transparent 30%,transparent 62%,rgba(23,6,15,.9));}
@@ -668,48 +666,33 @@ const FOTOS = [
   ['equipo-monteros', 'El equipo en Monteros, Tucumán'],
   ['conjunto-mallas', 'Un conjunto de la escuela'],
 ];
-// La portada: seis clips de las gimnastas teñidos del rosa de Rítmica con ffmpeg (assets/video/clip-*.mp4 y su cuadro
-// .webp). En la compu, tres recuadros que alternan dos clips cada uno; en el celular, uno solo que pasa por los seis.
-const CLIPS_COMPU = [['gimnasio', 'chiquitas'], ['pelota', 'cierre'], ['mazas', 'peluches']];
-const CLIPS_CELU = [['pelota', 'chiquitas', 'gimnasio', 'cierre', 'mazas', 'peluches']];
-
-// ───── Portada: el video de fondo (sin sonido) y la cuenta regresiva ─────
+// ───── Portada: el video de danza fusión de fondo (sin sonido) y la cuenta regresiva ─────
+// Una sola pantalla con las 12 fotos de danza fusión del video que mandó José (13/11/2026: va a ser de lo que más se
+// vea en la gala), cada una con un movimiento lento y fundido a la siguiente, en loop sin salto. El original era
+// vertical con bandas negras: se rearmó en dos versiones con su encuadre por foto, horizontal para la compu y
+// vertical para el celular (assets/video/fusion-*.mp4 y su primer cuadro .webp). Antes eran seis clips en tres recuadros.
 {
-  const fondo = $('#fondo'), recuadros = [];
-  const clip = (n, ext) => `assets/video/clip-${n}.${ext}`;
-  for (const lista of COMPU ? CLIPS_COMPU : CLIPS_CELU) {
-    const col = document.createElement('div');
-    col.className = 'col'; col.style.backgroundImage = `url(${clip(lista[0], 'webp')})`;
-    fondo.appendChild(col);
-    if (QUIETO || AHORRO) continue;   // sin video: queda el cuadro de muestra del primero
-    // Dos videos por recuadro que se pasan la posta: mientras uno se ve, el otro ya tiene cargado el que sigue.
-    const vs = [0, 1].map(() => {
-      const v = document.createElement('video');
-      Object.assign(v, { muted: true, playsInline: true, preload: 'auto' });
-      v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
-      col.appendChild(v); return v;
-    });
-    let k = 0, cual = 0;
-    const poner = (v, i) => { const s = clip(lista[i % lista.length], 'mp4'); if (!v.src.endsWith(s)) v.src = s; v.currentTime = 0; };
-    poner(vs[0], 0); poner(vs[1], 1); vs[0].classList.add('activo');
-    const rec = { quieto: false, play: () => vs[cual].play().catch(() => {}), pause: () => vs.forEach(v => v.pause()) };
-    vs.forEach(v => v.addEventListener('ended', () => {
-      if (v !== vs[cual]) return;
-      const prox = vs[1 - cual];
-      k++; cual = 1 - cual;
-      prox.classList.add('activo'); v.classList.remove('activo');
-      if (!rec.quieto) prox.play().catch(() => {});
-      setTimeout(() => poner(v, k + 1), 1000);   // después del fundido, el que terminó carga el siguiente
-    }));
-    recuadros.push(rec);
+  const fondo = $('#fondo'), vertical = matchMedia('(max-aspect-ratio: 1/1)');
+  const archivo = ext => `assets/video/fusion-${vertical.matches ? 'celu' : 'compu'}.${ext}`;
+  let video = null, quieto = false, visible = true;
+  const mover = () => { if (!video) return; if (quieto || !visible) video.pause(); else video.play().catch(() => {}); };
+  const poner = () => {
+    fondo.style.backgroundImage = `url(${archivo('webp')})`;   // se ve mientras carga, y siempre sin video
+    if (video && !video.src.endsWith(archivo('mp4'))) { video.poster = archivo('webp'); video.src = archivo('mp4'); mover(); }
+  };
+  if (!QUIETO && !AHORRO) {
+    video = document.createElement('video');
+    Object.assign(video, { muted: true, playsInline: true, loop: true, preload: 'auto' });
+    video.setAttribute('muted', ''); video.setAttribute('playsinline', '');
+    fondo.appendChild(video);
   }
-  if (recuadros.length) {
-    // Botón para frenarlos (se repiten sin fin: WCAG 2.2.2). Además solo corren mientras se ve la portada.
-    let quieto = false, visible = true;
+  poner();
+  vertical.addEventListener('change', poner);   // girar el celular o cambiar la ventana de forma cambia de versión
+  if (video) {
+    // Botón para frenarlo (se repite sin fin: WCAG 2.2.2). Además solo corre mientras se ve la portada.
     const b = document.createElement('button');
     Object.assign(b, { type: 'button', className: 'pausa pausa-video', textContent: 'Pausar video' });
     b.setAttribute('aria-pressed', 'false');
-    const mover = () => recuadros.forEach(r => { r.quieto = quieto || !visible; if (r.quieto) r.pause(); else r.play(); });
     b.addEventListener('click', () => { quieto = !quieto; b.setAttribute('aria-pressed', String(quieto)); b.textContent = quieto ? 'Ver video' : 'Pausar video'; mover(); });
     $('#portada').appendChild(b);
     new IntersectionObserver(([en]) => { visible = en.isIntersecting; mover(); }).observe($('#portada'));
