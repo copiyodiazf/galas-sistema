@@ -844,11 +844,9 @@ const desglose = () => Boolean(CFG?.sitio?.desgloseServicio);
 function textoPrecios(e) {
   const t = e?.tipos || {}, p = t.platea, z = t['zona-verde'];
   if (!p) return '';
-  const base = x => desglose() ? x.precio : x.final;
-  let s = `Platea <b>${pesos(base(p))}</b>` + (z ? ` y zona verde, la última fila, <b>${pesos(base(z))}</b>` : '');
-  if (desglose()) s += `, más ${CFG.cargoPct} % de servicio: <b>${pesos(p.final)}</b>${z ? ` y <b>${pesos(z.final)}</b>` : ''} en total.`;
-  else s += '.';
-  return s;
+  // El servicio en pesos y no en porcentaje (José, 13/11/2026): "$20.000 más $2.000 de servicio".
+  const uno = x => desglose() ? `<b>${pesos(x.precio)}</b> más ${pesos(x.final - x.precio)} de servicio (<b>${pesos(x.final)}</b> en total)` : `<b>${pesos(x.final)}</b>`;
+  return `Platea ${uno(p)}` + (z ? `; zona verde, la última fila, ${uno(z)}` : '') + '.';
 }
 function prepararBotones() {
   for (const a of $$('[data-ev]')) {
@@ -906,7 +904,7 @@ function avisosDeFunciones() {
     const e = eventoDe(p.dataset.desde); if (!e) continue;
     // El precio de la platea (José, 13/11: no "desde $10.000", que es la zona verde de la última fila)
     const t = e.tipos.platea || Object.values(e.tipos)[0];
-    p.innerHTML = `<b class="n">${pesos(desglose() ? t.precio : t.final)}</b>${desglose() ? ' más servicio' : ''}`;
+    p.innerHTML = `<b class="n">${pesos(desglose() ? t.precio : t.final)}</b>${desglose() ? ` más ${pesos(t.final - t.precio)} de servicio` : ''}`;
   }
   if (c.reservaMinutos) {
     const txt = `Desde una cuenta a tu nombre. Tus butacas quedan apartadas ${c.reservaMinutos} minutos: si la transferencia no llega en ese tiempo, se liberan para otros.`;

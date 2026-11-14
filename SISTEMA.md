@@ -214,7 +214,11 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
   - **13/11/2026, datos de José:** domingo 13/12, tres funciones: **16 h "Divas del Pop"** (la muestra, evento
     `divas-del-pop`), **18 h y 21 h "El Origen de Ser · entre ángeles y demonios"** (`el-origen-de-ser-18` y `-21`).
     Platea (filas 1 a 13, 321 butacas) **$20.000** y zona verde (fila 14, 16) **$10.000**, **más el 10 % de
-    servicio encima** (`precioIncluyeCargo: false`, `desgloseServicio: true`, `CARGO_PCT=10`).
+    servicio encima** (`precioIncluyeCargo: false`, `desgloseServicio: true`, `CARGO_PCT=10`). El servicio se
+    muestra **en pesos, no en porcentaje** (José, 13/11): "$20.000 más $2.000 de servicio" en la portada y
+    "+ $2.000 de servicio" en la compra (`SERV(t)` en `comprar.html`, por entrada: vale para toda página con
+    `desgloseServicio`). En la compra, en el celular el precio va abajo del nombre de la función (antes la tarjeta
+    se salía 22 px a 320).
     **Distribución de Chytapay: 8,12 %** (José, 13/11: a Rítmica le tienen que llegar los $20.000 LIMPIOS y la comisión
     de Chytapay, 0,8 % + IVA = 0,968 % del total, sale de la parte de José, como en El Quinto Elemento):
     d = (servicio − 0,968 % × total) / total = (2.000 − 212,96) / 22.000 = 8,12 % → José $1.786,40, la escuela $20.213,60
