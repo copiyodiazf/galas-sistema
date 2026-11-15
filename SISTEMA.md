@@ -238,11 +238,15 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
     video de danza fusión** (13/11, pedido de José: es de lo que más va a haber en la gala; antes eran seis clips
     teñidos de rosa en tres recuadros). José mandó un video vertical de 36 s con 12 fotos (3 s cada una, corte seco,
     bandas negras); se recortaron las fotos y se rearmó con movimiento lento y fundidos, en loop sin salto, en dos
-    versiones con su encuadre por foto: `assets/video/fusion-compu.mp4` (1280x720) y `fusion-celu.mp4` (720x1280),
-    1,6 MB cada uno, con su primer cuadro `.webp`. La página elige por la forma de la pantalla (más alta que ancha →
-    celular) y cambia si se gira. Se rehace con `herramientas/fondo-fusion-ritmica.py` (Pillow arma los cuadros y
-    ffmpeg los comprime; el encuadre de cada foto está ahí) desde `C:\ritmica-gala\material\fusion\` (las 12 fotos
-    recortadas y el video original). El rosa lo pone la capa de encima, no el video. Botón de pausa; con "reducir
+    versiones con su encuadre por foto, **en Full HD y con más nitidez** (José pidió "más nitidez": va a estar solo 3
+    semanas en línea): `assets/video/fusion-compu-hd.mp4` (1920x1080, 9,3 MB) y `fusion-celu-hd.mp4` (1080x1920,
+    8,2 MB), con su primer cuadro `.webp`. De cada foto hay una sola imagen (los 90 cuadros del original son iguales),
+    así que la nitidez sale de agrandarla al doble con Lanczos y una máscara de enfoque suave; nada de IA (inventa
+    detalle y cambia las caras). La primera versión (1280x720, 1,6 MB) se veía blanda. La página elige por la forma
+    de la pantalla (más alta que ancha → celular) y cambia si se gira. Se rehace con
+    `herramientas/fondo-fusion-ritmica.py` (Pillow y OpenCV arman los cuadros, ffmpeg los comprime; el encuadre de
+    cada foto está ahí; unos 8 min) desde `C:\ritmica-gala\material\fusion\` (las 12 fotos recortadas y el video
+    original). El rosa lo pone la capa de encima, no el video (más liviana desde las fotos). Botón de pausa; con "reducir
     movimiento" o "ahorro de datos" no se carga (queda el cuadro `.webp`). Si se cambia el video, **cambiarle el
     nombre** (el navegador guarda los assets un día). Una cinta que se dibuja sola, la cuenta regresiva y el **WhatsApp de José**
     (`ayudaWhatsapp`, el mismo de El Quinto Elemento). Después: las funciones como **entradas de teatro**; los dos

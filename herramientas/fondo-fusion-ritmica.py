@@ -2,14 +2,29 @@
 # cada foto con un movimiento lento (acercamiento o paneo) y un fundido a la siguiente, en loop sin salto.
 # Dos versiones: horizontal (compu) y vertical (celular), cada una con su encuadre por foto.
 # Uso: python herramientas/fondo-fusion-ritmica.py C:/ritmica-gala/material/fusion <carpeta de salida>
-# (ahí están las 12 fotos recortadas f00..f11.png y el video original). Necesita Pillow y ffmpeg. Tarda unos 3 min.
-# Lo que sale (fusion-compu/celu .mp4 y el primer cuadro .png, que se pasa a .webp) va a temas/santiago-ritmica/
+# (ahí están las 12 fotos recortadas f00..f11.png y el video original). Necesita Pillow, OpenCV y ffmpeg.
+# Lo que sale (fusion-*-hd.mp4 y el primer cuadro .png, que se pasa a .webp) va a temas/santiago-ritmica/
 # assets/video/ CON OTRO NOMBRE si cambia: el navegador guarda los assets un día.
 import sys, subprocess
+import cv2, numpy as np
 from PIL import Image
 
 FOTOS, SALIDA = sys.argv[1], sys.argv[2]
-FPS, T, X = 25, 3.0, 0.8          # 3 s por foto (como el original) y 0,8 s de fundido
+FPS, T, X = 30, 3.0, 0.8          # 3 s por foto (como el original) y 0,8 s de fundido
+
+def realzar(im):
+    """Más nitidez (José, 13/11: "más nitidez", va a estar solo 3 semanas en línea). Las fotos salen de un video de
+    WhatsApp y de cada una hay UNA sola imagen (los 90 cuadros son iguales: promediarlos no suma), así que se agranda
+    al doble con Lanczos, se alisan apenas los bloques de la compresión (si no, el enfoque los marca) y se pasa una
+    máscara de enfoque en dos tamaños. Suave a propósito: más fuerte, las caras quedaban como de plástico. Nada de IA:
+    inventa detalle y cambia las caras."""
+    a = cv2.cvtColor(np.asarray(im), cv2.COLOR_RGB2BGR)
+    a = cv2.resize(a, None, fx=2, fy=2, interpolation=cv2.INTER_LANCZOS4)
+    a = cv2.bilateralFilter(a, 5, 12, 3)
+    f = a.astype(np.float32)
+    f = f + .6 * (f - cv2.GaussianBlur(f, (0, 0), 2.2))
+    f = f + .3 * (f - cv2.GaussianBlur(f, (0, 0), 1.0))
+    return Image.fromarray(cv2.cvtColor(np.clip(f, 0, 255).astype(np.uint8), cv2.COLOR_BGR2RGB))
 
 # (fx, fy, z) al empezar y al terminar: fx/fy = dónde está la ventana dentro del espacio libre (0 = arriba/izquierda,
 # 1 = abajo/derecha); z = acercamiento (1 = la ventana más grande que entra en la foto).
@@ -57,11 +72,12 @@ def cuadro(im, W, H, a, b, u):
     return im.transform((W, H), Image.Transform.EXTENT, ventana(im, W, H, fx, fy, z), Image.Resampling.BICUBIC)
 
 def armar(nombre, W, H, plan, crf):
-    fotos = [Image.open(f'{FOTOS}/f{i:02d}.png').convert('RGB') for i in range(12)]
+    fotos = [realzar(Image.open(f'{FOTOS}/f{i:02d}.png').convert('RGB')) for i in range(12)]
     n = len(fotos); total = n * T; vida = T + X
     out = f'{SALIDA}/{nombre}.mp4'
     ff = subprocess.Popen(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}', '-r', str(FPS), '-i', '-',
-                           '-c:v', 'libx264', '-preset', 'slow', '-crf', str(crf), '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-an', out],
+                           '-c:v', 'libx264', '-preset', 'slow', '-crf', str(crf), '-profile:v', 'high', '-pix_fmt', 'yuv420p',
+                           '-movflags', '+faststart', '-an', out],
                           stdin=subprocess.PIPE)
     cuadros = round(total * FPS)
     for f in range(cuadros):
@@ -81,6 +97,8 @@ def armar(nombre, W, H, plan, crf):
     ff.stdin.close(); ff.wait()
     print(nombre, cuadros, 'cuadros')
 
-# crf 35: es un fondo con una capa rosa encima; así queda en 1,6 MB cada uno (con 30 eran 2,6 MB y no se notaba).
-armar('fusion-compu', 1280, 720, COMPU, 35)
-armar('fusion-celu', 720, 1280, CELU, 35)
+# Full HD (José, 13/11: más nitidez). La primera versión era 1280x720 con crf 35 (1,6 MB): en una pantalla de 1920 se
+# estiraba y la compresión borraba el detalle que quedaba. Con crf 22/23 eran 14,5 y 12,9 MB; con 26/27, 9,3 y 8,2 MB
+# y comparados de cerca no se distinguen (lo que se publicó salió de recomprimir los de 22/23 a 26/27).
+armar('fusion-compu-hd', 1920, 1080, COMPU, int(sys.argv[3]) if len(sys.argv) > 3 else 26)
+armar('fusion-celu-hd', 1080, 1920, CELU, int(sys.argv[4]) if len(sys.argv) > 4 else 27)
