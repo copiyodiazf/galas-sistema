@@ -343,8 +343,12 @@ Un servicio de Render por gala, todos del mismo código (en la cuenta de eventos
     Para otra gala: `CARGO_PCT = 100 × d / (100 − d)` con `d` = el % de la Distribución.
   - Usuarios (jose admin, florencia organizador, puerta1 y puerta2 control) en `backend/usuarios-panel-render-quinto.txt`.
   - Scripts contra esa base: `ENV_RENDER=render-env-quinto.txt USUARIOS_ARCHIVO=usuarios-panel-render-quinto.txt node herramientas/con-env-render.mjs <script>`.
-- **Santiago Rítmica** (tema `santiago-ritmica`): servicio `gala-santiago-ritmica` →
-  https://gala-santiago-ritmica.onrender.com (el nombre estaba libre el 13/11/2026). El servicio lo crea José.
+- **Santiago Rítmica** (tema `santiago-ritmica`): servicio `galas-santiago-ritmica` →
+  **https://galas-santiago-ritmica.onrender.com** (con "s"; lo creó José, en línea el 15/11/2026).
+  OJO: `render-env-ritmica.txt` traía `PUBLIC_URL` sin la "s" (gala-…) y el servicio arrancó así (la portada decía
+  `og:url` gala-…). Con eso los avisos de pago de Chytapay (`webhookUrl` de cada cobro), la vuelta de la conexión
+  de la cuenta y los enlaces de los mails van a una dirección que no existe: corregido el archivo el 15/11; en
+  Render hay que cambiar `PUBLIC_URL` antes de abrir la venta.
   - Base `gala_santiago_ritmica` en el Aiven de Rítmica (13/11/2026), con las tablas creadas por `crear-usuarios.mjs`.
   - Variables en `render-env-ritmica.txt` (git lo ignora): las de Oli con `QR_SECRET` y `CHYTAPAY_CLAVE_TOKENS`
     nuevos, `CHYTAPAY_SEDE=santiago-ritmica`, `CARGO_PCT=CARGO_PUNTO_PCT=10` (el 10 % va encima: Distribución 8,12)
@@ -353,8 +357,11 @@ Un servicio de Render por gala, todos del mismo código (en la cuenta de eventos
     `backend/usuarios-panel-render-ritmica.txt`.
   - galas-web quedó con 5222a51 (13/11/2026, 33/33 pruebas de etapas OK). Se publicó el último commit mientras otra
     ventana tenía sin commitear la portada con el video HD: al commitearla, publicar de nuevo y Manual Deploy.
-  - Falta (José): crear el servicio; en Chytapay, la redirect_uri `/chytapay/vuelta`, la sede `santiago-ritmica` con
-    `/api/webhooks/chytapay` y revisar que la Distribución siga en 8,12 ANTES de que Eugenia conecte.
+  - Falta (José): `PUBLIC_URL` con la "s" en Render; en Chytapay, la redirect_uri
+    `https://galas-santiago-ritmica.onrender.com/chytapay/vuelta`, la sede `santiago-ritmica` con
+    `https://galas-santiago-ritmica.onrender.com/api/webhooks/chytapay` y revisar que la Distribución siga en 8,12
+    ANTES de que Eugenia conecte. La base de producción todavía no tiene las funciones (`/api/config` sin eventos:
+    la portada dice "Las entradas salen muy pronto").
 
 ## Pendiente
 - Santiago Rítmica: que José confirme la numeración (el 1 a la derecha mirando al escenario), que la muestra sea
