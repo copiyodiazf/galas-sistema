@@ -230,6 +230,8 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
     sobre lo que le queda al comercio: con 8,12 % la escuela recibe $20.000,64 o $20.017,93, nunca menos de $20.000.
     Si la cuenta de la escuela factura sola en ARCA: Distribución ≈ 6,97 %. Confirmar con una venta real de El Quinto
     Elemento ($24.000 → a José le tendrían que haber llegado $1.766,40).
+    **José la cargó en 8,11 %** (16/11/2026), antes de que Eugenia conectara: por platea José $1.784,20 y la escuela
+    $20.002,84; zona verde $892,10 y $10.001,42. El sistema no lee ese porcentaje (solo lo aplica Chytapay).
     Los flyers están en `assets/flyer-*.webp`. Al de El Origen de Ser se le sacó la marca "CapCut AI" de arriba a
     la izquierda: se rellenó con el cielo de alrededor (OpenCV, inpaint).
   - **Segunda versión de la portada** (13/11/2026, pedido de José: "más contenido", logo más grande, el rosa de
