@@ -357,8 +357,10 @@ Un servicio de Render por gala, todos del mismo código (en la cuenta de eventos
     y `VENTA_ABIERTA=false` hasta que Eugenia conecte su cuenta.
   - Usuarios (jose admin, eugenia organizador, puerta1 y puerta2 control, boleteria venta) en
     `backend/usuarios-panel-render-ritmica.txt`.
-  - galas-web quedó con 5222a51 (13/11/2026, 33/33 pruebas de etapas OK). Se publicó el último commit mientras otra
-    ventana tenía sin commitear la portada con el video HD: al commitearla, publicar de nuevo y Manual Deploy.
+  - 16/11/2026: Eugenia conectó su cuenta de Chytapay (la titular es ella, con el nombre de fantasía de la escuela).
+  - 17/11/2026: galas-web con 1bae2cc (el video HD) y las 3 funciones **publicadas** en la base (se ven con precios;
+    la venta sigue cerrada por `VENTA_ABIERTA=false`). El servidor lee las funciones al arrancar: se ven después del
+    Manual Deploy. Abrir la venta = `VENTA_ABIERTA=true` en Render, cuando la escuela dé la fecha.
   - Falta (José): `PUBLIC_URL` con la "s" en Render; en Chytapay, la redirect_uri
     `https://galas-santiago-ritmica.onrender.com/chytapay/vuelta`, la sede `santiago-ritmica` con
     `https://galas-santiago-ritmica.onrender.com/api/webhooks/chytapay` y revisar que la Distribución siga en 8,12
