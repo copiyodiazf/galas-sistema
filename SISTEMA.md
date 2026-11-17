@@ -368,10 +368,11 @@ Un servicio de Render por gala, todos del mismo código (en la cuenta de eventos
     la portada dice "Las entradas salen muy pronto").
 
 ## Pendiente
-- Santiago Rítmica: que José confirme la numeración (el 1 a la derecha mirando al escenario), que la muestra sea
-  al mismo precio que las funciones, la hora de apertura de puertas, pasillos si hay, butacas a guardar y los textos
-  de la portada ("La muestra de la tarde, con la música de las grandes divas del pop" es una suposición). Probar la
-  portada en un celular de verdad (gama media). Base, usuarios y variables: hechos el 13/11/2026 (ver "En
-  producción"). Faltan el servicio en Render y la cuenta de Chytapay de la escuela.
+- Santiago Rítmica: **numeración confirmada** (José, 17/11/2026: "mirando hacia el escenario las butacas ascienden de
+  derecha a izquierda" = `asiento1: derecha`, como estaba). **Butacas guardadas**: toda la fila 1 (22) de la función de
+  las 21 h, cargadas en la base de producción el 17/11 (las 16 y 18 h, ninguna). Faltan: que la muestra sea al mismo
+  precio que las funciones, la hora de apertura de puertas, pasillos si hay y los textos de la portada ("La muestra
+  de la tarde, con la música de las grandes divas del pop" es una suposición). Probar la portada en un celular de
+  verdad (gama media). Servicio en Render y cuenta de Chytapay de la escuela: hechos (ver "En producción").
 - Adaptar `prueba-gala.mjs` a la cartelera.
 - Datos, logos y fotos de las otras galas del 13/12/2026.
