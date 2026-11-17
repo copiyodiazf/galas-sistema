@@ -201,6 +201,14 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
   está en cada butaca y si ya entró. La organización **guarda** butacas (no salen a la venta: familia, cámaras,
   invitados; `eventos.bloqueadas`) y da **cortesías** marcando butacas en el plano (pueden ser guardadas).
   La boletería vende tocando el plano y ve lo ocupado, no de quién. En la puerta, al escanear, sale la butaca en grande.
+- **Reservadas** (`eventos.reservadas`, Rítmica 17/11/2026): las invitaciones de la organización que **el panel no
+  nombra**. Eugenia pidió que se vieran ocupadas y que los paneles no hicieran referencia a ellas. Se ven grises, sin
+  número, en la compra y en el plano del panel de todos los usuarios, sin leyenda; tocarlas no hace nada. No cuentan
+  en ningún lado: no son libres ni guardadas, y "Butacas de la sala" de esa función las descuenta (337 − 28 = 309).
+  No salen a la venta ni en la boletería, ni como cortesía, y no se pueden guardar: la invitación va **por fuera del
+  sistema, sin QR** (en la puerta se deja pasar a mano). El panel no las edita: `herramientas/reservar-butacas.mjs
+  <evento> 1-* 2-10..13 3-13..14 [--aplicar]` (la lista reemplaza la anterior; "ninguna" las saca; una guardada pasa a
+  reservada; no reserva una vendida). La cartelera del panel (`/api/admin/eventos`) no las manda.
 - **Varias funciones con la misma sala:** cada evento de la ficha tiene sus propias butacas (lo vendido, guardado
   y pagándose es de ese evento). En la puerta, una entrada de otra función del mismo día dice "Es para … de las
   21:00 h: no es esta función" (antes, "hoy no vale", que confundía si las funciones son el mismo día).
@@ -369,8 +377,9 @@ Un servicio de Render por gala, todos del mismo código (en la cuenta de eventos
 
 ## Pendiente
 - Santiago Rítmica: **numeración confirmada** (José, 17/11/2026: "mirando hacia el escenario las butacas ascienden de
-  derecha a izquierda" = `asiento1: derecha`, como estaba). **Butacas guardadas**: toda la fila 1 (22) de la función de
-  las 21 h, cargadas en la base de producción el 17/11 (las 16 y 18 h, ninguna). Faltan: que la muestra sea al mismo
+  derecha a izquierda" = `asiento1: derecha`, como estaba). **Reservadas** para las invitaciones de Eugenia, en la
+  función de las 21 h: toda la fila 1 (22), la 10 a la 13 de la fila 2 y la 13 y 14 de la fila 3 (28; las 16 y 18 h,
+  ninguna). Primero se guardó la fila 1 a la vista; el mismo día pasó a reservada (ver "Reservadas"). Faltan: que la muestra sea al mismo
   precio que las funciones, la hora de apertura de puertas, pasillos si hay y los textos de la portada ("La muestra
   de la tarde, con la música de las grandes divas del pop" es una suposición). Probar la portada en un celular de
   verdad (gama media). Servicio en Render y cuenta de Chytapay de la escuela: hechos (ver "En producción").

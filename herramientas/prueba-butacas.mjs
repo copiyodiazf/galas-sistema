@@ -45,7 +45,7 @@ for (const [rol, usuario] of [['admin', 'jose'], ['organizador', 'eugenia'], ['c
 }
 for (const id of [EV, EV2, MUESTRA]) {
   const ev0 = await Evento.findByPk(id)
-  ev0.bloqueadas = []; ev0.publicado = false; ev0.tipos = TIPOS
+  ev0.bloqueadas = []; ev0.reservadas = []; ev0.publicado = false; ev0.tipos = TIPOS
   await ev0.save()
 }
 const login = async u => (await api('/api/admin/login', { metodo: 'POST', cuerpo: { usuario: u, password: CLAVE } })).d.token
@@ -154,6 +154,29 @@ ok(r.status === 200 && JSON.stringify((await Evento.findByPk(EV)).bloqueadas) ==
 r = await api('/api/admin/sala/bloquear', { metodo: 'POST', token: T.org, cuerpo: { evento: EV, butacas: ['7-3'], bloquear: false } })
 ok(r.status === 200 && !(await ocupadas()).has('7-3'), 'la que queda se larga de nuevo a la venta')
 
+// 5b) Reservadas para las invitaciones (Rítmica, 17/11/2026): ocupadas para todos y el panel no las nombra ni las cuenta
+const salaAntes = (await api(`/api/admin/sala?evento=${EV}`, { token: T.org })).d
+const evR = await Evento.findByPk(EV); evR.reservadas = ['9-1', '9-2', '9-3']; await evR.save()
+await api(`/api/admin/eventos/${EV}`, { metodo: 'PUT', token: T.org, cuerpo: {} })   // el panel recarga la cartelera
+oc = await ocupacion10()
+ok(['9-1', '9-2', '9-3'].every(id => oc.has(id)), 'las reservadas aparecen ocupadas en la compra')
+ok((await comprar(['9-2'], '30444556')).status === 409, 'no se pueden comprar online')
+r = await api('/api/admin/venta-punto', { metodo: 'POST', token: T.venta, cuerpo: { evento: EV, butacas: ['9-2'], cobro: 'efectivo', nombre: 'Juan Boleteria', email: 'juan9@ejemplo.com', dni: '30555699' } })
+ok(r.status === 409, 'ni en la boletería', JSON.stringify(r.d))
+r = await api('/api/admin/entrada-cortesia', { metodo: 'POST', token: T.org, cuerpo: { evento: EV, butacas: ['9-1'], nombre: 'Invitada', email: 'invitada@ejemplo.com' } })
+ok(r.status === 409, 'ni como cortesía (la invitación va por fuera del sistema)')
+r = await api('/api/admin/sala/bloquear', { metodo: 'POST', token: T.org, cuerpo: { evento: EV, butacas: ['9-3'], bloquear: true } })
+ok(r.status === 409, 'no se pueden guardar desde el panel')
+for (const [quien, token] of [['la organización', T.org], ['la boletería', T.venta], ['la puerta', T.puerta]]) {
+  const s = (await api(`/api/admin/sala?evento=${EV}`, { token })).d
+  ok(JSON.stringify(s.butacas['9-1']) === '{"estado":"ocupada"}' && s.total === salaAntes.total - 3 && s.cuentas.libres === salaAntes.cuentas.libres - 3
+    && s.cuentas.bloqueada === salaAntes.cuentas.bloqueada, `en el plano de ${quien}: ocupadas sin nombre, fuera del total y de las libres`, JSON.stringify({ b: s.butacas['9-1'], total: s.total, c: s.cuentas }))
+}
+ok(!JSON.stringify((await api('/api/admin/eventos', { token: T.admin })).d).includes('reservadas'), 'la cartelera del panel no las trae')
+evR.reservadas = []; await evR.save()
+await api(`/api/admin/eventos/${EV}`, { metodo: 'PUT', token: T.org, cuerpo: {} })
+ok(!(await ocupacion10()).has('9-2'), 'sin reservar, vuelven a estar libres')
+
 // 6) Boletería
 r = await api('/api/admin/venta-punto', { metodo: 'POST', token: T.venta, cuerpo: { evento: EV, butacas: ['8-5', '8-6'], cobro: 'efectivo', nombre: 'Juan Boleteria', email: 'juan@ejemplo.com', dni: '30555666' } })
 ok(r.status === 200 && r.d.total === 44000 && r.d.qrs[0].butaca === 'Fila 8 · Asiento 5', 'la boletería vende 2 butacas elegidas en el plano y el QR sale con la butaca', JSON.stringify(r.d))
@@ -233,7 +256,7 @@ ok(r.status === 404, 'el plano de un evento que no existe da 404')
 
 // Limpieza (base local): sin compras y sin guardadas; el evento queda oculto como en la ficha
 await Entrada.destroy({ where: {} }); await Orden.destroy({ where: {} }); await SinImputar.destroy({ where: {} })
-for (const id of [EV, EV2, MUESTRA]) { const evF = await Evento.findByPk(id); evF.bloqueadas = []; evF.publicado = false; await evF.save() }
+for (const id of [EV, EV2, MUESTRA]) { const evF = await Evento.findByPk(id); evF.bloqueadas = []; evF.reservadas = []; evF.publicado = false; await evF.save() }
 console.log(`\n${total - fallas} de ${total} bien${fallas ? `, ${fallas} MAL` : ''}`)
 await sequelize.close()
 process.exit(fallas ? 1 : 0)

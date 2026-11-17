@@ -20,7 +20,7 @@ const pct = (a, p) => a.length ? a.slice().sort((x, y) => x - y)[Math.min(a.leng
 const ev = await Evento.findByPk(EV)
 if (!ev?.publicado) { console.log('La función de las 18 h tiene que estar publicada (corré la muestra antes)'); process.exit(1) }
 await Entrada.destroy({ where: {} }); await Orden.destroy({ where: {} }); await SinImputar.destroy({ where: {} })
-ev.bloqueadas = []; await ev.save()
+ev.bloqueadas = []; ev.reservadas = []; await ev.save()
 
 const cfg = await fetch(BASE + '/api/config').then(r => r.json())
 const sala = cfg.sitio.sala
