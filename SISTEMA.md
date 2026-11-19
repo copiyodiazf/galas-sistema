@@ -208,6 +208,17 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
     una hora y con 10 se perjudica al que ya pagó: lo que frena la butaca sin pagar es ahora el tiempo de antes.
     Con sala, `RESERVA_MINUTOS` pasa a ser ese valor: el panel muestra "pagando" ese tiempo y retomar pide 5 minutos
     de margen.
+  - **Y después de la hora, las butacas NO se sueltan solas** (José, 19/11/2026: un banco que demora no es culpa del
+    papá). La compra que llegó al cobro (ya tiene el CVU) queda **retenida** (`RETENIDAS`/`retenida` en server.js;
+    `ordenes.liberadaEn` y `liberadaPor`, columnas aparte porque el estado es un ENUM): sus butacas siguen ocupadas
+    hasta que llega el pago (se emite con esas mismas), la organización las libera o la misma persona (DNI y email)
+    vuelve a comprar y elige otras (`liberadaPor: 'comprador'`). En el panel: "Vencidas con butacas guardadas:
+    revisar" en el resumen, el filtro "Vencidas con butacas" en Operaciones y las butacas en naranja en la Sala, con
+    el nombre. **Liberar sus butacas** (`POST /api/admin/orden/:id/liberar`, admin y organizador) antes le pregunta a
+    Chytapay si se pagó (si sí, emite en vez de liberar), no deja si hay una transferencia suya en "sin asignar" ni
+    mientras siga dentro de la hora. Si el pago llega después de liberarla, se emite igual: con sus butacas si siguen
+    libres o con las mejores que queden. El mail de "todavía no nos llegó el pago" le dice que sus butacas siguen
+    guardadas, y "Retomar mi compra" abre la compra con ellas elegidas (`?orden=…&butacas=…`).
   - La misma persona (DNI y email) que vuelve a elegir **libera** sus compras sin pagar de esa fecha. Con las mismas
     butacas, retoma el mismo cobro.
   - El navegador guarda su compra sin pagar (`sessionStorage`) y el plano le muestra esas butacas como suyas
