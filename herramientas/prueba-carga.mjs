@@ -27,10 +27,10 @@ const sala = cfg.sitio.sala
 // Las filas de platea, de adelante para atrás, con sus números de butaca
 const filas = sala.filas.filter(f => f.tipo !== 'zona-verde').map(f => ({ fila: f.fila, nums: f.bloques.filter(b => !b.hueco).flatMap(b => Array.from({ length: b.hasta - b.desde + 1 }, (_, i) => b.desde + i)) }))
 
-async function comprar(butacas, n, ip) {
+async function comprar(butacas, n, ip, cliente) {
   const t0 = performance.now()
   const r = await fetch(BASE + '/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': ip },
-    body: JSON.stringify({ evento: EV, butacas, nombre: 'Familia ' + letras(n), email: `familia${n}@ejemplo.com`, dni: String(40000000 + n) }) })
+    body: JSON.stringify({ evento: EV, butacas, nombre: 'Familia ' + letras(n), email: `familia${n}@ejemplo.com`, dni: String(40000000 + n), cliente }) })
   const d = await r.json().catch(() => ({}))
   return { status: r.status, d, ms: performance.now() - t0 }
 }
@@ -52,23 +52,59 @@ async function mejoresLibres(k, ip, sala) {
   return null
 }
 
+// Con butacas apartadas al tocarlas (19/11/2026, lo que hace la compra ahora): la familia toca sus butacas de a una,
+// como en el celular. Si alguna ya la tocó otro, suelta las que tenía, mira el plano que vino en la respuesta y elige
+// otras. Con todas apartadas, tarda unos segundos en completar sus datos y va a pagar. Con "sin" como 6.º argumento,
+// como antes: va directo a pagar sin tocar (para comparar).
+const APARTAR = process.argv[6] !== 'sin'
+const TOQUES = []   // cuánto tardó cada toque
+async function tocar(cliente, butaca, ip, soltar = false) {
+  const t0 = performance.now()
+  const r = await fetch(BASE + '/api/sala/apartar', { method: 'POST', headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': ip },
+    body: JSON.stringify({ evento: EV, cliente, butaca, soltar }) })
+  const d = await r.json().catch(() => ({}))
+  if (!soltar) TOQUES.push(performance.now() - t0)
+  return { status: r.status, d }
+}
+async function apartarTodas(cliente, butacas, ip) {
+  const tengo = []
+  for (const b of butacas) {
+    const r = await tocar(cliente, b, ip)
+    if (r.status === 200) { tengo.push(b); continue }
+    for (const x of tengo) await tocar(cliente, x, ip, true)
+    return { ok: false, status: r.status, sala: r.d.ocupadas, error: r.d.error }
+  }
+  return { ok: true }
+}
+
 async function familia(n, ip) {
   const k = 2 + Math.floor(Math.random() * 3)                // 2 a 4 entradas
   // Primer intento: todas apuntan a las filas 1 a 4, al centro (lo que haría cada papá)
   const f = filas[Math.floor(Math.random() * 4)]
   const centro = Math.floor(f.nums.length / 2) + Math.floor(Math.random() * 9) - 4
   let butacas = f.nums.slice(Math.max(0, centro - Math.floor(k / 2)), Math.max(0, centro - Math.floor(k / 2)) + k).map(x => `${f.fila}-${x}`)
-  const intentos = []
+  const intentos = [], cliente = `carga-${n}-${Math.random().toString(36).slice(2, 10)}`
+  let choques = 0   // veces que tocó una butaca que ya había tocado otro
   for (let i = 0; i < 10; i++) {
-    const r = await comprar(butacas, n, ip)
-    intentos.push(r)
-    if (r.status === 200) return { ok: true, intentos, butacas, fila: Number(butacas[0].split('-')[0]) }
-    if (r.status !== 409) return { ok: false, intentos, motivo: `${r.status} ${r.d.error || ''}`.slice(0, 90) }
+    let sala = null
+    if (APARTAR) {
+      const a = await apartarTodas(cliente, butacas, ip)
+      if (!a.ok && a.status !== 409) return { ok: false, intentos, choques, motivo: `toque ${a.status} ${a.error || ''}`.slice(0, 90) }
+      if (!a.ok) { choques++; sala = a.sala }
+      else await new Promise(z => setTimeout(z, 2000 + Math.random() * 6000))   // completa nombre, email y DNI
+    }
+    if (!sala) {
+      const r = await comprar(butacas, n, ip, APARTAR ? cliente : undefined)
+      intentos.push(r)
+      if (r.status === 200) return { ok: true, intentos, choques, butacas, fila: Number(butacas[0].split('-')[0]) }
+      if (r.status !== 409) return { ok: false, intentos, choques, motivo: `${r.status} ${r.d.error || ''}`.slice(0, 90) }
+      sala = r.d.sala
+    }
     await new Promise(z => setTimeout(z, 1500 + Math.random() * 3500))   // una persona tarda en volver a elegir
-    butacas = await mejoresLibres(k, ip, r.d.sala)            // chocó: mira el plano (el que trajo el choque) y elige otras
-    if (!butacas) return { ok: false, intentos, motivo: 'no quedan butacas juntas' }
+    butacas = await mejoresLibres(k, ip, sala)            // chocó: mira el plano (el que trajo el choque) y elige otras
+    if (!butacas) return { ok: false, intentos, choques, motivo: 'no quedan butacas juntas' }
   }
-  return { ok: false, intentos, motivo: 'se cansó (10 intentos)' }
+  return { ok: false, intentos, choques, motivo: 'se cansó (10 intentos)' }
 }
 
 function informe(titulo, res, total) {
@@ -78,9 +114,16 @@ function informe(titulo, res, total) {
   console.log(`\n── ${titulo} ──`)
   console.log(`${res.length} familias a la vez · todo resuelto en ${ms(total)} ms`)
   console.log(`compraron: ${ok.length} · sin comprar: ${mal.length}${mal.length ? ' → ' + JSON.stringify(motivos) : ''}`)
-  console.log(`primer intento: ${primeras.filter(x => x.status === 200).length} consiguieron lo que eligieron, ${primeras.filter(x => x.status === 409).length} chocaron con otra familia`)
-  console.log(`intentos hasta comprar: ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => `${i}→${ok.filter(r => r.intentos.length === i).length}`).join('  ')}`)
-  console.log(`respuesta del servidor por intento: mediana ${ms(pct(todas.map(x => x.ms), .5))} ms · 95 % ${ms(pct(todas.map(x => x.ms), .95))} ms · peor ${ms(Math.max(...todas.map(x => x.ms)))} ms`)
+  if (APARTAR) {
+    console.log(`al tocar: ${res.filter(r => !r.choques).length} se quedaron con lo primero que tocaron, ${res.filter(r => r.choques).length} tocaron alguna que ya era de otro y eligieron otras`)
+    console.log(`al ir a pagar: ${todas.filter(x => x.status === 409).length} compras rechazadas porque la butaca ya no era suya (con lo apartado al tocar tendría que ser 0)`)
+    console.log(`respuesta a cada toque: mediana ${ms(pct(TOQUES, .5))} ms · 95 % ${ms(pct(TOQUES, .95))} ms · peor ${ms(Math.max(...TOQUES))} ms (${TOQUES.length} toques)`)
+    TOQUES.length = 0
+  } else {
+    console.log(`primer intento: ${primeras.filter(x => x?.status === 200).length} consiguieron lo que eligieron, ${primeras.filter(x => x?.status === 409).length} chocaron con otra familia`)
+    console.log(`intentos hasta comprar: ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => `${i}→${ok.filter(r => r.intentos.length === i).length}`).join('  ')}`)
+  }
+  if (todas.length) console.log(`respuesta del servidor al ir a pagar: mediana ${ms(pct(todas.map(x => x.ms), .5))} ms · 95 % ${ms(pct(todas.map(x => x.ms), .95))} ms · peor ${ms(Math.max(...todas.map(x => x.ms)))} ms`)
   const porFila = {}; for (const r of ok) porFila[r.fila] = (porFila[r.fila] || 0) + 1
   console.log(`dónde quedaron (fila → familias): ${Object.entries(porFila).sort((a, b) => a[0] - b[0]).map(([f, c]) => `${f}→${c}`).join('  ')}`)
 }

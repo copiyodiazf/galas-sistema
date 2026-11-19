@@ -186,10 +186,28 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
   boletería y compras a tiempo de pagarse) y `apartarButacas`, siempre con el bloqueo del cupo tomado.
   - Con sala, la capacidad de cada tipo son sus butacas (sin las guardadas): el cupo cargado no cuenta.
   - Una compra es de **un solo tipo**: butacas de zonas con distinto precio se compran por separado.
-  - **Apartadas solo 10 minutos** (`RESERVA_BUTACAS_MINUTOS`, de 5 a 30; José, 11/11/2026: nada de butacas
-    reservadas sin la plata acreditada). Con sala, `RESERVA_MINUTOS` pasa a ser ese valor: el cobro de Chytapay
-    vence a la vez, el panel muestra "pagando" ese tiempo y retomar pide 3 minutos de margen. No se apartan cero
-    minutos: dos personas pagarían la misma butaca y a una le tocaría otra que no eligió.
+  - **La butaca es del primero que la toca** (José, 19/11/2026; `backend/apartadas.js`, `POST /api/sala/apartar`).
+    Antes se apartaba recién al tocar «Ir a pagar»: en la apertura dos familias elegían la misma, completaban sus
+    datos y a la segunda le decían que ya no estaba. Ahora tocarla la aparta para ese navegador (un número que
+    inventa la compra, `cliente`) por **15 minutos** (`APARTAR_BUTACAS_MINUTOS`, de 3 a 30) mientras completa los
+    datos, con la cuenta regresiva a la vista. Sumar butacas no estira el tiempo (corre desde la primera); si no va a
+    pagar, se liberan solas, y también al cerrar la página (`/api/sala/soltar`). Para los demás se ven ocupadas: no
+    se pueden apartar, comprar, vender en la boletería, dar como cortesía ni guardar; el panel las muestra
+    "Eligiéndose en la web". Viven **en memoria**, no en la base: cada toque contesta en milisegundos aunque toquen
+    cientos a la vez (en la base harían cola detrás del bloqueo de la compra), y Node atiende de a un pedido, así que
+    mirar si está libre y apartarla no se puede pisar. Un reinicio las pierde, pero no vende nada dos veces: eso lo
+    sigue cuidando la compra con la base bloqueada. Topes: las de una compra (`MAX_ENTRADAS`) y 120 por conexión
+    (`MAX_APARTADAS_IP`); toques, 300 por minuto (`MAX_TOQUES_IP_MINUTO`). El plano de la compra se pone al día cada
+    8 s (antes 20) y `MAX_SALA_IP_MINUTO` subió a 300. Un pago que llega tarde se queda con sus butacas aunque otro
+    las esté eligiendo (a ese se le sacan); si necesita otras, no toma las que alguien está eligiendo.
+    Prueba de carga con toques (`prueba-carga.mjs`, "sin" como 6.º argumento para comparar): 60 familias a la vez,
+    las 60 compraron, 0 rechazadas al ir a pagar, 0 butacas dobles, toque en 20 ms de mediana.
+  - **Una hora para transferir** (`RESERVA_BUTACAS_MINUTOS`, de 10 a 60; José, 19/11/2026). Al tocar «Ir a pagar»
+    lo apartado pasa a la compra y el cobro de Chytapay vence a la hora (su máximo). Primero eran 10 minutos (11/11:
+    nada de butacas reservadas sin la plata acreditada), pero en la gala de patín una transferencia tardó cerca de
+    una hora y con 10 se perjudica al que ya pagó: lo que frena la butaca sin pagar es ahora el tiempo de antes.
+    Con sala, `RESERVA_MINUTOS` pasa a ser ese valor: el panel muestra "pagando" ese tiempo y retomar pide 5 minutos
+    de margen.
   - La misma persona (DNI y email) que vuelve a elegir **libera** sus compras sin pagar de esa fecha. Con las mismas
     butacas, retoma el mismo cobro.
   - El navegador guarda su compra sin pagar (`sessionStorage`) y el plano le muestra esas butacas como suyas
@@ -383,5 +401,7 @@ Un servicio de Render por gala, todos del mismo código (en la cuenta de eventos
   precio que las funciones, la hora de apertura de puertas, pasillos si hay y los textos de la portada ("La muestra
   de la tarde, con la música de las grandes divas del pop" es una suposición). Probar la portada en un celular de
   verdad (gama media). Servicio en Render y cuenta de Chytapay de la escuela: hechos (ver "En producción").
+  La venta abre **las tres funciones a la vez** (José, 19/11/2026): sin apertura por función ni cola virtual por
+  ahora; la butaca se aparta al tocarla y hay una hora para transferir (ver "Butacas numeradas").
 - Adaptar `prueba-gala.mjs` a la cartelera.
 - Datos, logos y fotos de las otras galas del 13/12/2026.

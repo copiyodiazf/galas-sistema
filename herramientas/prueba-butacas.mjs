@@ -6,6 +6,7 @@
 import { readFileSync } from 'fs'
 import { createHmac, randomBytes, scryptSync } from 'crypto'
 import { sequelize, Orden, Entrada, SinImputar, Usuario, Evento } from '../backend/models/index.js'
+import { crearApartadas } from '../backend/apartadas.js'
 
 if (process.env.DB_NAME !== 'gala_ritmica') { console.log('Esta prueba borra compras: solo corre contra la base local gala_ritmica (DB_NAME=gala_ritmica)'); process.exit(1) }
 const BASE = `http://localhost:${process.argv[2] || 3047}`
@@ -92,12 +93,14 @@ ok(r.status === 400 && /hasta 10/.test(r.d.error), 'más de 10 butacas por compr
 r = await comprar([], '30222333')
 ok(r.status === 400, 'sin butacas no se puede comprar')
 
-// 2b) Apartadas solo 10 minutos: sin la plata acreditada, las butacas no quedan reservadas
-ok(cfg.reservaMinutos === 10 && c1.d.pago?.minutos === 10, 'con butacas se apartan 10 minutos, y el cobro de Chytapay vence a los 10 (no la hora de las otras galas)')
+// 2b) Una hora para transferir (José, 19/11/2026: en patín una transferencia tardó casi una hora; antes eran 10 minutos)
+ok(cfg.reservaMinutos === 60 && c1.d.pago?.minutos === 60, 'al ir a pagar, las butacas quedan apartadas 60 minutos y el cobro de Chytapay vence a la hora', `${cfg.reservaMinutos} ${c1.d.pago?.minutos}`)
 const lenta = await comprar(['10-1', '10-2'], '31000111')
-await Orden.update({ createdAt: new Date(Date.now() - 11 * 60000) }, { where: { id: lenta.d.orderId } })   // el aviso de vencido todavía no llegó
+await Orden.update({ createdAt: new Date(Date.now() - 50 * 60000) }, { where: { id: lenta.d.orderId } })
+ok((await ocupacion10()).has('10-1'), 'a los 50 minutos sin acreditarse, sus butacas siguen siendo suyas')
+await Orden.update({ createdAt: new Date(Date.now() - 61 * 60000) }, { where: { id: lenta.d.orderId } })   // el aviso de vencido todavía no llegó
 oc = await ocupacion10()
-ok(!oc.has('10-1') && !oc.has('10-2'), 'a los 11 minutos sin acreditarse, sus butacas ya están libres (aunque no haya llegado el aviso de vencido)')
+ok(!oc.has('10-1') && !oc.has('10-2'), 'a los 61 minutos, sus butacas ya están libres (aunque no haya llegado el aviso de vencido)')
 const rapida = await comprar(['10-2', '10-3'], '31000222')
 ok(rapida.status === 200, 'y otra persona puede tomarlas')
 await aviso({ event: 'payment.unmatched', reason: 'expired', amount: 44000, payerName: 'LENTA', payerCuil: 20310001115,
@@ -107,12 +110,118 @@ const oLenta = await Orden.findByPk(lenta.d.orderId)
 ok(oLenta.estado === 'pagada' && !String(oLenta.butacas).split(',').includes('10-2') && String(oLenta.butacas).split(',').length === 2,
   'su transferencia llega tarde desde su cuenta: se emite sola, con otras 2 juntas (la 10-2 ya la tomó otra persona)', `${oLenta.estado} ${oLenta.butacas}`)
 const lenta2 = await comprar(['11-5'], '31000333')
-await Orden.update({ createdAt: new Date(Date.now() - 11 * 60000) }, { where: { id: lenta2.d.orderId } })
+await Orden.update({ createdAt: new Date(Date.now() - 61 * 60000) }, { where: { id: lenta2.d.orderId } })
 await aviso({ event: 'payment.unmatched', reason: 'expired', amount: 22000, payerName: 'LENTA DOS', payerCuil: 27310003334,
   paymentRequest: { referenceId: lenta2.d.orderId }, operationDate: new Date().toISOString() })
 await espera(900)
 const oLenta2 = await Orden.findByPk(lenta2.d.orderId)
 ok(oLenta2.estado === 'pagada' && oLenta2.butacas === '11-5', 'si sus butacas siguen libres cuando llega, se queda con las que eligió', `${oLenta2.estado} ${oLenta2.butacas}`)
+
+// 2c) La butaca es del primero que la toca (José, 19/11/2026): queda apartada para él 15 minutos mientras completa
+// sus datos; si no va a pagar, se libera. Antes se apartaba recién al tocar «Ir a pagar».
+{
+  const cli = x => `cliente-prueba-${x}-${randomBytes(4).toString('hex')}`
+  const A = cli('a'), B = cli('b'), C = cli('c'), D = cli('d'), E = cli('e')
+  const tocar = (cliente, butaca, extra = {}) => api('/api/sala/apartar', { metodo: 'POST', cuerpo: { evento: EV, cliente, butaca, ...extra } })
+  const salaDe = async cliente => (await api(`/api/sala?evento=${EV}&cliente=${cliente}`)).d
+  const creadas = []
+  ok(cfg.apartarMinutos === 15, 'config: al tocarlas, las butacas quedan apartadas 15 minutos', String(cfg.apartarMinutos))
+  r = await tocar(A, '12-10')
+  ok(r.status === 200 && r.d.mias?.includes('12-10') && r.d.quedan > 14 * 60 && r.d.quedan <= 15 * 60, 'A toca la 12-10: es suya por 15 minutos', JSON.stringify(r.d).slice(0, 160))
+  r = await tocar(B, '12-10')
+  ok(r.status === 409 && /otra persona/.test(r.d.error) && r.d.ocupadas?.includes('12-10'), 'B la toca un momento después: "ya la eligió otra persona", y su plano la muestra ocupada', JSON.stringify(r.d).slice(0, 160))
+  ok((await salaDe(B)).ocupadas.includes('12-10') && !(await salaDe(A)).ocupadas.includes('12-10') && (await salaDe(A)).mias.includes('12-10'),
+    'en el plano de B está ocupada; en el de A, elegida')
+  ok((await ocupadas()).has('12-10'), 'y para cualquiera que mira el plano')
+  const juntos = await Promise.all([A, B, C].map(x => tocar(x, '12-11')))
+  ok(juntos.filter(x => x.status === 200).length === 1 && juntos.filter(x => x.status === 409).length === 2, 'tres tocan la 12-11 en el mismo instante: una sola se la queda', juntos.map(x => x.status).join(','))
+  const gana11 = [A, B, C][juntos.findIndex(x => x.status === 200)]
+  await tocar(gana11, '12-11', { soltar: true })
+  ok(!(await salaDe(B)).ocupadas.includes('12-11'), 'la suelta (la toca de nuevo) y queda libre para los demás')
+
+  // Nadie más la puede comprar mientras A la tiene apartada: ni online, ni en la boletería, ni como cortesía
+  r = await api('/api/orders', { metodo: 'POST', cuerpo: { evento: EV, butacas: ['12-10'], nombre: 'Bruno Prueba', email: 'b31500111@ejemplo.com', dni: '31500111', cliente: B } })
+  ok(r.status === 409 && r.d.ocupadas?.includes('12-10'), 'B no puede comprarla aunque vaya directo a pagar')
+  r = await api('/api/admin/venta-punto', { metodo: 'POST', token: T.venta, cuerpo: { evento: EV, butacas: ['12-10'], cobro: 'efectivo', nombre: 'Juan Boleteria', email: 'juan12@ejemplo.com', dni: '30555612' } })
+  ok(r.status === 409, 'ni la boletería', JSON.stringify(r.d))
+  r = await api('/api/admin/entrada-cortesia', { metodo: 'POST', token: T.org, cuerpo: { evento: EV, butacas: ['12-10'], nombre: 'Invitada', email: 'inv12@ejemplo.com' } })
+  ok(r.status === 409, 'ni como cortesía')
+  r = await api('/api/admin/sala/bloquear', { metodo: 'POST', token: T.org, cuerpo: { evento: EV, butacas: ['12-10'], bloquear: true } })
+  ok(r.status === 409 && /eligiendo/.test(r.d.error), 'ni se puede guardar', JSON.stringify(r.d))
+  for (const [quien, token] of [['la organización', T.org], ['la boletería', T.venta]]) {
+    const s = (await api(`/api/admin/sala?evento=${EV}`, { token })).d
+    ok(s.butacas['12-10']?.estado === 'eligiendo' && s.cuentas.eligiendo === 1, `el plano de ${quien} la muestra "eligiéndose en la web" y la cuenta`, JSON.stringify({ b: s.butacas['12-10'], c: s.cuentas }))
+  }
+
+  // A va a pagar: la compra se queda con la butaca y lo apartado se suelta (ahora la cuida la hora para transferir)
+  r = await api('/api/orders', { metodo: 'POST', cuerpo: { evento: EV, butacas: ['12-10'], nombre: 'Ana Apartada', email: 'a31500222@ejemplo.com', dni: '31500222', cliente: A } })
+  ok(r.status === 200 && r.d.pago?.minutos === 60, 'A va a pagar: su compra sale bien, con una hora para transferir', JSON.stringify(r.d).slice(0, 160))
+  creadas.push(r.d.orderId)
+  const sA = await salaDe(A)
+  ok(sA.mias.length === 0 && sA.quedan === null, 'lo apartado al tocar se soltó: ya no corre su reloj de 15 minutos')
+  ok((await salaDe(B)).ocupadas.includes('12-10'), 'y para los demás sigue ocupada (se está pagando)')
+  // Su compra sin pagar: si vuelve a elegir esas butacas, son suyas
+  r = await tocar(A, '12-10', { orden: r.d.orderId })
+  ok(r.status === 200, 'si la suelta y la vuelve a tocar con su compra sin pagar, puede (es suya)')
+  await tocar(A, '12-10', { soltar: true })
+
+  // Tope por compra
+  for (let i = 1; i <= 10; i++) await tocar(D, `13-${i}`)
+  r = await tocar(D, '13-11')
+  ok(r.status === 409 && /hasta 10/.test(r.d.error) && r.d.mias.length === 10, 'más de 10 apartadas a la vez: se rechaza la 11.ª', JSON.stringify(r.d).slice(0, 120))
+  await api('/api/sala/soltar', { metodo: 'POST', cuerpo: { evento: EV, cliente: D } })
+  ok((await salaDe(D)).mias.length === 0 && !(await salaDe(B)).ocupadas.includes('13-5'), 'al cerrar la página se sueltan todas juntas')
+  r = await tocar(E, '15-1')
+  ok(r.status === 400, 'una butaca que no existe se rechaza')
+  r = await api('/api/sala/apartar', { metodo: 'POST', cuerpo: { evento: EV, cliente: 'corto', butaca: '12-1' } })
+  ok(r.status === 400, 'sin un número de navegador válido, no se aparta')
+  r = await tocar(E, '6-1')
+  ok(r.status === 409, 'una que se está pagando no se aparta', JSON.stringify(r.d).slice(0, 120))
+
+  // Pago que llega tarde: el que pagó se queda con sus butacas aunque otro las esté eligiendo
+  const x = await comprar(['12-20', '12-21'], '31500333')
+  creadas.push(x.d.orderId)
+  await aviso({ event: 'payment_request.expired', referenceId: x.d.orderId, stateType: 'overdue', paidAmount: 0 })
+  await espera(400)
+  await Orden.update({ createdAt: new Date(Date.now() - 2 * 3600e3) }, { where: { id: x.d.orderId } })
+  await espera(3100)   // el plano tiene 3 s de caché y el vencimiento se cambió directo en la base
+  r = await tocar(E, '12-20')
+  ok(r.status === 200, 'su compra venció: E toca la 12-20, que quedó libre')
+  await aviso({ event: 'payment_request.payment_received', referenceId: x.d.orderId, stateType: 'total_payment', paidAmount: 44000, reconciledPayerName: 'TARDE APARTADA' })
+  await espera(900)
+  const oX = await Orden.findByPk(x.d.orderId)
+  ok(oX.estado === 'pagada' && oX.butacas === '12-20,12-21', 'llega su transferencia: se queda con las suyas (pagó primero)', `${oX.estado} ${oX.butacas}`)
+  const sE = await salaDe(E)
+  ok(!sE.mias.includes('12-20') && sE.ocupadas.includes('12-20'), 'a E se le saca de lo apartado y le aparece ocupada (en la pantalla: "Se ocupó")')
+
+  // Limpieza de esta parte (lo que sigue cuenta butacas)
+  for (const c of [A, B, C, D, E]) await api('/api/sala/soltar', { metodo: 'POST', cuerpo: { evento: EV, cliente: c } })
+  await Entrada.destroy({ where: { orden_id: creadas } }); await Orden.destroy({ where: { id: creadas } })
+  await espera(3100)
+}
+
+// 2d) El reloj de lo apartado, sin esperar 15 minutos (backend/apartadas.js con un reloj de mentira)
+{
+  let t = 0
+  const ap = crearApartadas({ minutos: 15, maxPorCliente: 3, maxPorIp: 4, reloj: () => t })
+  const h = ap.apartar('ev', 'c1', '1-1', 'ip1').hasta
+  t = 10 * 60000
+  ok(ap.apartar('ev', 'c1', '1-2', 'ip1').hasta === h, 'sumar otra butaca no estira el tiempo (corre desde la primera)')
+  ok(ap.apartar('ev', 'c2', '1-1', 'ip2').error === 'ajena', 'a los 10 minutos sigue siendo de c1')
+  t = 15 * 60000 + 1
+  ok(ap.de('ev', 'c1') === null && ap.apartar('ev', 'c2', '1-1', 'ip2').hasta === t + 15 * 60000, 'a los 15 minutos se libera sola y otro la puede tomar')
+  ap.apartar('ev', 'c3', '2-1', 'ip3'); ap.apartar('ev', 'c3', '2-2', 'ip3'); ap.apartar('ev', 'c3', '2-3', 'ip3')
+  ok(ap.apartar('ev', 'c3', '2-4', 'ip3').error === 'tope', 'tope por navegador')
+  ap.apartar('ev', 'c4', '3-1', 'ip3')
+  ok(ap.apartar('ev', 'c5', '3-2', 'ip3').error === 'tope_ip', 'tope por conexión')
+  ap.soltar('ev', 'c4', '3-1')
+  t += 60000
+  ok(ap.apartar('ev', 'c4', '3-1', 'ip1').hasta === t + 15 * 60000, 'el que soltó todo arranca de cero la próxima vez')
+  ap.quitar('ev', ['2-1'])
+  ok(!ap.de('ev', 'c3').butacas.includes('2-1') && ap.todas('ev').length === 4, 'a un pago que llegó tarde se le dan las suyas aunque otro las tenga apartadas', JSON.stringify(ap.todas('ev')))
+  t += 20 * 60000
+  ok(ap.purgar() >= 2 && ap.todas('ev').length === 0, 'lo vencido se borra de la memoria')
+}
 
 // 3) Zonas con otro precio: el evento tiene el tipo "zona-verde" y la fila 14 es de ese tipo
 r = await comprar(['14-1', '5-1'], '30333444')
