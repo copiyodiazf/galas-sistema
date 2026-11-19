@@ -358,6 +358,13 @@ const sVenta = (await api(`/api/admin/sala?evento=${EV}`, { token: T.venta })).d
 ok(sVenta.butacas['6-1']?.estado === 'vendida' && !sVenta.butacas['6-1'].nombre, 'la boletería ve qué está ocupado, pero no de quién')
 const res = (await api(`/api/admin/resumen?evento=${EV}`, { token: T.org })).d
 ok(res.tipos.platea.cupo === 321 && res.tipos['zona-verde'].cupo === 16, 'resumen: la capacidad de cada tipo son sus butacas (321 platea, 16 zona verde)', JSON.stringify(res.tipos))
+// Las cortesías ocupan lugar pero no son venta (José, 19/11/2026)
+const sumaTipos = k => Object.values(res.tipos).reduce((s, t) => s + t[k], 0)
+ok(sumaTipos('vendidas') === 7 && sumaTipos('cortesias') === 2 && res.tipos.platea.cortesias === 2 && res.entradas === 7 && res.cortesias === 2,
+  'resumen: las 2 cortesías no cuentan como vendidas (7 vendidas y 2 de cortesía aparte)', JSON.stringify(res.tipos))
+ok(Object.values(res.tipos).every(t => t.libres === t.cupo - t.vendidas - t.cortesias - t.reservadas), 'resumen: las cortesías siguen ocupando lugar (no quedan libres)', JSON.stringify(res.tipos))
+const enCartelera = (await api('/api/admin/eventos', { token: T.org })).d.eventos.find(e => e.id === EV)
+ok(enCartelera.vendidas === 7 && enCartelera.cortesias === 2, 'cartelera: 7 vendidas y 2 de cortesía aparte', JSON.stringify({ vendidas: enCartelera.vendidas, cortesias: enCartelera.cortesias }))
 const ops = (await api(`/api/admin/operaciones?evento=${EV}&estado=pagada`, { token: T.org })).d
 ok(ops.ordenes.some(o => o.butacas === 'Fila 6: 1, 2'), 'operaciones: cada compra con sus butacas')
 const csv = await fetch(`${BASE}/api/admin/exportar?evento=${EV}`, { headers: { Authorization: 'Bearer ' + T.org } }).then(x => x.text())

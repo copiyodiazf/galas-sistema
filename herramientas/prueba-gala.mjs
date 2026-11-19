@@ -115,9 +115,10 @@ ok((await api('/api/admin/venta-punto', { metodo: 'POST', token: T.org, cuerpo: 
 ok((await api('/api/admin/chytapay', { token: T.org })).status === 403, 'la academia NO ve la configuración de Chytapay')
 ok((await api('/api/admin/resumen', { token: T.puerta })).status === 403, 'la puerta NO ve el resumen')
 const res = (await api('/api/admin/resumen', { token: T.org })).d
-// 18 h: 2 + 1 + 1 (tardía) online, 3 en boletería y 2 cortesías = 9. Para la academia: 7 × 10.000 + 2 × 12.000 (21 h) = 94.000.
-ok(res.tipos.f18.vendidas === 9 && res.tipos.f21.vendidas === 2 && res.recaudado === 94000 && res.sinImputar === 1,
-  `resumen: 9 vendidas de las 18 h, 2 de las 21 h, $94.000 para la academia y 1 sin asignar (${res.tipos?.f18?.vendidas}, ${res.recaudado})`)
+// 18 h: 2 + 1 + 1 (tardía) online y 3 en boletería = 7 vendidas; las 2 cortesías van aparte (no son venta).
+// Para la academia: 7 × 10.000 + 2 × 12.000 (21 h) = 94.000.
+ok(res.tipos.f18.vendidas === 7 && res.tipos.f18.cortesias === 2 && res.tipos.f21.vendidas === 2 && res.recaudado === 94000 && res.sinImputar === 1,
+  `resumen: 7 vendidas de las 18 h (+2 de cortesía), 2 de las 21 h, $94.000 para la academia y 1 sin asignar (${res.tipos?.f18?.vendidas}, ${res.recaudado})`)
 ok((await api('/api/admin/exportar', { token: T.org })).status === 200, 'la academia descarga la planilla')
 
 // 9) Mis entradas

@@ -159,6 +159,10 @@ acredita en 30-70 s, pero hay bancos que demoran la transferencia.
 ## Panel del organizador (02/11/2026)
 - **Cortesías (03/11/2026):** el organizador también las emite (pestaña "Cortesías y planilla"). Pide confirmación,
   acepta un DNI opcional (para "Mis entradas") y el mail dice "Tu invitación… te invita" en vez de "tu compra".
+- **Las cortesías no son venta (José, 19/11/2026):** ocupan lugar (descuentan libres) pero no suman a "vendidas" en
+  ningún lado: `ocupacion()` las cuenta aparte (`cortesias` por tipo), la tarjeta de cada función dice "N vendidas ·
+  M de cortesía" (violeta en la barra, como en el plano) y la Cartelera las muestra debajo ("+ M de cortesía").
+  La plata y "Entradas vendidas" ya las dejaban afuera (`NO_PLATA`). Prueba: 3 nuevas en `prueba-butacas.mjs`.
 Todo se cobra por transferencia (Chytapay): el panel no desglosa por medio de pago.
 - **Resumen:**
   - Cifras: entradas, compras, cobrado (lo que pagó el público) y "Para vos" (sin el servicio).
@@ -241,7 +245,7 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
 - **Varias funciones con la misma sala:** cada evento de la ficha tiene sus propias butacas (lo vendido, guardado
   y pagándose es de ese evento). En la puerta, una entrada de otra función del mismo día dice "Es para … de las
   21:00 h: no es esta función" (antes, "hoy no vale", que confundía si las funciones son el mismo día).
-- **Prueba:** `herramientas/prueba-butacas.mjs` (71 pruebas) con el servidor
+- **Prueba:** `herramientas/prueba-butacas.mjs` (138 pruebas al 19/11/2026) con el servidor
   `TEMA=santiago-ritmica DB_NAME=gala_ritmica PORT=3047 node server.js` y
   `DB_NAME=gala_ritmica node ../herramientas/prueba-butacas.mjs 3047` (desde `backend`, base LOCAL).
 - **Santiago Rítmica** (tema `santiago-ritmica`): Paraninfo, Av. Belgrano (S) 1912. 337 butacas: filas 1 (22),
