@@ -1,0 +1,34 @@
+{
+  "_ayuda": "Show de Fin de Año 2026 de EPA · Escuela de Patín Artístico (Villa Carlos Paz, Córdoba): \"Sé la princesa que quieras ser\", domingo 13/12 en el Estadio Arena. Armado el 21/11/2026 con los flyers, 7 videos del show 2025 y la patinadora animada que mandó la escuela por WhatsApp (el Instagram no se pudo bajar). FALTAN de la escuela: la hora, los precios (y si el servicio va adentro o aparte), si hay más de una función, si es numerada, la regla de las dos cuentas de Chytapay (primeras 500 a una cuenta o emparejar), el WhatsApp de consultas y la dirección exacta. Sin tipos, la función se ve como \"Entradas muy pronto\". Entre 800 y 1000 entradas el año pasado.",
+  "nombre": "Sé la Princesa · Show EPA 2026",
+  "lema": "Escuela de Patín Artístico",
+  "organiza": "EPA · Escuela de Patín Artístico",
+  "lugar": "Estadio Arena",
+  "direccion": "Villa Carlos Paz, Córdoba",
+  "ciudad": "Villa Carlos Paz",
+  "instagram": "epa_escuela_de_patin_artistico",
+  "mail": {
+    "_ayuda": "Colores del mail de las entradas: el azul marino y el rosa del logo, con la franja de los vestidos de princesa del flyer.",
+    "encabezado": "#1f2a6b",
+    "sobrecabeza": "#f7a8d0",
+    "acento": "#e0338a",
+    "acentoTexto": "#ffffff",
+    "titulos": "#c2186f",
+    "franja": ["#e0338a", "#b98af0", "#5aa6e0", "#f2c94c", "#7fd1c7"]
+  },
+  "festejo": { "*": ["#e0338a", "#f7a8d0", "#b98af0", "#5aa6e0", "#f2c94c", "#ffffff"] },
+  "modo": "gala",
+  "eventos": [
+    {
+      "id": "2026-12-13-se-la-princesa",
+      "nombre": "Sé la princesa que quieras ser",
+      "subtitulo": "Show de Fin de Año · EPA Escuela de Patín Artístico",
+      "fecha": "2026-12-13",
+      "puertas": "",
+      "imagen": "/assets/flyers/flyer-oficial-450.webp",
+      "publicado": true,
+      "artistas": [],
+      "tipos": []
+    }
+  ]
+}

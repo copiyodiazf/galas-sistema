@@ -1,0 +1,19 @@
+/* Tema del Show de Fin de Año de EPA (Villa Carlos Paz, 21/11/2026): "Sé la princesa que quieras ser". El azul marino
+   y el rosa del logo, con los lilas del castillo de los flyers. Cinzel (las mayúsculas de "SHOW DE FIN DE AÑO" y
+   "ESTADIO ARENA") para los títulos y Nunito, redonda y amable, para el texto. La compra, el panel y los mails. */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Nunito:wght@400;600;700;800;900&display=swap');
+:root{
+  --noche:#141943; --noche-2:#1d2360; --noche-3:#2a3178; --oro:#f59ac6; --oro-vivo:#ffd6ea; --crema:#fbf5fb;
+  --gris:#c9c2e4; --tierra:#c2186f;
+  --oro-degrade:linear-gradient(180deg,#ffe0ef,#f59ac6 55%,#d9478f);
+  --f-display:'Cinzel',Georgia,serif; --f-texto:'Nunito',system-ui,sans-serif;
+}
+body{background:radial-gradient(ellipse 80% 45% at 15% 0%,rgba(224,51,138,.22),transparent 70%),
+                radial-gradient(ellipse 80% 45% at 90% 10%,rgba(185,138,240,.22),transparent 70%),
+                radial-gradient(ellipse 90% 50% at 50% 100%,rgba(90,166,224,.14),transparent 70%),var(--noche);}
+h1{font-weight:700;letter-spacing:.01em;}
+.tarjeta{background:linear-gradient(180deg,rgba(42,49,120,.92),rgba(29,35,96,.94));border-color:rgba(245,154,198,.24);}
+.btn{color:#3a0b24;background:linear-gradient(180deg,#ffd6ea,#f59ac6);box-shadow:0 10px 26px rgba(224,51,138,.3);}
+.paso span{color:#3a0b24;}
+th{background:rgba(29,35,96,.97) !important;}
+.cabeza img{background:#fff;}
