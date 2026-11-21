@@ -157,8 +157,15 @@ acredita en 30-70 s, pero hay bancos que demoran la transferencia.
   o se le vence, ve "¿Ya hiciste la transferencia? No la hagas de nuevo…", con su mail y WhatsApp.
 
 ## Panel del organizador (02/11/2026)
-- **Cortesías (03/11/2026):** el organizador también las emite (pestaña "Cortesías y planilla"). Pide confirmación,
-  acepta un DNI opcional (para "Mis entradas") y el mail dice "Tu invitación… te invita" en vez de "tu compra".
+- **Cortesías (03/11/2026):** piden confirmación, aceptan un DNI opcional (para "Mis entradas") y el mail dice
+  "Tu invitación… te invita" en vez de "tu compra".
+- **Las cortesías son solo de la administración (José, 21/11/2026):** solo el admin las emite (`entrada-cortesia`
+  pide rol admin) y solo él las ve (`veCortesias`, `sinCortesias` en `server.js`). El organizador, la puerta y la
+  boletería no las encuentran en Operaciones, Buscar, la planilla, el Resumen ni la Cartelera, ni pueden abrir o
+  reenviar sus QR. Siguen ocupando lugar: a ellos la capacidad les llega ya sin esos lugares (como las reservadas:
+  los libres son los mismos) y en el plano son butacas ocupadas, sin nombre. En la puerta el QR de una cortesía
+  vale como cualquier entrada ("Ingreso OK", nombre y tipo, sin decir que es cortesía). La pestaña del organizador
+  pasó a llamarse "Planilla". Antes (03/11) el organizador también las emitía.
 - **Las cortesías no son venta (José, 19/11/2026):** ocupan lugar (descuentan libres) pero no suman a "vendidas" en
   ningún lado: `ocupacion()` las cuenta aparte (`cortesias` por tipo), la tarjeta de cada función dice "N vendidas ·
   M de cortesía" (violeta en la barra, como en el plano) y la Cartelera las muestra debajo ("+ M de cortesía").
@@ -254,10 +261,10 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
   reservadas: a las 21 h, platea 293 por las 28 de las invitaciones), y el mail dice "Ubicación por orden de
   llegada". Si alguien toca butacas a las 16 h y se pasa a otra función, se le sueltan. "Quedan pocas" también se
   mide contra el tamaño del tipo (la cuarta parte): la zona verde, de 16, lo decía sin haber vendido ninguna.
-- **Prueba:** `herramientas/prueba-butacas.mjs` (138 pruebas al 20/11/2026) con todas las funciones numeradas:
+- **Prueba:** `herramientas/prueba-butacas.mjs` (152 pruebas al 21/11/2026) con todas las funciones numeradas:
   `TEMA=santiago-ritmica DB_NAME=gala_ritmica PORT=3047 SALA_FUNCIONES=* node server.js` y
   `DB_NAME=gala_ritmica node ../herramientas/prueba-butacas.mjs 3047` (desde `backend`, base LOCAL).
-  Las funciones sin numerar: `herramientas/prueba-sin-numerar.mjs` (28 pruebas), con el servidor como queda la
+  Las funciones sin numerar: `herramientas/prueba-sin-numerar.mjs` (30 pruebas), con el servidor como queda la
   ficha (sin `SALA_FUNCIONES`) en el 3048.
 - **Santiago Rítmica** (tema `santiago-ritmica`): Paraninfo, Av. Belgrano (S) 1912. 337 butacas: filas 1 (22),
   2 (21), 3 a 12 (26), 13 (9 + cabina de musicalización + 9) y 14, zona verde, detrás de la cabina (8 + 8).

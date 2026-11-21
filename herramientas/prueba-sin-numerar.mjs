@@ -91,9 +91,14 @@ ok(r.status === 409 && /Quedan 4/.test(r.d.error), 'la zona verde no se pasa de 
 r = await api('/api/admin/venta-punto', { metodo: 'POST', token: T.venta, cuerpo: { evento: E21, tipo: 'platea', cantidad: 2, cobro: 'efectivo', ...datos('30111005') } })
 ok(r.status === 200 && r.d.qrs?.length === 2 && r.d.qrs.every(q => !q.butaca), 'la boletería vende 2 a las 21 h, sin butaca', JSON.stringify(r.d))
 r = await api('/api/admin/entrada-cortesia', { metodo: 'POST', token: T.org, cuerpo: { evento: E21, tipo: 'platea', cantidad: 4, nombre: 'Invitada', email: 'inv@ejemplo.com' } })
-ok(r.status === 200 && r.d.cantidad === 4, 'la organización da 4 cortesías a las 21 h, por cantidad', JSON.stringify(r.d))
-res = (await api(`/api/admin/resumen?evento=${E21}`, { token: T.org })).d
+ok(r.status === 403, 'la organización no da cortesías (solo la administración, José 21/11/2026)', JSON.stringify(r.d))
+r = await api('/api/admin/entrada-cortesia', { metodo: 'POST', token: T.admin, cuerpo: { evento: E21, tipo: 'platea', cantidad: 4, nombre: 'Invitada', email: 'inv@ejemplo.com' } })
+ok(r.status === 200 && r.d.cantidad === 4, 'la administración da 4 cortesías a las 21 h, por cantidad', JSON.stringify(r.d))
+res = (await api(`/api/admin/resumen?evento=${E21}`, { token: T.admin })).d
 ok(res.tipos.platea.vendidas === 2 && res.tipos.platea.cortesias === 4 && res.tipos.platea.libres === 287, '21 h: 2 vendidas, 4 cortesías y 287 libres', JSON.stringify(res.tipos.platea))
+res = (await api(`/api/admin/resumen?evento=${E21}`, { token: T.org })).d
+ok(res.tipos.platea.cortesias === 0 && res.tipos.platea.cupo === 289 && res.tipos.platea.libres === 287 && res.cortesias === 0,
+  'la organización no ve las cortesías: platea de 289 con los mismos 287 libres', JSON.stringify(res.tipos.platea))
 
 // 5) La puerta: el QR de las 18 h entra a las 18 h y no a las 21 h
 const q18 = ent[0].codigo

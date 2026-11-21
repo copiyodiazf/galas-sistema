@@ -196,7 +196,7 @@ ok(oLenta2.estado === 'pagada' && oLenta2.butacas === '11-5', 'otra que llega ta
   ok(r.status === 409 && r.d.ocupadas?.includes('12-10'), 'B no puede comprarla aunque vaya directo a pagar')
   r = await api('/api/admin/venta-punto', { metodo: 'POST', token: T.venta, cuerpo: { evento: EV, butacas: ['12-10'], cobro: 'efectivo', nombre: 'Juan Boleteria', email: 'juan12@ejemplo.com', dni: '30555612' } })
   ok(r.status === 409, 'ni la boletería', JSON.stringify(r.d))
-  r = await api('/api/admin/entrada-cortesia', { metodo: 'POST', token: T.org, cuerpo: { evento: EV, butacas: ['12-10'], nombre: 'Invitada', email: 'inv12@ejemplo.com' } })
+  r = await api('/api/admin/entrada-cortesia', { metodo: 'POST', token: T.admin, cuerpo: { evento: EV, butacas: ['12-10'], nombre: 'Invitada', email: 'inv12@ejemplo.com' } })
   ok(r.status === 409, 'ni como cortesía')
   r = await api('/api/admin/sala/bloquear', { metodo: 'POST', token: T.org, cuerpo: { evento: EV, butacas: ['12-10'], bloquear: true } })
   ok(r.status === 409 && /eligiendo/.test(r.d.error), 'ni se puede guardar', JSON.stringify(r.d))
@@ -310,9 +310,11 @@ ok(r.status === 409, 'no se puede guardar una butaca ya vendida')
 r = await api('/api/admin/sala/bloquear', { metodo: 'POST', token: T.venta, cuerpo: { evento: EV, butacas: ['8-1'], bloquear: true } })
 ok(r.status === 403, 'la boletería no guarda butacas')
 r = await api('/api/admin/entrada-cortesia', { metodo: 'POST', token: T.org, cuerpo: { evento: EV, butacas: ['7-1', '7-2'], nombre: 'Familia Molina', email: 'familia@ejemplo.com' } })
+ok(r.status === 403, 'la organización no emite cortesías: solo la administración (José, 21/11/2026)', JSON.stringify(r.d))
+r = await api('/api/admin/entrada-cortesia', { metodo: 'POST', token: T.admin, cuerpo: { evento: EV, butacas: ['7-1', '7-2'], nombre: 'Familia Molina', email: 'familia@ejemplo.com' } })
 ok(r.status === 200 && r.d.cantidad === 2, 'cortesía con 2 de las guardadas', JSON.stringify(r.d))
 ok(JSON.stringify((await Evento.findByPk(EV)).bloqueadas) === '["7-3"]', 'las que se dieron dejan de estar guardadas (queda la 7-3)')
-r = await api('/api/admin/entrada-cortesia', { metodo: 'POST', token: T.org, cuerpo: { evento: EV, butacas: ['6-2'], nombre: 'Otra', email: 'otra@ejemplo.com' } })
+r = await api('/api/admin/entrada-cortesia', { metodo: 'POST', token: T.admin, cuerpo: { evento: EV, butacas: ['6-2'], nombre: 'Otra', email: 'otra@ejemplo.com' } })
 ok(r.status === 409, 'una cortesía no puede usar una butaca vendida')
 r = await api(`/api/admin/eventos/${EV}`, { metodo: 'PUT', token: T.org, cuerpo: { subtitulo: 'Santiago Rítmica · Gala 2026 · 10 años' } })
 ok(r.status === 200 && JSON.stringify((await Evento.findByPk(EV)).bloqueadas) === '["7-3"]', 'editar la gala en el panel no borra las guardadas')
@@ -328,7 +330,7 @@ ok(['9-1', '9-2', '9-3'].every(id => oc.has(id)), 'las reservadas aparecen ocupa
 ok((await comprar(['9-2'], '30444556')).status === 409, 'no se pueden comprar online')
 r = await api('/api/admin/venta-punto', { metodo: 'POST', token: T.venta, cuerpo: { evento: EV, butacas: ['9-2'], cobro: 'efectivo', nombre: 'Juan Boleteria', email: 'juan9@ejemplo.com', dni: '30555699' } })
 ok(r.status === 409, 'ni en la boletería', JSON.stringify(r.d))
-r = await api('/api/admin/entrada-cortesia', { metodo: 'POST', token: T.org, cuerpo: { evento: EV, butacas: ['9-1'], nombre: 'Invitada', email: 'invitada@ejemplo.com' } })
+r = await api('/api/admin/entrada-cortesia', { metodo: 'POST', token: T.admin, cuerpo: { evento: EV, butacas: ['9-1'], nombre: 'Invitada', email: 'invitada@ejemplo.com' } })
 ok(r.status === 409, 'ni como cortesía (la invitación va por fuera del sistema)')
 r = await api('/api/admin/sala/bloquear', { metodo: 'POST', token: T.org, cuerpo: { evento: EV, butacas: ['9-3'], bloquear: true } })
 ok(r.status === 409, 'no se pueden guardar desde el panel')
@@ -349,22 +351,50 @@ r = await api('/api/admin/venta-punto', { metodo: 'POST', token: T.venta, cuerpo
 ok(r.status === 409, 'la boletería tampoco puede vender una ya vendida')
 
 // 7) El plano del panel
-const sOrg = (await api(`/api/admin/sala?evento=${EV}`, { token: T.org })).d
-ok(sOrg.butacas['6-1']?.estado === 'vendida' && sOrg.butacas['6-1'].nombre === 'Ana Prueba' && sOrg.butacas['6-1'].entro === true, 'panel: la 6-1 vendida, de quién es y que ya entró')
-ok(sOrg.butacas['7-1']?.estado === 'cortesia' && sOrg.butacas['14-1']?.estado === 'pagando' && sOrg.butacas['8-5']?.metodo === 'punto', 'panel: cortesías, pagándose y vendidas en la boletería')
+const sAdm = (await api(`/api/admin/sala?evento=${EV}`, { token: T.admin })).d
+ok(sAdm.butacas['6-1']?.estado === 'vendida' && sAdm.butacas['6-1'].nombre === 'Ana Prueba' && sAdm.butacas['6-1'].entro === true, 'panel: la 6-1 vendida, de quién es y que ya entró')
+ok(sAdm.butacas['7-1']?.estado === 'cortesia' && sAdm.butacas['14-1']?.estado === 'pagando' && sAdm.butacas['8-5']?.metodo === 'punto', 'panel de la administración: cortesías, pagándose y vendidas en la boletería')
 // (2 pagándose: desde que las vencidas guardan sus butacas, la 10-2 y la 10-3 de "rapida" ya no se venden)
-ok(sOrg.cuentas.vendida === 7 && sOrg.cuentas.cortesia === 2 && sOrg.cuentas.pagando === 2 && sOrg.cuentas.libres === 337 - 11, 'panel: las cuentas (7 vendidas, 2 cortesías, 2 pagándose, 326 libres)', JSON.stringify(sOrg.cuentas))
+ok(sAdm.cuentas.vendida === 7 && sAdm.cuentas.cortesia === 2 && sAdm.cuentas.pagando === 2 && sAdm.cuentas.libres === 337 - 11, 'panel: las cuentas (7 vendidas, 2 cortesías, 2 pagándose, 326 libres)', JSON.stringify(sAdm.cuentas))
+// La organización y la puerta no ven las cortesías: butacas ocupadas sin nombre, fuera del total y de las libres
+for (const [quien, token] of [['la organización', T.org], ['la puerta', T.puerta]]) {
+  const s = (await api(`/api/admin/sala?evento=${EV}`, { token })).d
+  ok(JSON.stringify(s.butacas['7-1']) === '{"estado":"ocupada"}' && !s.cuentas.cortesia && s.total === 335 && s.cuentas.libres === sAdm.cuentas.libres,
+    `${quien}: la cortesía es una butaca ocupada, sin nombre ni cuenta`, JSON.stringify({ b: s.butacas['7-1'], total: s.total, c: s.cuentas }))
+}
 const sVenta = (await api(`/api/admin/sala?evento=${EV}`, { token: T.venta })).d
 ok(sVenta.butacas['6-1']?.estado === 'vendida' && !sVenta.butacas['6-1'].nombre, 'la boletería ve qué está ocupado, pero no de quién')
-const res = (await api(`/api/admin/resumen?evento=${EV}`, { token: T.org })).d
+const res = (await api(`/api/admin/resumen?evento=${EV}`, { token: T.admin })).d
 ok(res.tipos.platea.cupo === 321 && res.tipos['zona-verde'].cupo === 16, 'resumen: la capacidad de cada tipo son sus butacas (321 platea, 16 zona verde)', JSON.stringify(res.tipos))
 // Las cortesías ocupan lugar pero no son venta (José, 19/11/2026)
 const sumaTipos = k => Object.values(res.tipos).reduce((s, t) => s + t[k], 0)
 ok(sumaTipos('vendidas') === 7 && sumaTipos('cortesias') === 2 && res.tipos.platea.cortesias === 2 && res.entradas === 7 && res.cortesias === 2,
   'resumen: las 2 cortesías no cuentan como vendidas (7 vendidas y 2 de cortesía aparte)', JSON.stringify(res.tipos))
 ok(Object.values(res.tipos).every(t => t.libres === t.cupo - t.vendidas - t.cortesias - t.reservadas), 'resumen: las cortesías siguen ocupando lugar (no quedan libres)', JSON.stringify(res.tipos))
-const enCartelera = (await api('/api/admin/eventos', { token: T.org })).d.eventos.find(e => e.id === EV)
+const resOrg = (await api(`/api/admin/resumen?evento=${EV}`, { token: T.org })).d
+ok(resOrg.cortesias === 0 && resOrg.tipos.platea.cortesias === 0 && resOrg.tipos.platea.cupo === 319 && resOrg.tipos.platea.libres === res.tipos.platea.libres && !resOrg.ultimas.some(o => o.metodo === 'cortesia'),
+  'resumen de la organización: sin cortesías; la platea tiene 319 (sin sus 2 lugares) y los mismos libres', JSON.stringify({ c: resOrg.cortesias, platea: resOrg.tipos.platea }))
+const enCartelera = (await api('/api/admin/eventos', { token: T.admin })).d.eventos.find(e => e.id === EV)
 ok(enCartelera.vendidas === 7 && enCartelera.cortesias === 2, 'cartelera: 7 vendidas y 2 de cortesía aparte', JSON.stringify({ vendidas: enCartelera.vendidas, cortesias: enCartelera.cortesias }))
+ok((await api('/api/admin/eventos', { token: T.org })).d.eventos.find(e => e.id === EV).cortesias === 0, 'la cartelera de la organización no las muestra')
+const opsOrg = (await api(`/api/admin/operaciones?evento=${EV}&estado=todas`, { token: T.org })).d
+const opsAdm = (await api(`/api/admin/operaciones?evento=${EV}&estado=todas`, { token: T.admin })).d
+ok(!opsOrg.ordenes.some(o => o.metodo === 'cortesia') && !opsOrg.cuentas.cortesia && opsAdm.ordenes.some(o => o.metodo === 'cortesia') && opsAdm.cuentas.cortesia === 1,
+  'operaciones: la administración ve la cortesía; la organización, no', JSON.stringify({ org: opsOrg.cuentas, adm: opsAdm.cuentas }))
+const molina = opsAdm.ordenes.find(o => o.nombre === 'Familia Molina')
+for (const [quien, token] of [['la organización', T.org], ['la puerta', T.puerta], ['la boletería', T.venta]]) {
+  const b = (await api('/api/admin/buscar?q=Molina', { token })).d
+  ok(Array.isArray(b.ordenes) && !b.ordenes.length, `buscar "Molina": ${quien} no la encuentra`, JSON.stringify(b))
+}
+ok((await api('/api/admin/buscar?q=Molina', { token: T.admin })).d.ordenes.length === 1, '…la administración sí')
+ok((await api(`/api/admin/orden/${molina.id}/qrs`, { token: T.org })).status === 404 && (await api(`/api/admin/orden/${molina.id}/qrs`, { token: T.admin })).status === 200, 'sus QR: solo la administración')
+ok((await api(`/api/admin/orden/${molina.id}/reenviar`, { metodo: 'POST', token: T.org, cuerpo: { email: 'otro@ejemplo.com' } })).status === 404, 'la organización no la puede reenviar')
+const csvOrg = await fetch(`${BASE}/api/admin/exportar?evento=${EV}`, { headers: { Authorization: 'Bearer ' + T.org } }).then(x => x.text())
+ok(!csvOrg.includes('Familia Molina'), 'la planilla de la organización no la trae')
+// En la puerta vale como cualquier entrada: "Ingreso OK", su nombre y su tipo, sin decir que es cortesía
+const qrMolina = (await Entrada.findOne({ where: { orden_id: molina.id, indice: 1 } })).codigo
+const enPuerta = (await api('/api/validar', { metodo: 'POST', token: T.puerta, cuerpo: { codigo: qrMolina, evento: EV } })).d
+ok(enPuerta.ok && enPuerta.msg === 'Ingreso OK' && enPuerta.tipo === 'Platea' && !/cortes/i.test(JSON.stringify(enPuerta)), 'en la puerta, la cortesía entra como cualquier entrada', JSON.stringify(enPuerta))
 const ops = (await api(`/api/admin/operaciones?evento=${EV}&estado=pagada`, { token: T.org })).d
 ok(ops.ordenes.some(o => o.butacas === 'Fila 6: 1, 2'), 'operaciones: cada compra con sus butacas')
 const csv = await fetch(`${BASE}/api/admin/exportar?evento=${EV}`, { headers: { Authorization: 'Bearer ' + T.org } }).then(x => x.text())
