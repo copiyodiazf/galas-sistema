@@ -245,9 +245,20 @@ Sin `sala`, todo sigue por cantidad, como en las otras galas (sus 33 pruebas pas
 - **Varias funciones con la misma sala:** cada evento de la ficha tiene sus propias butacas (lo vendido, guardado
   y pagándose es de ese evento). En la puerta, una entrada de otra función del mismo día dice "Es para … de las
   21:00 h: no es esta función" (antes, "hoy no vale", que confundía si las funciones son el mismo día).
-- **Prueba:** `herramientas/prueba-butacas.mjs` (138 pruebas al 19/11/2026) con el servidor
-  `TEMA=santiago-ritmica DB_NAME=gala_ritmica PORT=3047 node server.js` y
+- **No todas las funciones de la sala tienen que ser numeradas** (José, 20/11/2026: en Rítmica solo la de las
+  16 h; a las 18 y a las 21 h la ubicación es por orden de llegada). `sitio.json → sala.funciones` es la lista de
+  las numeradas; sin la lista, todas. Las demás se venden por cantidad, como en cualquier gala: sin plano, sin
+  apartar al tocar, sin butacas guardadas después de la hora. `usaSala(ev)` es la que decide, y `/api/config` y
+  `/api/admin/config` mandan `numerada` en cada evento (la compra, la boletería, la cortesía y la pestaña Sala del
+  panel la siguen). La capacidad sigue siendo la de la sala (sus butacas de cada zona, sin las guardadas ni las
+  reservadas: a las 21 h, platea 293 por las 28 de las invitaciones), y el mail dice "Ubicación por orden de
+  llegada". Si alguien toca butacas a las 16 h y se pasa a otra función, se le sueltan. "Quedan pocas" también se
+  mide contra el tamaño del tipo (la cuarta parte): la zona verde, de 16, lo decía sin haber vendido ninguna.
+- **Prueba:** `herramientas/prueba-butacas.mjs` (138 pruebas al 20/11/2026) con todas las funciones numeradas:
+  `TEMA=santiago-ritmica DB_NAME=gala_ritmica PORT=3047 SALA_FUNCIONES=* node server.js` y
   `DB_NAME=gala_ritmica node ../herramientas/prueba-butacas.mjs 3047` (desde `backend`, base LOCAL).
+  Las funciones sin numerar: `herramientas/prueba-sin-numerar.mjs` (28 pruebas), con el servidor como queda la
+  ficha (sin `SALA_FUNCIONES`) en el 3048.
 - **Santiago Rítmica** (tema `santiago-ritmica`): Paraninfo, Av. Belgrano (S) 1912. 337 butacas: filas 1 (22),
   2 (21), 3 a 12 (26), 13 (9 + cabina de musicalización + 9) y 14, zona verde, detrás de la cabina (8 + 8).
   José: "la numeración comienza mirando desde el escenario, de izquierda a derecha" → en el plano, el 1 a la
