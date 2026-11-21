@@ -3,10 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<!-- Portada PROPIA del Show de Fin de Año de EPA (tema epa, 21/11/2026). El servidor reemplaza NOMBRE, DESCRIPCION y URL
-     (entre dobles porcentajes) para la vista previa de WhatsApp. Los precios y la hora NO van escritos acá: salen de
-     /api/config. El material es el que mandó la escuela: los flyers de la campaña, 7 videos del show 2025 en el mismo
-     Estadio Arena y la patinadora animada que usan en sus publicaciones. -->
+<!-- Portada PROPIA del Show de Fin de Año de EPA (tema epa), segunda versión (21/11/2026), con lo que pidió José:
+     el logo oficial (el de su Instagram, redibujado en vector), sus colores (azul francia, rosa y el dorado de las
+     estrellas), fondos a pantalla completa (las princesas del flyer animadas con IA y los videos reales del show 2025),
+     y movimiento: pantallas que se apoyan una sobre otra, títulos que entran en 3D, un carrusel 3D con las tomas del
+     show, tarjetas que se inclinan con el mouse, el logo que gira como una moneda y purpurina. Los flyers se usan para
+     sacar datos e imágenes, no se muestran. El servidor reemplaza NOMBRE, DESCRIPCION y URL (entre dobles porcentajes);
+     los precios y la hora salen de /api/config. Todo respeta "reducir movimiento" y el ahorro de datos. -->
 <title>%%NOMBRE%%</title>
 <meta name="description" content="%%DESCRIPCION%%">
 <meta property="og:type" content="website">
@@ -15,239 +18,265 @@
 <meta property="og:url" content="%%URL%%/">
 <meta property="og:image" content="%%URL%%/assets/compartir.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#fbeef7">
+<meta name="theme-color" content="#06114f">
 <link rel="icon" href="assets/logo.webp">
-<link rel="preload" as="image" href="assets/video/show25-portada.webp" fetchpriority="high">
+<link rel="preload" as="image" href="assets/video/princesas-ia-celu.webp" media="(orientation: portrait)" fetchpriority="high">
+<link rel="preload" as="image" href="assets/video/princesas-ia-compu.webp" media="(orientation: landscape)" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Great+Vibes&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<!-- La compra se prepara apenas se apunta al botón: abre al instante (Chrome/Android; los demás lo ignoran). -->
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,900&display=swap" rel="stylesheet">
 <script type="speculationrules">{"prerender":[{"where":{"href_matches":"/comprar*"},"eagerness":"moderate"}]}</script>
 <style>
-/* ───── Marca: el azul marino y el rosa del logo, los lilas del castillo y el dorado de la corona ───── */
+/* ───── Los colores del logo de EPA: azul francia y rosa, el dorado de las estrellitas, sobre una noche azul ───── */
 :root{
-  --rosa:#e0338a; --rosa-osc:#b51f69; --rosa-claro:#ffd9ec; --rosa-suave:#fdeef6;
-  --azul:#1f2a6b; --azul-2:#2e3c92; --lila:#b98af0; --lila-claro:#efe6ff; --celeste:#5aa6e0; --oro:#e8b543;
-  --fondo:#fdf7fb; --tinta:#25214c; --gris:#6c6691;
-  --f:'Nunito',system-ui,sans-serif; --f-tit:'Cinzel',Georgia,serif; --f-script:'Great Vibes','Brush Script MT',cursive;
-  --sombra:0 18px 40px -18px rgba(31,42,107,.35);
-  --radio:22px;
+  --noche:#050e45; --noche-2:#0a1872; --azul:#1a3cf0; --azul-vivo:#3b5bff; --azul-claro:#9fb2ff;
+  --rosa:#ff4fa3; --rosa-2:#f08dbd; --rosa-claro:#ffd1e7; --lila:#8b6cf0; --oro:#f4c14d;
+  --tinta:#eef1ff; --gris:#b8c2f2;
+  --f:'Montserrat',system-ui,sans-serif; --f-script:'Great Vibes','Brush Script MT',cursive;
+  --vidrio:rgba(255,255,255,.09); --borde-vidrio:rgba(255,255,255,.18);
+  --curva:cubic-bezier(.2,.8,.2,1);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 [hidden]{display:none !important;}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;}
-body{font-family:var(--f);color:var(--tinta);line-height:1.55;overflow-x:hidden;
-  background:radial-gradient(ellipse 90% 40% at 0% 30%,rgba(185,138,240,.16),transparent 70%),
-             radial-gradient(ellipse 90% 40% at 100% 70%,rgba(224,51,138,.10),transparent 70%),var(--fondo);}
+body{font-family:var(--f);color:var(--tinta);background:var(--noche);line-height:1.55;overflow-x:clip;}
 img,video{display:block;max-width:100%;}
-a{color:var(--rosa-osc);}
+a{color:var(--rosa-claro);}
 h2,h3{text-wrap:balance;}
 .saltar{position:absolute;left:-9999px;top:8px;background:#fff;color:#000;padding:8px 12px;border-radius:8px;z-index:50;}
 .saltar:focus{left:8px;}
 :focus-visible{outline:3px solid var(--rosa);outline-offset:3px;border-radius:6px;}
-.envase{max-width:1080px;margin:0 auto;padding:0 16px;}
+.envase{max-width:1100px;margin:0 auto;padding:0 18px;position:relative;width:100%;}
 
-/* ───── Títulos de cada sección ───── */
-.bloque{padding:72px 0;position:relative;}
-.antetitulo{font-family:var(--f-tit);font-weight:700;font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--rosa-osc);
-  display:flex;align-items:center;gap:10px;}
-.antetitulo::before{content:"";width:26px;height:2px;background:linear-gradient(90deg,var(--rosa),var(--lila));border-radius:2px;}
-h2{font-family:var(--f-tit);font-weight:700;color:var(--azul);font-size:clamp(28px,7vw,44px);line-height:1.12;margin:10px 0 12px;letter-spacing:.01em;}
-h2 em{display:inline-block;font-family:var(--f-script);font-style:normal;font-weight:400;color:var(--rosa);font-size:1.35em;letter-spacing:0;line-height:1;}
-.bajada{color:var(--gris);font-size:17px;max-width:60ch;}
+/* ───── Pantallas a lo ancho y alto: cada una con su fondo (video o arte) y un velo azul para leer ───── */
+.pantalla{position:relative;min-height:100svh;overflow:hidden;isolation:isolate;display:grid;align-items:center;}
+.fondo{position:absolute;inset:0;z-index:-2;}
+.fondo video,.fondo img{width:100%;height:100%;object-fit:cover;}
+.velo{position:absolute;inset:0;z-index:-1;pointer-events:none;}
 
-/* ───── Botón de compra ───── */
-.comprar{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;text-decoration:none;color:#fff;
-  padding:15px 30px 14px;border-radius:999px;font-weight:900;font-size:18px;letter-spacing:.02em;line-height:1.1;text-align:center;
-  background:linear-gradient(135deg,#f0479b,var(--rosa) 45%,#c22a7a);
-  box-shadow:0 14px 30px -10px rgba(224,51,138,.65),inset 0 1px 0 rgba(255,255,255,.45);
-  transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s;}
-.comprar small{font-weight:700;font-size:13px;opacity:.92;letter-spacing:0;}
-.comprar:hover{transform:translateY(-2px);box-shadow:0 18px 34px -10px rgba(224,51,138,.7),inset 0 1px 0 rgba(255,255,255,.45);}
-.comprar:active{transform:translateY(0) scale(.98);}
-.comprar.apagado{background:linear-gradient(135deg,#c9c3e6,#a9a2d4);box-shadow:none;cursor:default;}
-.comprar.apagado:hover{transform:none;}
-.boton{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--azul);font-weight:800;font-size:15px;
-  padding:11px 18px;border-radius:999px;background:#fff;border:2px solid var(--lila-claro);box-shadow:var(--sombra);}
-.boton:hover{border-color:var(--lila);}
+/* Títulos */
+.ante{font-weight:800;font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--rosa-claro);display:flex;align-items:center;gap:10px;}
+.ante::before{content:"";width:28px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--rosa),var(--oro));flex:none;}
+h2{font-weight:900;font-size:clamp(30px,7.6vw,56px);line-height:1.05;letter-spacing:-.02em;margin:12px 0 14px;color:#fff;}
+h2 em{display:inline-block;font-family:var(--f-script);font-style:normal;font-weight:400;font-size:1.3em;letter-spacing:0;line-height:1;
+  background:linear-gradient(180deg,#fff 0%,var(--rosa-claro) 35%,var(--rosa) 90%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 18px rgba(255,79,163,.45));padding:0 .08em;}
+.bajada{color:var(--gris);font-size:17px;max-width:56ch;}
 
-/* ───── Portada: el show del año pasado de fondo y el título del flyer ───── */
-.portada{position:relative;min-height:100svh;display:grid;align-items:end;overflow:hidden;isolation:isolate;
-  background:linear-gradient(180deg,#f6e4f4,#efe2ff);}
-.escenario{position:absolute;inset:0;z-index:-2;}
-.escenario video,.escenario img{width:100%;height:100%;object-fit:cover;object-position:50% 35%;}
-/* Arriba se aclara para el logo; abajo, un velo rosado para que el título se lea sobre el video. */
-.portada::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
-  background:linear-gradient(180deg,rgba(253,247,251,.92) 0%,rgba(253,247,251,.35) 14%,rgba(253,247,251,0) 25%,
-    rgba(250,232,244,.35) 34%,rgba(250,236,246,.86) 46%,var(--fondo) 88%);}
-.logo-portada{position:absolute;top:max(14px,env(safe-area-inset-top));left:50%;translate:-50% 0;width:min(46vw,210px);height:auto;
-  filter:drop-shadow(0 4px 14px rgba(255,255,255,.9));}
-.titulo{padding:0 18px 26px;text-align:center;}
-.show{font-family:var(--f-tit);font-weight:700;font-size:clamp(14px,4vw,19px);letter-spacing:.24em;color:var(--azul);text-transform:uppercase;text-shadow:0 0 10px #fff,0 0 3px #fff;
-  display:flex;align-items:center;justify-content:center;gap:10px;}
-.show::before,.show::after{content:"";width:28px;height:1.5px;background:var(--rosa);opacity:.7;}
-h1{margin:4px 0 0;line-height:.9;color:var(--azul);font-weight:400;}
-h1 .sela{display:block;font-family:var(--f-script);font-size:clamp(40px,11vw,64px);color:var(--rosa);line-height:.9;margin-bottom:-.12em;text-shadow:0 0 12px #fff,0 0 4px #fff;}
-h1 .princesa{display:block;font-family:var(--f-script);font-size:clamp(84px,25vw,152px);line-height:.92;
-  background:linear-gradient(180deg,#ff6cb2 10%,var(--rosa) 50%,#a8185f 95%);-webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 2px 0 #fff) drop-shadow(0 6px 18px rgba(255,255,255,.95));padding:0 .12em;
-  animation:aparece 1.1s cubic-bezier(.2,.8,.2,1) both .15s;}
-h1 .quieras{display:block;font-family:var(--f-tit);font-weight:700;font-size:clamp(20px,6.2vw,34px);letter-spacing:.08em;margin-top:-.15em;}
-@keyframes aparece{from{opacity:0;translate:0 .25em;filter:blur(10px);}}
-.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:18px 0 20px;}
-.chip{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.88);
-  border:1.5px solid rgba(224,51,138,.22);font-weight:800;font-size:14px;color:var(--azul);backdrop-filter:blur(6px);}
-.chip svg{width:17px;height:17px;color:var(--rosa);flex:none;}
-.cuenta{display:flex;justify-content:center;gap:8px;margin-top:18px;}
-.cuenta div{min-width:64px;padding:8px 6px 6px;border-radius:16px;background:rgba(255,255,255,.85);border:1.5px solid var(--lila-claro);
-  box-shadow:0 8px 20px -12px rgba(31,42,107,.4);}
-.cuenta b{display:block;font-family:var(--f-tit);font-size:26px;line-height:1;color:var(--azul);font-variant-numeric:tabular-nums;}
-.cuenta small{display:block;font-weight:800;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--rosa-osc);margin-top:3px;}
-.cuenta-txt{font-weight:800;font-size:13px;color:var(--gris);margin-top:8px;letter-spacing:.02em;}
-/* Brillitos del flyer (pocos, livianos) */
-.brillo{position:absolute;color:#fff;font-size:var(--t,18px);left:var(--x);top:var(--y);text-shadow:0 0 10px #fff,0 0 22px var(--rosa-claro);
-  animation:titila 2.8s ease-in-out infinite;animation-delay:var(--d,0s);pointer-events:none;z-index:0;}
-@keyframes titila{0%,100%{opacity:.2;scale:.7;}50%{opacity:1;scale:1.1;}}
+/* Botón de compra: rosa con un brillo que lo recorre */
+.comprar{position:relative;overflow:hidden;display:inline-flex;flex-direction:column;align-items:center;gap:1px;text-decoration:none;color:#fff;
+  padding:16px 34px 15px;border-radius:999px;font-weight:900;font-size:18px;letter-spacing:.02em;line-height:1.1;text-align:center;
+  background:linear-gradient(135deg,#ff6cb5,var(--rosa) 45%,#d42b84);box-shadow:0 16px 36px -12px rgba(255,79,163,.75),inset 0 1px 0 rgba(255,255,255,.5);
+  transition:transform .2s var(--curva),box-shadow .2s;}
+.comprar small{font-weight:700;font-size:13px;opacity:.95;letter-spacing:0;}
+.comprar::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);
+  translate:-120% 0;animation:brillo 3.8s var(--curva) infinite 1.5s;}
+@keyframes brillo{0%{translate:-120% 0}35%,100%{translate:120% 0}}
+@media (hover:hover){ .comprar:hover{transform:translateY(-2px) scale(1.02);} }
+.comprar:active{transform:scale(.97);}
+.comprar.apagado{background:linear-gradient(135deg,rgba(255,255,255,.22),rgba(255,255,255,.12));box-shadow:none;border:1.5px solid var(--borde-vidrio);}
+.comprar.apagado::after{display:none;}
+.boton{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:#fff;font-weight:800;font-size:15px;padding:12px 18px;border-radius:999px;
+  background:var(--vidrio);border:1.5px solid var(--borde-vidrio);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:background .2s;}
+.boton svg{width:20px;height:20px;}
+@media (hover:hover){ .boton:hover{background:rgba(255,255,255,.18);} }
 
-/* En la compu: el título a la izquierda, sobre el castillo, y el video en una ventana de castillo a la derecha. */
-@media (min-width:900px){
-  .portada{grid-template-columns:1.05fr .95fr;align-items:center;min-height:min(100vh,940px);padding:40px max(32px,4vw);gap:3vw;
-    background:linear-gradient(115deg,#fdf3fa 0%,#f5e8ff 55%,#e9dcff 100%);}
-  .portada::before{background:url(assets/arte/arte-castillo-900.webp) 0% 60%/auto 100% no-repeat;opacity:.18;
-    -webkit-mask-image:radial-gradient(ellipse 45% 55% at 25% 70%,#000 35%,transparent 100%);mask-image:radial-gradient(ellipse 45% 55% at 25% 70%,#000 35%,transparent 100%);}
-  .escenario{position:relative;inset:auto;z-index:0;order:2;justify-self:center;height:min(82vh,780px);aspect-ratio:9/16;
-    border-radius:999px 999px 34px 34px;overflow:hidden;padding:7px;background:linear-gradient(160deg,#fff,var(--rosa-claro) 40%,var(--lila) 100%);
-    box-shadow:0 30px 70px -28px rgba(31,42,107,.55),0 0 0 1px rgba(255,255,255,.6);}
-  .escenario video,.escenario img{border-radius:999px 999px 28px 28px;}
-  .logo-portada{position:static;translate:none;width:230px;margin:0 auto 26px;}
-  .titulo{order:1;padding:0;}
+/* Aparecer al llegar, en 3D (animación ligada al scroll donde se puede; si no, con una clase) */
+.entra{opacity:0;transform:perspective(900px) rotateX(22deg) translateY(50px) scale(.96);transform-origin:50% 100%;transition:opacity .9s var(--curva),transform 1s var(--curva);transition-delay:var(--retraso,0s);}
+.entra.visto{opacity:1;transform:none;}
+@supports (animation-timeline:view()){
+  .entra{transition:none;animation:entrar linear both;animation-timeline:view();animation-range:entry 5% cover 32%;}
+  @keyframes entrar{from{opacity:0;transform:perspective(900px) rotateX(22deg) translateY(60px) scale(.95);}to{opacity:1;transform:none;}}
 }
 
-/* ───── Entradas ───── */
-#entradas{background:linear-gradient(180deg,var(--fondo),#f7efff);}
-.tipos{display:grid;gap:14px;margin:26px 0 8px;}
-@media (min-width:700px){ .tipos{grid-template-columns:repeat(auto-fit,minmax(260px,1fr));} }
-.tipo{position:relative;padding:22px 22px 20px;border-radius:var(--radio);background:#fff;border:2px solid var(--lila-claro);box-shadow:var(--sombra);overflow:hidden;}
-.tipo::after{content:"";position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;
-  background:radial-gradient(circle,rgba(224,51,138,.16),transparent 70%);}
-.tipo h3{font-family:var(--f-tit);font-size:20px;color:var(--azul);}
+/* ═════ 1) PORTADA: las princesas del flyer, animadas, a pantalla completa ═════ */
+.portada{position:sticky;top:0;z-index:0;height:100svh;min-height:600px;align-items:end;}
+.portada .fondo video{object-position:50% 60%;}
+/* Arriba se oscurece apenas para el logo; abajo, la noche azul para el título */
+.portada .velo{background:radial-gradient(ellipse 80% 50% at 50% 100%,rgba(255,79,163,.28),transparent 70%),
+  linear-gradient(180deg,rgba(5,14,69,.55) 0%,rgba(5,14,69,0) 22%,rgba(5,14,69,0) 42%,rgba(5,14,69,.72) 70%,rgba(5,14,69,.96) 100%);}
+#brillos{position:absolute;inset:0;z-index:0;pointer-events:none;}
+@supports (animation-timeline:scroll()){
+  .portada .fondo{animation:alejar linear both;animation-timeline:scroll(root);animation-range:0 100vh;}
+  @keyframes alejar{to{transform:scale(1.18);filter:brightness(.55);}}
+  .portada .titulo{animation:subir linear both;animation-timeline:scroll(root);animation-range:0 90vh;}
+  @keyframes subir{to{transform:translateY(-12vh) scale(.94);opacity:0;}}
+}
+.sello{position:absolute;top:max(16px,env(safe-area-inset-top));left:50%;margin-left:calc(clamp(104px,26vw,150px) / -2);width:clamp(104px,26vw,150px);height:auto;z-index:2;
+  border-radius:50%;box-shadow:0 14px 40px -10px rgba(0,0,0,.6),0 0 0 4px rgba(255,255,255,.25);
+  animation:moneda 1.6s var(--curva) .2s both,flotar 6s ease-in-out 2s infinite;}
+@keyframes moneda{from{transform:perspective(800px) rotateY(-540deg) scale(.4);opacity:0;}}
+@keyframes flotar{50%{translate:0 -8px;}}
+.titulo{position:relative;z-index:1;text-align:center;padding:0 18px max(28px,env(safe-area-inset-bottom));perspective:900px;}
+.titulo::before{content:"";position:absolute;inset:-6% -10% 30%;z-index:-1;background:radial-gradient(ellipse 50% 50% at 50% 45%,rgba(5,14,69,.45),transparent 75%);pointer-events:none;}
+.show{font-weight:800;font-size:clamp(13px,3.6vw,18px);letter-spacing:.34em;text-transform:uppercase;color:#fff;text-shadow:0 0 18px rgba(5,14,69,.95),0 2px 6px rgba(5,14,69,.9);
+  animation:aparecer .9s var(--curva) .4s both;}
+h1{margin:2px 0 0;font-weight:400;line-height:.9;transform-style:preserve-3d;}
+h1 .sela{display:block;font-family:var(--f-script);font-size:clamp(42px,11vw,72px);color:var(--rosa-claro);line-height:1;
+  text-shadow:0 0 14px rgba(5,14,69,.95),0 2px 4px rgba(5,14,69,.8),0 0 26px rgba(255,79,163,.6);animation:aparecer 1s var(--curva) .55s both;}
+h1 .princesa{display:block;font-family:var(--f-script);font-size:clamp(92px,27vw,190px);line-height:.86;margin-top:-.1em;padding:0 .1em;
+  background:linear-gradient(180deg,#fff 5%,var(--rosa-claro) 30%,var(--rosa) 75%,#c4237a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 26px rgba(255,79,163,.55)) drop-shadow(0 4px 0 rgba(5,14,69,.6));
+  animation:volar3d 1.4s var(--curva) .7s both;}
+@keyframes volar3d{from{opacity:0;transform:rotateX(75deg) translateY(.4em) translateZ(-200px);}}
+h1 .quieras{display:block;font-weight:900;font-size:clamp(18px,5.6vw,34px);letter-spacing:.14em;text-transform:uppercase;color:#fff;margin-top:-.1em;
+  text-shadow:0 2px 16px rgba(5,14,69,.8);animation:aparecer 1s var(--curva) 1.05s both;}
+@keyframes aparecer{from{opacity:0;transform:translateY(24px);}}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:18px 0 20px;animation:aparecer 1s var(--curva) 1.2s both;}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:999px;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.22);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);font-weight:800;font-size:14px;color:#fff;}
+.chip svg{width:17px;height:17px;color:var(--rosa-claro);}
+.portada .comprar{animation:aparecer 1s var(--curva) 1.35s both;}
+.cuenta{display:flex;justify-content:center;gap:9px;margin-top:20px;animation:aparecer 1s var(--curva) 1.5s both;}
+.cuenta div{min-width:66px;padding:9px 6px 7px;border-radius:16px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);perspective:300px;}
+.cuenta b{display:block;font-weight:900;font-size:28px;line-height:1;color:#fff;font-variant-numeric:tabular-nums;}
+.cuenta small{display:block;font-weight:800;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--rosa-claro);margin-top:4px;}
+.cuenta b.gira{animation:girar .6s var(--curva);}
+@keyframes girar{from{transform:rotateX(-90deg);opacity:.3;}}
+.bajar{display:block;margin:16px auto 0;width:26px;height:40px;border:2px solid rgba(255,255,255,.6);border-radius:14px;position:relative;opacity:.8;}
+.bajar::after{content:"";position:absolute;left:50%;top:7px;width:4px;height:8px;margin-left:-2px;border-radius:2px;background:#fff;animation:rueda 1.8s ease-in-out infinite;}
+@keyframes rueda{60%{transform:translateY(12px);opacity:0;}}
+@media (min-width:900px){ .titulo{padding-bottom:5vh;} .sello{top:26px;} }
+@media (max-height:700px){ .sello{display:none;} }
+
+/* ═════ 2) EL SHOW 2025: el video real de fondo y un carrusel 3D con las tomas ═════ */
+.show25{z-index:1;padding:90px 0 70px;box-shadow:0 -30px 60px rgba(5,14,69,.7);}
+.show25 .velo{background:linear-gradient(180deg,rgba(5,14,69,.92),rgba(10,24,114,.76) 40%,rgba(5,14,69,.95));}
+.carrusel{position:relative;--w:min(44vw,230px);--r:calc(var(--w) * 1.05);height:calc(var(--w) * 16 / 9 + 40px);margin:26px auto 0;perspective:1100px;touch-action:pan-y;}
+.anillo{position:absolute;left:50%;top:20px;width:var(--w);aspect-ratio:9/16;margin-left:calc(var(--w) / -2);transform-style:preserve-3d;
+  transform:translateZ(calc(var(--r) * -1)) rotateY(var(--giro,0deg));transition:transform 1.1s var(--curva);}
+.toma{position:absolute;inset:0;border-radius:22px;overflow:hidden;background:var(--noche-2);border:3px solid rgba(255,255,255,.85);
+  transform:rotateY(calc(var(--i) * 72deg)) translateZ(var(--r));box-shadow:0 24px 50px -18px rgba(0,0,0,.7);transition:filter .6s;
+  filter:brightness(.42) saturate(.8);}
+.toma.frente{filter:none;}
+.toma video{width:100%;height:100%;object-fit:cover;}
+.leyenda{text-align:center;margin-top:18px;font-weight:800;font-size:18px;min-height:1.6em;color:#fff;}
+.flechas{display:flex;justify-content:center;gap:12px;margin-top:10px;}
+.flechas button{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--borde-vidrio);background:var(--vidrio);color:#fff;font-size:24px;line-height:1;cursor:pointer;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+@media (min-width:900px){ .carrusel{--w:250px;--r:330px;} }
+
+/* ═════ 3) ENTRADAS: sobre el castillo del flyer ═════ */
+.entradas{z-index:2;padding:90px 0;}
+.entradas .fondo img{object-position:50% 30%;}
+@supports (animation-timeline:view()){
+  .entradas .fondo img,.magia .fondo img{animation:paralaje linear both;animation-timeline:view();}
+  @keyframes paralaje{from{transform:translateY(-8%) scale(1.18);}to{transform:translateY(8%) scale(1.18);}}
+}
+.entradas .velo{background:linear-gradient(180deg,rgba(5,14,69,.96) 0%,rgba(5,14,69,.7) 30%,rgba(10,24,114,.78) 70%,rgba(5,14,69,.97) 100%);}
+.tipos{display:grid;gap:16px;margin:30px 0 10px;}
+@media (min-width:700px){ .tipos{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));} }
+.tipo,.pronto{position:relative;padding:26px 24px;border-radius:24px;background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(255,255,255,.05));
+  border:1.5px solid rgba(255,255,255,.24);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 30px 60px -30px rgba(0,0,0,.8);
+  transition:transform .25s ease-out;overflow:hidden;}
+/* El brillo que sigue al mouse sobre la tarjeta */
+.tipo::before,.pronto::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,0%),rgba(255,255,255,.22),transparent 45%);pointer-events:none;}
+.tipo h3{font-weight:900;font-size:22px;color:#fff;}
 .tipo p{color:var(--gris);font-size:15px;}
-.tipo .precio{font-family:var(--f-tit);font-weight:700;font-size:34px;color:var(--rosa-osc);margin-top:8px;line-height:1.1;}
-.tipo .precio small{display:block;font-family:var(--f);font-weight:700;font-size:13px;color:var(--gris);}
-.tipo .estado{position:absolute;top:16px;right:16px;font-weight:900;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
-  padding:4px 10px;border-radius:999px;background:var(--rosa-suave);color:var(--rosa-osc);z-index:1;}
+.tipo .precio{font-weight:900;font-size:40px;line-height:1.05;margin-top:8px;color:#fff;}
+.tipo .precio small{display:block;font-weight:700;font-size:13px;color:var(--gris);}
+.tipo .estado{position:absolute;top:16px;right:16px;font-weight:900;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:var(--rosa);color:#fff;}
 .etapas{margin-top:10px;display:grid;gap:4px;font-size:14px;}
 .etapas div{display:flex;justify-content:space-between;gap:10px;color:var(--gris);}
-.etapas div.vigente{color:var(--azul);font-weight:900;}
-.etapas div.paso{text-decoration:line-through;opacity:.6;}
-.pronto{padding:26px 22px;border-radius:var(--radio);background:#fff;border:2px dashed rgba(224,51,138,.35);text-align:center;}
-.pronto b{display:block;font-family:var(--f-tit);font-size:22px;color:var(--azul);}
-.pronto p{color:var(--gris);margin-top:4px;}
-.accion{display:flex;flex-direction:column;align-items:center;gap:10px;margin:26px 0 10px;text-align:center;}
+.etapas .vigente{color:#fff;font-weight:900;}
+.etapas .paso{text-decoration:line-through;opacity:.6;}
+.pronto{text-align:center;}
+.pronto b{display:block;font-weight:900;font-size:24px;color:#fff;}
+.pronto p{color:var(--gris);margin-top:6px;}
+.pronto .corona{font-size:34px;display:block;margin-bottom:6px;animation:flotar2 4s ease-in-out infinite;}
+@keyframes flotar2{50%{transform:translateY(-6px) rotate(-4deg);}}
+.accion{display:flex;flex-direction:column;align-items:center;gap:12px;margin:28px 0 8px;text-align:center;}
 .accion .nota{color:var(--gris);font-size:14px;}
-.pasos{list-style:none;display:grid;gap:12px;margin-top:34px;counter-reset:p;}
+.pasos{list-style:none;display:grid;gap:12px;margin-top:36px;counter-reset:p;}
 @media (min-width:800px){ .pasos{grid-template-columns:repeat(3,1fr);} }
-.pasos li{counter-increment:p;display:flex;gap:14px;align-items:flex-start;padding:18px;border-radius:18px;background:rgba(255,255,255,.75);border:1.5px solid var(--lila-claro);}
-.pasos li::before{content:counter(p);flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;
-  font-family:var(--f-tit);font-weight:700;color:#fff;background:linear-gradient(135deg,#f0479b,var(--lila));}
-.pasos b{display:block;color:var(--azul);font-size:17px;}
+.pasos li{counter-increment:p;display:flex;gap:14px;align-items:flex-start;padding:20px;border-radius:20px;background:var(--vidrio);border:1.5px solid var(--borde-vidrio);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.pasos li::before{content:counter(p);flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;font-weight:900;color:#fff;
+  background:linear-gradient(135deg,var(--rosa),var(--azul-vivo));box-shadow:0 8px 20px -6px rgba(255,79,163,.6);}
+.pasos b{display:block;color:#fff;font-size:17px;}
 .pasos span{color:var(--gris);font-size:15px;}
-.seguro{display:flex;gap:14px;align-items:flex-start;margin-top:18px;padding:16px 18px;border-radius:18px;background:var(--lila-claro);color:var(--azul);font-size:15px;}
-.seguro svg{width:26px;height:26px;flex:none;color:var(--azul-2);margin-top:2px;}
+.seguro{display:flex;gap:14px;align-items:flex-start;margin-top:18px;padding:16px 18px;border-radius:18px;background:rgba(26,60,240,.25);border:1.5px solid rgba(159,178,255,.3);font-size:15px;}
+.seguro svg{width:26px;height:26px;flex:none;color:var(--azul-claro);margin-top:2px;}
 
-/* ───── El show del año pasado: tomas verticales, como historias ───── */
-#show{background:linear-gradient(180deg,#f7efff,var(--fondo));}
-.tomas{display:grid;grid-auto-flow:column;grid-auto-columns:min(62vw,240px);gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;
-  padding:20px 16px 18px;margin:0 -16px;scrollbar-width:none;}
-.tomas::-webkit-scrollbar{display:none;}
-@media (min-width:1000px){ .tomas{grid-auto-flow:row;grid-template-columns:repeat(5,1fr);grid-auto-columns:auto;overflow:visible;margin:0;padding:20px 0;} }
-.toma{scroll-snap-align:center;position:relative;border-radius:24px;overflow:hidden;aspect-ratio:9/16;background:var(--lila-claro);
-  box-shadow:0 20px 40px -22px rgba(31,42,107,.6);border:4px solid #fff;}
-.toma video,.toma img{width:100%;height:100%;object-fit:cover;}
-.toma figcaption{position:absolute;inset:auto 0 0 0;padding:40px 14px 14px;color:#fff;font-weight:800;font-size:15px;line-height:1.25;
-  background:linear-gradient(180deg,transparent,rgba(31,20,70,.82));}
-.toma:nth-child(even){translate:0 18px;}
-@media (max-width:999px){ .toma:nth-child(even){translate:none;} }
+/* ═════ 4) LA MAGIA: la nena que se ata los patines, a pantalla completa ═════ */
+.magia{z-index:2;min-height:85svh;align-items:end;text-align:center;}
+.magia .fondo img{object-position:50% 40%;}
+.magia .velo{background:linear-gradient(180deg,rgba(5,14,69,.95) 0%,rgba(5,14,69,.12) 20%,rgba(5,14,69,.1) 50%,rgba(5,14,69,.9) 88%);}
+.magia blockquote{padding:0 20px 60px;max-width:820px;margin:0 auto;}
+.magia blockquote p{font-family:var(--f-script);font-size:clamp(38px,9vw,70px);line-height:1.05;color:#fff;text-shadow:0 4px 30px rgba(5,14,69,.9);}
+.magia blockquote p span{color:var(--rosa-claro);}
 
-/* ───── La magia: el arte del flyer, a lo ancho ───── */
-.magia{position:relative;min-height:min(70vh,560px);display:grid;place-items:end center;overflow:hidden;isolation:isolate;text-align:center;}
-.magia img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 40%;z-index:-2;}
-.magia::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,var(--fondo) 0%,rgba(253,247,251,0) 10%,rgba(253,247,251,0) 52%,rgba(253,247,251,.94) 86%);}
-.magia blockquote{padding:0 20px 46px;max-width:760px;}
-.magia blockquote p{font-family:var(--f-script);font-size:clamp(34px,8.5vw,58px);line-height:1.05;color:var(--azul);text-shadow:0 2px 14px #fff,0 0 2px #fff;}
-.magia blockquote p span{color:var(--rosa);}
-
-/* ───── La escuela ───── */
-.escuela{display:grid;gap:26px;align-items:center;}
-@media (min-width:860px){ .escuela{grid-template-columns:1fr 330px;} }
-.escuela .logo-grande{width:min(300px,78vw);height:auto;margin-bottom:22px;}
-.sedes{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 20px;}
-.sedes span{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;background:#fff;border:1.5px solid var(--lila-claro);font-weight:800;color:var(--azul);font-size:14px;}
-.sedes span::before{content:"🛼";font-size:14px;}
-.lema-escuela{font-family:var(--f-script);font-size:34px;color:var(--rosa);line-height:1.1;}
-.redes{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;}
-.redes .boton svg{width:20px;height:20px;}
-.mascota{position:relative;justify-self:center;width:min(300px,76vw);}
-.mascota img{width:100%;height:auto;filter:drop-shadow(0 24px 30px rgba(31,42,107,.25));animation:flota 5s ease-in-out infinite;
-  -webkit-mask-image:linear-gradient(90deg,transparent,#000 16%);mask-image:linear-gradient(90deg,transparent,#000 16%);}
-@keyframes flota{50%{translate:0 -8px;}}
-.globo{position:absolute;top:2%;right:-4%;max-width:180px;padding:12px 15px;border-radius:20px 20px 20px 6px;background:#fff;
-  box-shadow:var(--sombra);font-weight:900;color:var(--azul);font-size:15px;line-height:1.25;border:2px solid var(--rosa-claro);}
+/* ═════ 5) LA ESCUELA: todas juntas en el Arena, de fondo ═════ */
+.escuela{z-index:2;padding:90px 0;}
+.escuela .velo{background:linear-gradient(180deg,rgba(5,14,69,.95),rgba(10,24,114,.8) 45%,rgba(5,14,69,.96));}
+.escuela .grilla{display:grid;gap:30px;align-items:center;}
+@media (min-width:880px){ .escuela .grilla{grid-template-columns:1fr 340px;} }
+.moneda{width:clamp(130px,34vw,180px);height:auto;border-radius:50%;margin-bottom:18px;box-shadow:0 18px 40px -12px rgba(0,0,0,.6),0 0 0 4px rgba(255,255,255,.2);opacity:0;}
+.moneda.gira{animation:moneda 1.5s var(--curva) both;opacity:1;}
+.sedes{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 22px;}
+.sedes span{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;background:var(--vidrio);border:1.5px solid var(--borde-vidrio);
+  font-weight:800;color:#fff;font-size:14px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.sedes span::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--rosa);box-shadow:0 0 10px var(--rosa);}
+.lema{font-family:var(--f-script);font-size:clamp(32px,7vw,44px);line-height:1.1;color:var(--rosa-claro);}
+.redes{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;}
+.mascota{position:relative;justify-self:center;width:min(300px,74vw);aspect-ratio:1/1.25;}
+.mascota .aro{position:absolute;inset:18% 0 0;border-radius:50%;background:radial-gradient(circle at 50% 40%,rgba(255,79,163,.55),rgba(26,60,240,.35) 60%,transparent 72%);}
+.mascota img{position:absolute;left:8%;bottom:0;width:84%;height:auto;filter:drop-shadow(0 26px 30px rgba(0,0,0,.45));opacity:0;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 16%);mask-image:linear-gradient(90deg,transparent,#000 16%);transform-origin:50% 100%;}
+.mascota.sale img{animation:saltar 1.2s var(--curva) both;opacity:1;}
+@keyframes saltar{0%{transform:perspective(800px) translateY(40%) translateZ(-120px) scale(.7);opacity:0;}60%{transform:perspective(800px) translateY(-4%) translateZ(40px) scale(1.04);opacity:1;}100%{transform:none;opacity:1;}}
+.globo{position:absolute;top:2%;right:-2%;max-width:170px;padding:12px 15px;border-radius:20px 20px 20px 6px;background:#fff;color:var(--noche);
+  box-shadow:0 18px 40px -14px rgba(0,0,0,.6);font-weight:900;font-size:15px;line-height:1.25;opacity:0;transform:scale(.6) rotate(-6deg);transform-origin:0 100%;transition:all .6s var(--curva) .9s;}
 .globo b{color:var(--rosa);}
-@media (max-width:420px){ .globo{right:0;max-width:150px;font-size:14px;} }
+.mascota.sale .globo{opacity:1;transform:none;}
 
-/* ───── Flyers de la campaña ───── */
-.flyers{display:grid;grid-auto-flow:column;grid-auto-columns:min(58vw,230px);gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;
-  padding:20px 16px;margin:0 -16px;scrollbar-width:none;}
-.flyers::-webkit-scrollbar{display:none;}
-.flyers button{scroll-snap-align:center;border:0;padding:0;background:none;cursor:zoom-in;border-radius:18px;overflow:hidden;
-  box-shadow:0 18px 34px -18px rgba(31,42,107,.55);transition:transform .25s cubic-bezier(.2,.8,.2,1);}
-.flyers button:hover{transform:translateY(-4px) rotate(-.6deg);}
-.flyers img{width:100%;height:auto;aspect-ratio:9/16;object-fit:cover;}
-@media (min-width:1000px){ .flyers{grid-auto-flow:row;grid-template-columns:repeat(4,1fr);overflow:visible;margin:0;padding:20px 0;} }
-
-/* ───── Cómo llegar ───── */
+/* ═════ 6) CÓMO LLEGAR Y PREGUNTAS ═════ */
+.info{position:relative;z-index:2;padding:80px 0;background:radial-gradient(ellipse 70% 40% at 10% 0%,rgba(255,79,163,.16),transparent 70%),
+  radial-gradient(ellipse 70% 40% at 90% 60%,rgba(26,60,240,.3),transparent 70%),var(--noche);}
 .lugar{display:grid;gap:18px;margin-top:24px;}
-@media (min-width:860px){ .lugar{grid-template-columns:1fr 1.2fr;align-items:stretch;} }
+@media (min-width:880px){ .lugar{grid-template-columns:1fr 1.2fr;} }
 .datos{display:grid;gap:12px;align-content:start;}
-.dato{padding:16px 18px;border-radius:18px;background:#fff;border:1.5px solid var(--lila-claro);box-shadow:var(--sombra);}
-.dato small{display:block;font-weight:900;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--rosa-osc);}
-.dato b{display:block;font-size:18px;color:var(--azul);}
+.dato{padding:18px 20px;border-radius:20px;background:var(--vidrio);border:1.5px solid var(--borde-vidrio);}
+.dato small{display:block;font-weight:900;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--rosa-claro);}
+.dato b{display:block;font-size:19px;color:#fff;}
+.dato span{color:var(--gris);}
 .links{display:flex;flex-wrap:wrap;gap:10px;}
-.lugar iframe{width:100%;min-height:320px;height:100%;border:0;border-radius:var(--radio);box-shadow:var(--sombra);background:var(--lila-claro);}
-
-/* ───── Preguntas ───── */
-.preguntas{display:grid;gap:10px;margin-top:22px;max-width:780px;}
-.preguntas details{border-radius:18px;background:#fff;border:1.5px solid var(--lila-claro);overflow:hidden;}
-.preguntas summary{cursor:pointer;list-style:none;padding:16px 50px 16px 18px;font-weight:900;color:var(--azul);position:relative;}
+.lugar iframe{width:100%;min-height:320px;height:100%;border:0;border-radius:22px;background:var(--noche-2);}
+.preguntas{display:grid;gap:10px;margin-top:22px;max-width:800px;}
+.preguntas details{border-radius:18px;background:var(--vidrio);border:1.5px solid var(--borde-vidrio);overflow:hidden;}
+.preguntas summary{cursor:pointer;list-style:none;padding:17px 52px 17px 20px;font-weight:800;color:#fff;position:relative;}
 .preguntas summary::-webkit-details-marker{display:none;}
-.preguntas summary::after{content:"+";position:absolute;right:18px;top:50%;translate:0 -50%;font-size:24px;color:var(--rosa);transition:rotate .2s;}
+.preguntas summary::after{content:"+";position:absolute;right:20px;top:50%;translate:0 -50%;font-size:26px;color:var(--rosa);transition:rotate .25s;}
 .preguntas details[open] summary::after{rotate:45deg;}
-.preguntas details p{padding:0 18px 16px;color:var(--gris);}
+.preguntas details p{padding:0 20px 18px;color:var(--gris);}
 
-/* ───── Pie y barra de compra (celular) ───── */
-footer{padding:40px 0 110px;background:var(--azul);color:#d9d6f2;text-align:center;font-size:15px;}
+/* Pie, barra de compra y pausa */
+footer{position:relative;z-index:2;padding:46px 0 120px;background:#030a33;color:var(--gris);text-align:center;font-size:15px;}
 footer .envase{display:grid;gap:10px;justify-items:center;}
-footer img{width:150px;height:auto;background:#fff;border-radius:18px;padding:10px 14px;}
-footer .lema-pie{font-family:var(--f-script);font-size:30px;color:#ffc2df;}
+footer img{width:110px;height:auto;border-radius:50%;}
+footer .lema{font-size:32px;}
 footer a{color:#fff;}
-.barra{position:fixed;left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:10px 10px 10px 18px;border-radius:999px;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);box-shadow:0 14px 36px -12px rgba(31,42,107,.5);
-  border:1.5px solid var(--rosa-claro);translate:0 140%;transition:translate .35s cubic-bezier(.2,.8,.2,1);}
+.barra{position:fixed;left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));z-index:30;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:9px 9px 9px 16px;border-radius:999px;background:rgba(5,14,69,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1.5px solid rgba(255,255,255,.18);box-shadow:0 16px 40px -14px rgba(0,0,0,.7);translate:0 150%;transition:translate .4s var(--curva);}
 .barra.visible{translate:0 0;}
-.barra b{display:block;font-family:var(--f-tit);color:var(--azul);font-size:14px;line-height:1.1;}
+.barra b{display:block;font-weight:900;color:#fff;font-size:14px;line-height:1.15;}
 .barra small{display:block;color:var(--gris);font-size:12px;font-weight:700;}
-.barra .comprar{padding:11px 20px;font-size:16px;}
-@media (min-width:900px){ .barra{left:auto;right:24px;width:420px;} }
-
-/* ───── Visor de flyers y ventana de vista previa ───── */
-[popover]{margin:auto;border:0;border-radius:22px;padding:22px;max-width:min(92vw,460px);background:#fff;color:var(--tinta);box-shadow:0 30px 80px -20px rgba(31,42,107,.6);}
-[popover]::backdrop{background:rgba(31,42,107,.55);backdrop-filter:blur(3px);}
-#visor{padding:0;background:transparent;box-shadow:none;max-width:min(92vw,520px);}
-#visor img{max-height:86vh;width:auto;border-radius:18px;margin:0 auto;}
+.barra .comprar{padding:11px 20px;font-size:15px;}
+@media (min-width:900px){ .barra{left:auto;right:24px;width:440px;} }
+.pausa{position:fixed;right:12px;top:max(12px,env(safe-area-inset-top));z-index:31;border:1.5px solid var(--borde-vidrio);background:rgba(5,14,69,.6);color:#fff;
+  font:800 11px var(--f);padding:7px 11px;border-radius:999px;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+[popover]{margin:auto;border:0;border-radius:22px;padding:22px;max-width:min(92vw,440px);background:#fff;color:var(--noche);box-shadow:0 30px 80px -20px rgba(0,0,0,.7);}
+[popover]::backdrop{background:rgba(5,14,69,.7);backdrop-filter:blur(3px);}
 .cerrar{display:block;margin:14px auto 0;border:0;border-radius:999px;padding:10px 22px;font:800 15px var(--f);background:var(--rosa);color:#fff;cursor:pointer;}
 
+/* Quietud (botón de pausa o "reducir movimiento"): sin animaciones ni videos que corran solos */
+body.quieto *,body.quieto *::before,body.quieto *::after{animation:none !important;transition:none !important;}
+body.quieto .entra,body.quieto .moneda,body.quieto .mascota img,body.quieto .globo{opacity:1;transform:none;}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important;}
+  .entra,.moneda,.mascota img,.globo{opacity:1;transform:none;}
+  .portada{position:relative;}
 }
 </style>
 </head>
@@ -255,25 +284,21 @@ footer a{color:#fff;}
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.3 7-12a7 7 0 1 0-14 0c0 5.7 7 12 7 12Z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.6" fill="currentColor"/></symbol>
-  <symbol id="i-reloj" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   <symbol id="i-ig" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5.5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="12" r="4.3" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="17.4" cy="6.6" r="1.35" fill="currentColor"/></symbol>
   <symbol id="i-tt" viewBox="0 0 24 24"><path fill="currentColor" d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></symbol>
   <symbol id="i-bolsa" viewBox="0 0 24 24"><path d="M5 8h14l-1 13H6L5 8Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 10V6a3 3 0 0 1 6 0v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-  <symbol id="i-wa" viewBox="0 0 24 24"><path fill="currentColor" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.26-.46-2.39-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.21 3.07.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35m-5.42 7.4h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.89-9.88 2.64 0 5.12 1.03 6.99 2.9a9.82 9.82 0 0 1 2.89 6.99c0 5.45-4.44 9.88-9.88 9.88m8.41-18.3A11.82 11.82 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.31-1.65a11.88 11.88 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.89a11.82 11.82 0 0 0-3.48-8.41Z"/></symbol>
   <symbol id="i-escudo" viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m8.5 12 2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 <a class="saltar" href="#entradas">Ir a las entradas</a>
+<button class="pausa" id="pausa" type="button" aria-pressed="false">Pausar animaciones</button>
 
-<header class="portada" id="portada">
-  <div class="escenario">
-    <video id="video-portada" muted loop playsinline preload="metadata" poster="assets/video/show25-portada.webp" aria-label="El show 2025 de EPA en el Estadio Arena"></video>
-  </div>
-  <span class="brillo" style="--x:9%;--y:24%;--t:16px" aria-hidden="true">✦</span>
-  <span class="brillo" style="--x:86%;--y:30%;--t:22px;--d:.8s" aria-hidden="true">✦</span>
-  <span class="brillo" style="--x:78%;--y:52%;--t:14px;--d:1.6s" aria-hidden="true">✦</span>
-  <span class="brillo" style="--x:14%;--y:58%;--t:20px;--d:2.2s" aria-hidden="true">✦</span>
+<!-- 1) PORTADA -->
+<header class="pantalla portada" id="portada">
+  <div class="fondo"><video id="video-portada" muted loop playsinline preload="none" aria-hidden="true"></video></div>
+  <div class="velo"></div>
+  <div id="brillos" aria-hidden="true"></div>
+  <img class="sello" src="assets/logo-epa.svg" width="600" height="600" alt="EPA · Escuela de Patín Artístico">
   <div class="titulo">
-    <img class="logo-portada" src="assets/logo-epa-320.webp" srcset="assets/logo-epa-320.webp 320w, assets/logo-epa-640.webp 640w" sizes="230px" width="320" height="142" alt="EPA · Escuela de Patín Artístico">
     <p class="show">Show de fin de año</p>
     <h1><span class="sela">Sé la</span><span class="princesa">Princesa</span><span class="quieras">que quieras ser</span></h1>
     <div class="chips">
@@ -281,129 +306,115 @@ footer a{color:#fff;}
       <span class="chip"><svg aria-hidden="true"><use href="#i-pin"/></svg>Estadio Arena · Villa Carlos Paz</span>
     </div>
     <a class="comprar" id="btn-portada" href="#entradas">Entradas<small id="btn-portada-txt">Show de fin de año</small></a>
-    <div class="cuenta" id="cuenta" aria-live="off"></div>
-    <p class="cuenta-txt" id="cuenta-txt"></p>
+    <div class="cuenta" id="cuenta" aria-hidden="true"></div>
+    <a class="bajar" href="#show" aria-label="Bajar"></a>
   </div>
 </header>
 
 <main>
-  <!-- ENTRADAS -->
-  <section class="bloque" id="entradas">
+  <!-- 2) EL SHOW 2025 -->
+  <section class="pantalla show25" id="show" aria-labelledby="t-show">
+    <div class="fondo"><video id="video-show" muted loop playsinline preload="none" poster="assets/video/show25-portada.webp" aria-hidden="true"></video></div>
+    <div class="velo"></div>
     <div class="envase">
-      <p class="antetitulo">Domingo 13 de diciembre</p>
-      <h2>Tus entradas, <em>con QR</em></h2>
-      <p class="bajada">Comprás acá, pagás por transferencia y el QR te llega al mail al instante. El día del show lo mostrás en la puerta desde el celular.</p>
-      <div class="tipos" id="tipos" aria-live="polite">
-        <div class="pronto"><b>Cargando…</b></div>
+      <p class="ante entra">Así fue el show 2025</p>
+      <h2 class="entra" id="t-show">La magia <em>se vive en la pista</em></h2>
+      <p class="bajada entra">El año pasado, en el mismo Estadio Arena: el túnel de luces, la tribuna llena y todas las patinadoras juntas.</p>
+      <div class="carrusel" id="carrusel" aria-roledescription="carrusel" aria-label="Tomas del show 2025">
+        <div class="anillo" id="anillo">
+          <figure class="toma" style="--i:0" data-titulo="La entrada por el túnel de luces"><video muted loop playsinline preload="none" poster="assets/video/show25-tunel.webp" data-src="assets/video/show25-tunel.mp4"></video></figure>
+          <figure class="toma" style="--i:1" data-titulo="Los nervios antes de salir"><video muted loop playsinline preload="none" poster="assets/video/show25-saludo.webp" data-src="assets/video/show25-saludo.mp4"></video></figure>
+          <figure class="toma" style="--i:2" data-titulo="La tribuna llena del Arena"><video muted loop playsinline preload="none" poster="assets/video/show25-tribuna.webp" data-src="assets/video/show25-tribuna.mp4"></video></figure>
+          <figure class="toma" style="--i:3" data-titulo="De la mano, en ronda"><video muted loop playsinline preload="none" poster="assets/video/show25-ronda.webp" data-src="assets/video/show25-ronda.mp4"></video></figure>
+          <figure class="toma" style="--i:4" data-titulo="Todas juntas: una sola pasión"><video muted loop playsinline preload="none" poster="assets/video/show25-grupo.webp" data-src="assets/video/show25-grupo.mp4"></video></figure>
+        </div>
       </div>
-      <div class="accion">
-        <a class="comprar apagado" id="btn-entradas" href="#entradas" aria-disabled="true">Entradas muy pronto<small>Seguinos en Instagram para enterarte</small></a>
+      <p class="leyenda" id="leyenda" aria-live="polite">La entrada por el túnel de luces</p>
+      <div class="flechas"><button type="button" id="ant" aria-label="Toma anterior">‹</button><button type="button" id="sig" aria-label="Toma siguiente">›</button></div>
+    </div>
+  </section>
+
+  <!-- 3) ENTRADAS -->
+  <section class="pantalla entradas" id="entradas" aria-labelledby="t-entradas">
+    <div class="fondo"><img src="assets/arte/arte-castillo-900.webp" srcset="assets/arte/arte-castillo-600.webp 600w, assets/arte/arte-castillo-900.webp 900w" sizes="100vw" alt="" loading="lazy" width="900" height="680"></div>
+    <div class="velo"></div>
+    <div class="envase">
+      <p class="ante entra">Domingo 13 de diciembre</p>
+      <h2 class="entra" id="t-entradas">Tus entradas, <em>con QR</em></h2>
+      <p class="bajada entra">Comprás acá, pagás por transferencia y el QR te llega al mail al instante. El día del show lo mostrás en la puerta desde el celular.</p>
+      <div class="tipos" id="tipos" aria-live="polite"><div class="pronto"><b>Cargando…</b></div></div>
+      <div class="accion entra">
+        <a class="comprar apagado" id="btn-entradas" href="#entradas" aria-disabled="true">Entradas muy pronto<small>Seguí a EPA en Instagram para enterarte</small></a>
         <p class="nota"><a href="/mis-entradas" id="recuperar">¿Ya compraste? Recuperá tus entradas</a></p>
       </div>
       <ol class="pasos">
-        <li><span><b>Elegís tus entradas</b>Con tu nombre, tu DNI y tu mail.</span></li>
-        <li><span><b>Transferís</b>Te damos un CVU para esa compra: pagás desde tu banco o tu billetera virtual.</span></li>
-        <li><span><b>Te llega el QR</b>Al mail, al instante. Uno por persona, para mostrar en la puerta.</span></li>
+        <li class="entra"><span><b>Elegís tus entradas</b>Con tu nombre, tu DNI y tu mail.</span></li>
+        <li class="entra"><span><b>Transferís</b>Te damos un CVU para esa compra: pagás desde tu banco o tu billetera virtual.</span></li>
+        <li class="entra"><span><b>Te llega el QR</b>Al mail, al instante. Uno por persona, para mostrar en la puerta.</span></li>
       </ol>
-      <div class="seguro">
-        <svg aria-hidden="true"><use href="#i-escudo"/></svg>
-        <p><b>Transferí desde una cuenta a tu nombre</b> (la del DNI que cargás): así el pago se reconoce solo y las entradas salen al instante.
-          Comprá solo en esta página: nunca te vamos a pedir claves, códigos ni datos de tu tarjeta.</p>
-      </div>
+      <div class="seguro entra"><svg aria-hidden="true"><use href="#i-escudo"/></svg>
+        <p><b>Transferí desde una cuenta a tu nombre</b> (la del DNI que cargás): así el pago se reconoce solo y las entradas salen al instante. Comprá solo en esta página: nunca te vamos a pedir claves ni datos de tu tarjeta.</p></div>
     </div>
   </section>
 
-  <!-- EL SHOW DEL AÑO PASADO -->
-  <section class="bloque" id="show">
-    <div class="envase">
-      <p class="antetitulo">Así fue el show 2025</p>
-      <h2>La magia <em>se vive en la pista</em></h2>
-      <p class="bajada">El año pasado, en el mismo Estadio Arena: la entrada por el túnel de luces, la tribuna llena y todas las patinadoras juntas.</p>
-      <div class="tomas" id="tomas">
-        <figure class="toma"><video muted loop playsinline preload="none" poster="assets/video/show25-tunel.webp" data-src="assets/video/show25-tunel.mp4" aria-label="Las patinadoras entran por el túnel de luces"></video><figcaption>La entrada por el túnel de luces</figcaption></figure>
-        <figure class="toma"><video muted loop playsinline preload="none" poster="assets/video/show25-saludo.webp" data-src="assets/video/show25-saludo.mp4" aria-label="Patinadoras saludando antes de salir a la pista"></video><figcaption>Los nervios antes de salir</figcaption></figure>
-        <figure class="toma"><video muted loop playsinline preload="none" poster="assets/video/show25-tribuna.webp" data-src="assets/video/show25-tribuna.mp4" aria-label="La tribuna del Estadio Arena llena"></video><figcaption>La tribuna llena del Arena</figcaption></figure>
-        <figure class="toma"><video muted loop playsinline preload="none" poster="assets/video/show25-ronda.webp" data-src="assets/video/show25-ronda.mp4" aria-label="Una ronda de patinadoras tomadas de la mano"></video><figcaption>De la mano, en ronda</figcaption></figure>
-        <figure class="toma"><video muted loop playsinline preload="none" poster="assets/video/show25-grupo.webp" data-src="assets/video/show25-grupo.mp4" aria-label="Todas las patinadoras de EPA juntas frente al cartel del Arena"></video><figcaption>Todas juntas: una sola pasión</figcaption></figure>
-      </div>
-    </div>
+  <!-- 4) LA MAGIA -->
+  <section class="pantalla magia" aria-label="Un show donde la magia, el patinaje y los sueños se viven en la pista">
+    <div class="fondo"><img src="assets/arte/arte-patines-900.webp" srcset="assets/arte/arte-patines-600.webp 600w, assets/arte/arte-patines-900.webp 900w" sizes="100vw" alt="" loading="lazy" width="900" height="715"></div>
+    <div class="velo"></div>
+    <blockquote class="entra"><p>Un show donde <span>la magia</span>, el patinaje y los sueños se viven en la pista</p></blockquote>
   </section>
 
-  <!-- LA MAGIA -->
-  <section class="magia" aria-label="Sé la princesa que quieras ser">
-    <img src="assets/arte/arte-princesas-900.webp" srcset="assets/arte/arte-princesas-600.webp 600w, assets/arte/arte-princesas-900.webp 900w" sizes="100vw" alt="Seis princesas patinando de la mano hacia un castillo rosa" loading="lazy" width="900" height="555">
-    <blockquote><p>Un show donde <span>la magia</span>, el patinaje y los sueños se viven en la pista</p></blockquote>
-  </section>
-
-  <!-- LA ESCUELA -->
-  <section class="bloque" id="escuela">
-    <div class="envase escuela">
+  <!-- 5) LA ESCUELA -->
+  <section class="pantalla escuela" id="escuela" aria-labelledby="t-escuela">
+    <div class="fondo"><video id="video-grupo" muted loop playsinline preload="none" poster="assets/video/show25-grupo.webp" aria-hidden="true"></video></div>
+    <div class="velo"></div>
+    <div class="envase grilla">
       <div>
-        <img class="logo-grande" src="assets/logo-epa-640.webp" width="640" height="285" alt="EPA · Escuela de Patín Artístico" loading="lazy">
-        <p class="antetitulo">Organiza</p>
-        <h2>3 sedes, <em>una sola pasión</em></h2>
-        <div class="sedes"><span>Club Sarmiento</span><span>Club Atlético Carlos Paz</span><span>Club Martín Ferreyra</span></div>
-        <p class="lema-escuela">Donde los sueños se trabajan en equipo</p>
-        <div class="redes">
+        <img class="moneda" id="moneda" src="assets/logo-epa.svg" width="600" height="600" alt="EPA · Escuela de Patín Artístico" loading="lazy">
+        <p class="ante entra">Organiza EPA · Escuela de Patín Artístico</p>
+        <h2 class="entra" id="t-escuela">3 sedes, <em>una sola pasión</em></h2>
+        <div class="sedes entra"><span>Club Sarmiento</span><span>Club Atlético Carlos Paz</span><span>Club Martín Ferreyra</span></div>
+        <p class="lema entra">Donde los sueños se trabajan en equipo</p>
+        <div class="redes entra">
           <a class="boton" href="https://www.instagram.com/epa_escuela_de_patin_artistico/" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-ig"/></svg>Instagram</a>
           <a class="boton" href="https://www.tiktok.com/@epapatinartistico" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-tt"/></svg>TikTok</a>
           <a class="boton" href="https://epaescueladepatin.mitiendanube.com/" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-bolsa"/></svg>Tienda EPA</a>
         </div>
       </div>
-      <div class="mascota">
+      <div class="mascota" id="mascota">
+        <div class="aro" aria-hidden="true"></div>
         <img src="assets/mascota.webp" width="399" height="852" alt="La patinadora animada de EPA, sentada con sus patines, guiñando un ojo" loading="lazy">
         <p class="globo">¡Te espero en la pista el <b>13 de diciembre</b>!</p>
       </div>
     </div>
   </section>
 
-  <!-- LOS FLYERS -->
-  <section class="bloque" id="flyers" style="padding-top:20px">
+  <!-- 6) CÓMO LLEGAR Y PREGUNTAS -->
+  <section class="info" id="lugar" aria-labelledby="t-lugar">
     <div class="envase">
-      <p class="antetitulo">La cuenta regresiva</p>
-      <h2>Compartí <em>el flyer</em></h2>
-      <p class="bajada">Tocá uno para verlo grande y mandáselo a la familia.</p>
-      <div class="flyers" id="lista-flyers">
-        <button type="button" data-flyer="oficial" aria-label="Ver el flyer grande: Sé la princesa que quieras ser"><img src="assets/flyers/flyer-oficial-450.webp" width="450" height="800" alt="" loading="lazy"></button>
-        <button type="button" data-flyer="patinando" aria-label="Ver el flyer grande: te invita al show de fin de año"><img src="assets/flyers/flyer-patinando-450.webp" width="450" height="800" alt="" loading="lazy"></button>
-        <button type="button" data-flyer="invita" aria-label="Ver el flyer grande: la princesa que se ata los patines"><img src="assets/flyers/flyer-invita-450.webp" width="450" height="800" alt="" loading="lazy"></button>
-        <button type="button" data-flyer="cuenta" aria-label="Ver el flyer grande: cuenta regresiva al show"><img src="assets/flyers/flyer-cuenta-450.webp" width="450" height="800" alt="" loading="lazy"></button>
-      </div>
-    </div>
-  </section>
-
-  <!-- CÓMO LLEGAR -->
-  <section class="bloque" id="lugar" style="padding-top:30px">
-    <div class="envase">
-      <p class="antetitulo">Cómo llegar</p>
-      <h2>Estadio Arena, <em>Villa Carlos Paz</em></h2>
+      <p class="ante entra">Cómo llegar</p>
+      <h2 class="entra" id="t-lugar">Estadio Arena, <em>Villa Carlos Paz</em></h2>
       <div class="lugar">
-        <div class="datos">
-          <div class="dato"><small>Cuándo</small><b id="dato-cuando">Domingo 13 de diciembre</b><span id="dato-hora">Horario a confirmar</span></div>
-          <div class="dato"><small>Dónde</small><b>Estadio Arena</b>Villa Carlos Paz, Córdoba</div>
+        <div class="datos entra">
+          <div class="dato"><small>Cuándo</small><b>Domingo 13 de diciembre</b><span id="dato-hora">Horario a confirmar</span></div>
+          <div class="dato"><small>Dónde</small><b>Estadio Arena</b><span>Villa Carlos Paz, Córdoba</span></div>
           <div class="links">
-            <a class="boton" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Estadio%20Arena%20Villa%20Carlos%20Paz"><svg aria-hidden="true" width="20" height="20"><use href="#i-pin"/></svg>Abrir en el mapa</a>
-            <a class="boton" id="agendar" target="_blank" rel="noopener" href="#"><svg aria-hidden="true" width="20" height="20"><use href="#i-cal"/></svg>Agendar</a>
+            <a class="boton" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Estadio%20Arena%20Villa%20Carlos%20Paz"><svg aria-hidden="true"><use href="#i-pin"/></svg>Abrir en el mapa</a>
+            <a class="boton" id="agendar" target="_blank" rel="noopener" href="#"><svg aria-hidden="true"><use href="#i-cal"/></svg>Agendar</a>
           </div>
         </div>
         <iframe id="mapa" title="Mapa: Estadio Arena, Villa Carlos Paz" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
           data-src="https://www.google.com/maps?output=embed&q=Estadio%20Arena%20Villa%20Carlos%20Paz%2C%20C%C3%B3rdoba"></iframe>
       </div>
-    </div>
-  </section>
-
-  <!-- PREGUNTAS -->
-  <section class="bloque" id="preguntas" style="padding-top:30px">
-    <div class="envase">
-      <p class="antetitulo">Preguntas frecuentes</p>
-      <h2>Todo lo que <em>necesitás saber</em></h2>
+      <p class="ante entra" style="margin-top:70px">Preguntas frecuentes</p>
+      <h2 class="entra">Todo lo que <em>necesitás saber</em></h2>
       <div class="preguntas">
-        <details><summary>¿Cómo compro las entradas?</summary><p>Tocás «Entradas», elegís cuántas y cargás tu nombre, tu DNI y tu mail. Te damos un CVU para transferir y, apenas entra la plata, te llegan los QR al mail.</p></details>
-        <details><summary>¿Cómo pago?</summary><p id="faq-pago">Por transferencia, desde tu banco o tu billetera virtual (Mercado Pago, Ualá, Naranja X, MODO o cualquier banco), desde una cuenta a tu nombre. Mientras pagás, tu lugar queda guardado.</p></details>
-        <details><summary>¿Y si transfiero desde otra cuenta?</summary><p>El pago se reconoce solo cuando la cuenta que transfiere es del mismo DNI que cargaste. Si pagás desde la cuenta de un familiar, cargá el DNI de esa persona. Si ya pagaste desde otra, no transfieras de nuevo: la escuela lo asigna a mano.</p></details>
-        <details><summary>¿Dónde están mis entradas?</summary><p>Te llegan al mail apenas se acredita el pago, una con QR por persona. Si no las ves, revisá Spam o Promociones, o buscalas en <a href="/mis-entradas">Mis entradas</a> con tu mail y tu DNI.</p></details>
-        <details><summary>¿Hay que imprimirlas?</summary><p>No: mostrás el QR desde el celular. Hacele una captura antes de ir, por si en el estadio no hay señal. Cada QR sirve para entrar una vez.</p></details>
-        <details data-wa-caja hidden><summary>¿Tenés otra duda?</summary><p>Escribinos por WhatsApp y te respondemos: <a data-wa target="_blank" rel="noopener" href="#">abrir el chat</a>.</p></details>
+        <details class="entra"><summary>¿Cómo compro las entradas?</summary><p>Tocás «Entradas», elegís cuántas y cargás tu nombre, tu DNI y tu mail. Te damos un CVU para transferir y, apenas entra la plata, te llegan los QR al mail.</p></details>
+        <details class="entra"><summary>¿Cómo pago?</summary><p id="faq-pago">Por transferencia, desde tu banco o tu billetera virtual (Mercado Pago, Ualá, Naranja X, MODO o cualquier banco), desde una cuenta a tu nombre. Mientras pagás, tu lugar queda guardado.</p></details>
+        <details class="entra"><summary>¿Y si transfiero desde otra cuenta?</summary><p>El pago se reconoce solo cuando la cuenta que transfiere es del mismo DNI que cargaste. Si pagás desde la cuenta de un familiar, cargá el DNI de esa persona. Si ya pagaste desde otra, no transfieras de nuevo: la escuela lo asigna a mano.</p></details>
+        <details class="entra"><summary>¿Dónde están mis entradas?</summary><p>Te llegan al mail apenas se acredita el pago, una con QR por persona. Si no las ves, revisá Spam o Promociones, o buscalas en <a href="/mis-entradas">Mis entradas</a> con tu mail y tu DNI.</p></details>
+        <details class="entra"><summary>¿Hay que imprimirlas?</summary><p>No: mostrás el QR desde el celular. Hacele una captura antes de ir, por si en el estadio no hay señal. Cada QR sirve para entrar una vez.</p></details>
+        <details class="entra" data-wa-caja hidden><summary>¿Tenés otra duda?</summary><p>Escribinos por WhatsApp y te respondemos: <a data-wa target="_blank" rel="noopener" href="#">abrir el chat</a>.</p></details>
       </div>
     </div>
   </section>
@@ -411,40 +422,37 @@ footer a{color:#fff;}
 
 <footer>
   <div class="envase">
-    <img src="assets/logo-epa-320.webp" width="320" height="142" alt="EPA · Escuela de Patín Artístico" loading="lazy">
-    <p class="lema-pie">Donde los sueños se trabajan en equipo</p>
+    <img src="assets/logo-epa.svg" width="600" height="600" alt="EPA · Escuela de Patín Artístico" loading="lazy">
+    <p class="lema">Donde los sueños se trabajan en equipo</p>
     <span>Show de Fin de Año 2026 · Domingo 13 de diciembre · Estadio Arena, Villa Carlos Paz</span>
     <span>Las entradas online se venden solo en esta página. <a href="/mis-entradas">Mis entradas</a></span>
   </div>
 </footer>
 
 <div class="barra" id="barra" aria-hidden="true">
-  <span><b>Sé la Princesa</b><small id="barra-txt">Dom 13 dic · Estadio Arena</small></span>
+  <span><b>Sé la Princesa · EPA</b><small id="barra-txt">Dom 13 dic · Estadio Arena</small></span>
   <a class="comprar" id="btn-barra" href="#entradas" tabindex="-1">Entradas</a>
 </div>
-
-<div popover id="visor" aria-label="Flyer del show"><img id="visor-img" alt=""><button class="cerrar" type="button" popovertarget="visor" popovertargetaction="hide">Cerrar</button></div>
 
 <script>
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const pesos = n => '$' + Number(n).toLocaleString('es-AR');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-const hoyAR = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date());
 const dm = f => { const d = new Date(f + 'T12:00:00Z'); return `${DIAS[d.getUTCDay()]} ${d.getUTCDate()}/${d.getUTCMonth() + 1}`; };
-// Sin animaciones ni videos que se reproducen solos si la persona lo pidió (o si tiene el ahorro de datos prendido).
-const QUIETO = matchMedia('(prefers-reduced-motion: reduce)').matches || navigator.connection?.saveData === true;
-let FECHA = '2026-12-13', HORA = null;
+// Sin animaciones ni videos que corran solos si la persona lo pidió o tiene el ahorro de datos prendido.
+const QUIETO = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const AHORRO = navigator.connection?.saveData === true;
+const MOUSE = matchMedia('(hover: hover) and (pointer: fine)').matches;
+const VERTICAL = () => innerHeight > innerWidth;
+let FECHA = '2026-12-13', HORA = null, pausado = false, purpurina = null;
 
-// ───── Precios y hora (de /api/config) ─────
-// VISTA PREVIA (copia publicada sin el sistema, herramientas/vista-previa.mjs): los precios vienen de una copia de
-// /api/config y los botones no venden.
+// ───── Precios y hora (de /api/config); VISTA PREVIA: una copia de /api/config y los botones no venden ─────
 const PREVIA = window.VISTA_PREVIA || null;
 if (PREVIA) {
-  document.body.insertAdjacentHTML('beforeend', `<div popover id="p-previa"><h3 style="font-family:var(--f-tit);color:var(--azul)">Vista previa</h3>
-    <p style="margin-top:8px">Así se va a ver la página. La compra con QR se habilita cuando abra la venta.</p>
+  document.body.insertAdjacentHTML('beforeend', `<div popover id="p-previa"><h3>Vista previa</h3><p style="margin-top:8px">Así se va a ver la página. La compra con QR se habilita cuando abra la venta.</p>
     <button class="cerrar" popovertarget="p-previa" popovertargetaction="hide">Entendido</button></div>
-    <p style="position:fixed;top:10px;right:10px;z-index:30;margin:0;font:900 10px var(--f);letter-spacing:.2em;color:#fff;background:var(--rosa);padding:5px 10px;border-radius:99px;">VISTA PREVIA</p>`);
+    <p style="position:fixed;top:10px;left:10px;z-index:40;margin:0;font:900 10px var(--f);letter-spacing:.2em;color:#fff;background:var(--rosa);padding:5px 10px;border-radius:99px;">VISTA PREVIA</p>`);
   $('#recuperar').hidden = true;
 }
 const desglose = c => Boolean(c?.sitio?.desgloseServicio);
@@ -456,7 +464,8 @@ const precioTxt = (c, t) => desglose(c) ? `${pesos(t.precio)}<small>+ ${pesos(t.
     a.hidden = false; const caja = a.closest('[data-wa-caja]'); if (caja) caja.hidden = false;
   }
   const e = c.eventos?.[0];
-  if (!e) { $('#tipos').innerHTML = '<div class="pronto"><b>Entradas muy pronto</b><p>Seguinos en Instagram para enterarte cuándo abre la venta.</p></div>'; return; }
+  const pronto = '<div class="pronto"><span class="corona" aria-hidden="true">👑</span><b>Entradas muy pronto</b><p>Estamos preparando la venta online. Seguí a EPA en Instagram para enterarte apenas abra.</p></div>';
+  if (!e) { $('#tipos').innerHTML = pronto; return; }
   FECHA = e.fecha || FECHA; HORA = e.hora || null;
   if (HORA) {
     const h = HORA.replace(/:00$/, '');
@@ -464,90 +473,164 @@ const precioTxt = (c, t) => desglose(c) ? `${pesos(t.precio)}<small>+ ${pesos(t.
     $('#dato-hora').textContent = e.puertas ? `Puertas ${e.puertas} · Show ${h} h` : `Show a las ${h} h`;
     $('#barra-txt').textContent = `Dom 13 dic · ${h} h · Estadio Arena`;
   }
-  agendar(); cuenta();
+  agendar(); cuenta(true);
   const tipos = Object.entries(e.tipos || {});
-  if (!tipos.length) {
-    $('#tipos').innerHTML = '<div class="pronto"><b>Entradas muy pronto</b><p>Estamos preparando la venta online. Seguinos en Instagram para enterarte apenas abra.</p></div>';
-    $('#btn-portada-txt').textContent = 'Muy pronto';
-    return;
-  }
+  if (!tipos.length) { $('#tipos').innerHTML = pronto; $('#btn-portada-txt').textContent = 'Muy pronto'; inclinar(); return; }
   $('#tipos').innerHTML = tipos.map(([, t]) => {
     const marca = t.estado === 'agotado' ? '<span class="estado">Agotada</span>' : t.estado === 'pocas' ? '<span class="estado">Quedan pocas</span>' : '';
     const etapas = (t.etapas || []).map(s => `<div class="${s.vigente ? 'vigente' : ''}${s.paso ? ' paso' : ''}"><span>${esc(s.nombre || 'Hasta el ' + dm(s.hasta))}</span><span>${pesos(s.final)}</span></div>`).join('');
     return `<article class="tipo">${marca}<h3>${esc(t.nombre)}</h3>${t.detalle ? `<p>${esc(t.detalle)}</p>` : ''}<p class="precio">${precioTxt(c, t)}</p>${etapas ? `<div class="etapas">${etapas}</div>` : ''}</article>`;
   }).join('');
-  const minimo = Math.min(...tipos.map(([, t]) => t.final));
+  inclinar();
+  const minimo = Math.min(...tipos.map(([, t]) => t.final)), desde = tipos.length > 1 ? 'desde ' : '';
   if (e.vendible) {
     const url = `/comprar?evento=${encodeURIComponent(e.id)}`;
     const b = $('#btn-entradas');
     b.classList.remove('apagado'); b.removeAttribute('aria-disabled'); b.href = url;
-    b.innerHTML = `Comprar entradas<small>${tipos.length > 1 ? 'desde ' : ''}${pesos(minimo)}</small>`;
-    $('#btn-portada').href = url; $('#btn-portada').innerHTML = `Comprar entradas<small>${tipos.length > 1 ? 'desde ' : ''}${pesos(minimo)}</small>`;
-    $('#btn-barra').href = url;
-    $('#barra').dataset.activa = '1';
+    b.innerHTML = `Comprar entradas<small>${desde}${pesos(minimo)}</small>`;
+    $('#btn-portada').href = url; $('#btn-portada').innerHTML = `Comprar entradas<small>${desde}${pesos(minimo)}</small>`;
+    $('#btn-barra').href = url; $('#barra').dataset.activa = '1';
     if (PREVIA) for (const a of [b, $('#btn-portada'), $('#btn-barra')]) {
-      a.href = '#entradas';
-      a.addEventListener('click', ev => { ev.preventDefault(); try { $('#p-previa').showPopover(); } catch {} });
+      a.href = '#entradas'; a.addEventListener('click', ev => { ev.preventDefault(); try { $('#p-previa').showPopover(); } catch {} });
     }
   }
   if (c.reservaMinutos) $('#faq-pago').textContent = `Por transferencia, desde tu banco o tu billetera virtual (Mercado Pago, Ualá, Naranja X, MODO o cualquier banco), desde una cuenta a tu nombre. Al tocar «Ir a pagar» tenés ${c.reservaMinutos === 60 ? 'una hora' : c.reservaMinutos + ' minutos'} para transferir y tu lugar queda guardado mientras tanto.`;
 }).catch(() => { $('#tipos').innerHTML = '<div class="pronto"><b>No pudimos cargar los precios</b><p>Revisá tu conexión y recargá la página.</p></div>'; });
 if (!PREVIA) fetch('/api/visita', { method: 'POST' }).catch(() => {});
 
-// ───── Cuenta regresiva al domingo 13 (hora argentina; sin hora confirmada, al comienzo del día) ─────
-function objetivo() { return Date.parse(`${FECHA}T${HORA || '00:00'}:00-03:00`); }
-function cuenta() {
+// ───── Cuenta regresiva al domingo 13 (hora argentina; sin hora confirmada, al comienzo del día). Los números giran al cambiar ─────
+const objetivo = () => Date.parse(`${FECHA}T${HORA || '00:00'}:00-03:00`);
+let antes = [];
+function cuenta(forzar) {
   const falta = objetivo() - Date.now();
-  if (!(falta > 0)) { $('#cuenta').innerHTML = ''; $('#cuenta-txt').textContent = falta > -6 * 3600e3 ? '¡Hoy es el show!' : ''; return; }
-  const d = Math.floor(falta / 864e5), h = Math.floor(falta / 36e5) % 24, m = Math.floor(falta / 6e4) % 60;
-  $('#cuenta').innerHTML = [[d, d === 1 ? 'día' : 'días'], [h, 'horas'], [m, 'min']].map(([n, t]) => `<div><b>${String(n).padStart(2, '0')}</b><small>${t}</small></div>`).join('');
-  $('#cuenta-txt').textContent = d > 0 ? 'para el show' : '¡Ya casi!';
+  if (!(falta > 0)) { $('#cuenta').innerHTML = falta > -6 * 3600e3 ? '<div style="padding:10px 18px"><b>¡Hoy!</b><small>es el show</small></div>' : ''; return; }
+  const v = [Math.floor(falta / 864e5), Math.floor(falta / 36e5) % 24, Math.floor(falta / 6e4) % 60];
+  const t = [v[0] === 1 ? 'día' : 'días', 'horas', 'min'];
+  if (forzar === true || !$('#cuenta').children.length) $('#cuenta').innerHTML = v.map((x, i) => `<div><b>${String(x).padStart(2, '0')}</b><small>${t[i]}</small></div>`).join('');
+  else $$('#cuenta b').forEach((b, i) => { if (v[i] !== antes[i]) { b.textContent = String(v[i]).padStart(2, '0'); b.classList.remove('gira'); void b.offsetWidth; b.classList.add('gira'); } });
+  antes = v;
 }
-cuenta(); setInterval(cuenta, 30000);
-
-// ───── Agendar (Google Calendar): con hora, dos horas y media; sin hora, el día entero ─────
+cuenta(true); setInterval(cuenta, 15000);
 function agendar() {
   const q = new URLSearchParams({ action: 'TEMPLATE', text: 'Show de Fin de Año EPA · Sé la princesa que quieras ser', location: 'Estadio Arena, Villa Carlos Paz, Córdoba' });
-  const f = FECHA.replaceAll('-', '');
-  if (HORA) {
-    const ini = new Date(objetivo()), fin = new Date(objetivo() + 2.5 * 3600e3);
-    const z = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-    q.set('dates', `${z(ini)}/${z(fin)}`);
-  } else { const sig = new Date(Date.parse(FECHA + 'T12:00:00Z') + 864e5).toISOString().slice(0, 10).replaceAll('-', ''); q.set('dates', `${f}/${sig}`); }
+  if (HORA) { const z = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); q.set('dates', `${z(new Date(objetivo()))}/${z(new Date(objetivo() + 2.5 * 3600e3))}`); }
+  else { const f = FECHA.replaceAll('-', ''), sig = new Date(Date.parse(FECHA + 'T12:00:00Z') + 864e5).toISOString().slice(0, 10).replaceAll('-', ''); q.set('dates', `${f}/${sig}`); }
   $('#agendar').href = 'https://calendar.google.com/calendar/render?' + q.toString();
 }
 agendar();
 
-// ───── Video de la portada: solo mientras se ve (y nada si la persona pidió quietud o ahorro de datos) ─────
-const vp = $('#video-portada');
-if (!QUIETO) {
-  vp.src = 'assets/video/show25-portada.mp4';
-  new IntersectionObserver(([en]) => { if (en.isIntersecting) vp.play().catch(() => {}); else vp.pause(); }, { threshold: 0.15 }).observe($('#portada'));
+// ───── Videos de fondo: cada uno se pide al acercarse y corre solo mientras se ve ─────
+const videos = [];
+function fondo(video, fuente) {
+  const v = { video, fuente, visible: false };
+  videos.push(v);
+  // La portada es "sticky": para el navegador sigue a la vista aunque otra sección la tape. Se mira el scroll.
+  if (video.closest('.portada')) return v;
+  new IntersectionObserver(([en]) => { v.visible = en.isIntersecting; mover(v); }, { rootMargin: '200px 0px' }).observe(video.closest('.pantalla'));
+  return v;
 }
-// La barra de compra aparece cuando la portada quedó atrás (si la venta está abierta)
+function mover(v) {
+  if (v.visible && !pausado && !AHORRO) { if (!v.video.src) v.video.src = typeof v.fuente === 'function' ? v.fuente() : v.fuente; v.video.play().catch(() => {}); }
+  else v.video.pause();
+}
+// La portada: las princesas animadas, en vertical para el celular y en horizontal para la compu
+const vp = $('#video-portada');
+const ladoPortada = () => VERTICAL() ? 'celu' : 'compu';
+let lado = ladoPortada();
+vp.poster = `assets/video/princesas-ia-${lado}.webp`;
+const portada = fondo(vp, () => `assets/video/princesas-ia-${ladoPortada()}.mp4`);
+matchMedia('(orientation: portrait)').addEventListener('change', () => {
+  const nuevo = ladoPortada(); if (nuevo === lado) return; lado = nuevo;
+  vp.poster = `assets/video/princesas-ia-${lado}.webp`; if (vp.src) { vp.src = `assets/video/princesas-ia-${lado}.mp4`; mover(portada); }
+});
+fondo($('#video-show'), 'assets/video/show25-portada.mp4');
+let portadaVista = null;
+function mirarPortada() {
+  const vista = scrollY < innerHeight * .95;
+  if (vista === portadaVista) return;
+  portadaVista = vista; portada.visible = vista; mover(portada);
+  if (purpurina) { if (vista && !pausado) purpurina.start(); else purpurina.stop(); }
+}
+let pidiendoCuadro = false;
+addEventListener('scroll', () => { if (!pidiendoCuadro) { pidiendoCuadro = true; requestAnimationFrame(() => { pidiendoCuadro = false; mirarPortada(); }); } }, { passive: true });
+mirarPortada();
+fondo($('#video-grupo'), 'assets/video/show25-grupo.mp4');
+
+// ───── Purpurina sobre la portada (Sparticles, 5 KB, se carga después de lo importante) ─────
+function encenderPurpurina() {
+  if (purpurina || QUIETO || AHORRO) return;
+  const s = document.createElement('script'); s.src = 'assets/vendor/sparticles-2.2.0.min.js';
+  s.onload = () => {
+    const compu = innerWidth >= 900;
+    purpurina = new window.Sparticles($('#brillos'), { count: compu ? 70 : 36, speed: 1.1, direction: 180, xVariance: 3, yVariance: 2, rotate: true, rotation: .6,
+      shape: ['star', 'diamond'], color: ['#ffffff', '#ffd1e7', '#f4c14d', '#9fb2ff'], minSize: 1, maxSize: compu ? 5 : 4,
+      alphaSpeed: 8, minAlpha: .15, maxAlpha: .95, twinkle: true, drift: 1 });
+    if (pausado || !portadaVista) purpurina.stop();
+  };
+  document.head.appendChild(s);
+}
+if (document.readyState === 'complete') setTimeout(encenderPurpurina, 600); else addEventListener('load', () => setTimeout(encenderPurpurina, 600));
+
+// ───── Carrusel 3D de las tomas: gira solo cada 3,5 s mientras se ve; solo corre el video de adelante ─────
+const tomas = $$('.toma'), n = tomas.length;
+let giro = 0, carruselVisible = false, temporizador = null;
+function ponerToma() {
+  const actual = ((giro % n) + n) % n;
+  $('#anillo').style.setProperty('--giro', `${-giro * 72}deg`);
+  tomas.forEach((t, k) => {
+    const v = t.querySelector('video'), frente = k === actual;
+    t.classList.toggle('frente', frente);
+    if (frente && carruselVisible && !pausado && !AHORRO) { if (!v.src) v.src = v.dataset.src; v.play().catch(() => {}); } else v.pause();
+  });
+  $('#leyenda').textContent = tomas[actual].dataset.titulo;
+}
+function paso(d) { giro += d; ponerToma(); }
+function reloj() { clearInterval(temporizador); if (carruselVisible && !pausado) temporizador = setInterval(() => paso(1), 3500); }
+$('#sig').addEventListener('click', () => { paso(1); reloj(); });
+$('#ant').addEventListener('click', () => { paso(-1); reloj(); });
+let x0 = null;
+$('#carrusel').addEventListener('pointerdown', e => { x0 = e.clientX; });
+$('#carrusel').addEventListener('pointerup', e => { if (x0 !== null && Math.abs(e.clientX - x0) > 40) { paso(e.clientX < x0 ? 1 : -1); reloj(); } x0 = null; });
+new IntersectionObserver(([en]) => { carruselVisible = en.isIntersecting; ponerToma(); reloj(); }, { threshold: 0.35 }).observe($('#carrusel'));
+
+// ───── Tarjetas de entradas que se inclinan con el mouse (solo con mouse: en el celular marea) ─────
+function inclinar() {
+  if (!MOUSE || QUIETO) return;
+  for (const t of $$('.tipo, .pronto')) {
+    t.addEventListener('pointermove', e => {
+      if (pausado) return;
+      const r = t.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+      t.style.transform = `perspective(900px) rotateY(${(x - .5) * 14}deg) rotateX(${(.5 - y) * 12}deg) translateZ(8px)`;
+      t.style.setProperty('--mx', `${x * 100}%`); t.style.setProperty('--my', `${y * 100}%`);
+    });
+    t.addEventListener('pointerleave', () => { t.style.transform = ''; });
+  }
+}
+
+// ───── Apariciones: donde no hay animaciones ligadas al scroll, se marcan al verse ─────
+if (!CSS.supports('animation-timeline: view()')) {
+  const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add('visto'); io.unobserve(en.target); } }), { threshold: 0.15 });
+  $$('.entra').forEach(el => io.observe(el));
+}
+// El logo gira como una moneda y la patinadora salta al llegar a la escuela
+new IntersectionObserver(([en], o) => { if (en.isIntersecting) { $('#moneda').classList.add('gira'); $('#mascota').classList.add('sale'); o.disconnect(); } }, { threshold: 0.25 }).observe($('#escuela'));
+
+// ───── Barra de compra (cuando la portada quedó atrás y la venta está abierta) y mapa al acercarse ─────
 new IntersectionObserver(([en]) => {
   const barra = $('#barra'), ver = !en.isIntersecting && barra.dataset.activa === '1';
   barra.classList.toggle('visible', ver); barra.setAttribute('aria-hidden', String(!ver)); $('#btn-barra').tabIndex = ver ? 0 : -1;
-}, { threshold: 0.05 }).observe($('#portada'));
+}, { threshold: 0 }).observe($('#cuenta'));
+new IntersectionObserver(([en], o) => { if (en.isIntersecting) { const m = $('#mapa'); m.src = m.dataset.src; o.disconnect(); } }, { rootMargin: '400px' }).observe($('#mapa'));
 
-// ───── Las tomas del show 2025: cada una se carga y se reproduce cuando se ve ─────
-const tomas = new IntersectionObserver(entradas => {
-  for (const en of entradas) {
-    const v = en.target;
-    if (en.isIntersecting) { if (QUIETO) continue; if (!v.src) v.src = v.dataset.src; v.play().catch(() => {}); }
-    else v.pause();
-  }
-}, { threshold: 0.55 });
-$$('#tomas video').forEach(v => tomas.observe(v));
-
-// ───── Flyers: tocar uno lo muestra grande ─────
-$$('[data-flyer]').forEach(b => b.addEventListener('click', () => {
-  const img = $('#visor-img'); img.src = `assets/flyers/flyer-${b.dataset.flyer}-900.webp`; img.alt = b.getAttribute('aria-label').replace('Ver el flyer grande: ', 'Flyer: ');
-  try { $('#visor').showPopover(); } catch {}
-}));
-
-// ───── El mapa se pide recién cuando se acerca ─────
-new IntersectionObserver(([en], o) => { if (en.isIntersecting) { const m = $('#mapa'); m.src = m.dataset.src; o.disconnect(); } }, { rootMargin: '300px' }).observe($('#mapa'));
+// ───── Pausar todo (WCAG 2.2.2) ─────
+function pausar(si) {
+  pausado = si; document.body.classList.toggle('quieto', si);
+  $('#pausa').setAttribute('aria-pressed', String(si)); $('#pausa').textContent = si ? 'Reanudar animaciones' : 'Pausar animaciones';
+  videos.forEach(mover); ponerToma(); reloj();
+  if (purpurina) { if (si) purpurina.stop(); else purpurina.start(); }
+}
+$('#pausa').addEventListener('click', () => pausar(!pausado));
+if (QUIETO) pausar(true);
 </script>
 </body>
 </html>

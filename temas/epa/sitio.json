@@ -8,15 +8,15 @@
   "ciudad": "Villa Carlos Paz",
   "instagram": "epa_escuela_de_patin_artistico",
   "mail": {
-    "_ayuda": "Colores del mail de las entradas: el azul marino y el rosa del logo, con la franja de los vestidos de princesa del flyer.",
-    "encabezado": "#1f2a6b",
-    "sobrecabeza": "#f7a8d0",
-    "acento": "#e0338a",
+    "_ayuda": "Colores del mail de las entradas: los del logo oficial (azul francia, rosa y el dorado de las estrellitas) sobre la noche azul de la página.",
+    "encabezado": "#050e45",
+    "sobrecabeza": "#ffd1e7",
+    "acento": "#ff4fa3",
     "acentoTexto": "#ffffff",
-    "titulos": "#c2186f",
-    "franja": ["#e0338a", "#b98af0", "#5aa6e0", "#f2c94c", "#7fd1c7"]
+    "titulos": "#1a3cf0",
+    "franja": ["#1a3cf0", "#ff4fa3", "#f4c14d", "#8b6cf0", "#ffd1e7"]
   },
-  "festejo": { "*": ["#e0338a", "#f7a8d0", "#b98af0", "#5aa6e0", "#f2c94c", "#ffffff"] },
+  "festejo": { "*": ["#1a3cf0", "#ff4fa3", "#ffd1e7", "#f4c14d", "#8b6cf0", "#ffffff"] },
   "modo": "gala",
   "eventos": [
     {
@@ -25,7 +25,7 @@
       "subtitulo": "Show de Fin de Año · EPA Escuela de Patín Artístico",
       "fecha": "2026-12-13",
       "puertas": "",
-      "imagen": "/assets/flyers/flyer-oficial-450.webp",
+      "imagen": "/assets/arte/arte-princesas-600.webp",
       "publicado": true,
       "artistas": [],
       "tipos": []
