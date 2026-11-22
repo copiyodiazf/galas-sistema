@@ -579,6 +579,11 @@ if (PREVIA) {
     <button class="cerrar" popovertarget="p-previa" popovertargetaction="hide">Entendido</button></div>
     <p style="position:fixed;top:10px;left:10px;z-index:40;margin:0;font:900 10px var(--f);letter-spacing:.2em;color:#fff;background:var(--rosa);padding:5px 10px;border-radius:99px;">VISTA PREVIA</p>`);
   $('#recuperar').hidden = true;
+  // En la copia publicada no existe el sistema: los enlaces a él (Mis entradas, la compra) muestran el cartel.
+  document.addEventListener('click', ev => {
+    const a = ev.target.closest('a[href^="/"]'); if (!a) return;
+    ev.preventDefault(); try { $('#p-previa').showPopover(); } catch {}
+  });
 }
 const desglose = c => Boolean(c?.sitio?.desgloseServicio);
 const precioTxt = (c, t) => desglose(c) ? `${pesos(t.precio)}<small>+ ${pesos(t.final - t.precio)} de servicio</small>` : pesos(t.final);
