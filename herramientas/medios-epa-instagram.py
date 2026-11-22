@@ -1,7 +1,7 @@
 # Medios de la página de EPA sacados de su Instagram (bajado con gallery-dl el 22/11/2026, C:\epa-gala\material\instagram-gdl):
 #  - el video del show 2025 (24/12/2025, 720x1280, 92 s): seis tomas para el carrusel 3D y un fondo de ~20 s para la sección;
 #  - fotos de las patinadoras en torneos y entrenamientos 2025-2026 para la galería (sin nombres).
-# Uso: python herramientas/medios-epa-instagram.py   (ffmpeg en el PATH, Pillow)
+# Uso: python herramientas/medios-epa-instagram.py [--solo-galeria]   (ffmpeg en el PATH, Pillow)
 import subprocess, os, sys
 from PIL import Image
 
@@ -15,6 +15,33 @@ os.makedirs(GALERIA, exist_ok=True)
 def ff(*args):
     r = subprocess.run(['ffmpeg', '-v', 'error', '-y', *args], capture_output=True, text=True)
     if r.returncode: sys.exit(r.stderr[-800:])
+
+# 0) La galería: torneos y entrenamientos (archivo de Instagram → nombre corto), en 600 y 1200 px de ancho
+# Del 9 al 14 eran el resumen del Clausura 2026 de la cuenta personal de una patinadora que ya no está en la escuela
+# (publicación DZGgxLqEcRH): José pidió sacarla (22/11/2026). Van en su lugar fotos donde seguro no está: entrenamientos de
+# septiembre en Sarmiento, una patinadora con su profe en el Arena y una nena con su medalla en el podio de FEDECOR.
+# No usar fotos de su cuenta ni de las publicaciones que la etiquetan, ni la placa #90 con su nombre.
+import json
+fotos = json.load(open(r'C:\epa-gala\material\hojas-ig\fotos.json', encoding='utf-8'))
+ELEGIDAS = [8, 10, 11, 12, 13, 14, 15, 6, 73, 71, 75, 77, 111, 110, 109, 115, 112]
+# Las apaisadas se ven en la galería en 3:4: la miniatura se recorta alrededor de la nena (x del centro, de 0 a 1);
+# la grande, que se abre al tocarla, queda entera
+FOCO = {73: .5, 71: .44, 75: .52, 77: .62, 111: .5, 110: .52}
+SOLO_GALERIA = '--solo-galeria' in sys.argv
+def galeria():
+    for k, n in enumerate(ELEGIDAS, 1):
+        im = Image.open(os.path.join(r'C:\epa-gala\material', fotos[n]['archivo'])).convert('RGB')
+        for ancho in (600, 1200):
+            c = im.copy()
+            if ancho == 600 and n in FOCO and c.width / c.height > 3 / 4:
+                w = round(c.height * 3 / 4); x = min(max(0, round(c.width * FOCO[n] - w / 2)), c.width - w)
+                c = c.crop((x, 0, x + w, c.height))
+            if c.width > ancho: c = c.resize((ancho, round(c.height * ancho / c.width)), Image.LANCZOS)
+            c.save(os.path.join(GALERIA, f'g{k:02d}-{ancho}.webp'), quality=78, method=6)
+    print('galería:', len(ELEGIDAS), 'fotos', flush=True)
+if SOLO_GALERIA:
+    galeria(); sys.exit()
+galeria()
 
 # 1) Las tomas del carrusel (vertical 432x768, en loop)
 # El video del show trae arriba a la izquierda el logo de CapCut (con lo que lo editaron), en x 40-84, y 42-78 de 720x1280:
@@ -46,17 +73,6 @@ ff(*ins, '-filter_complex', ';'.join(filtros), '-map', '[v]', '-an', '-c:v', 'li
 ff('-ss', '0.5', '-i', fondo, '-frames:v', '1', '-c:v', 'libwebp', '-quality', '70', fondo.replace('.mp4', '.webp'))
 print('fondo del show listo', flush=True)
 
-# 3) La galería: torneos y entrenamientos (archivo de Instagram → nombre corto), en 600 y 1200 px de ancho
-import json
-fotos = json.load(open(r'C:\epa-gala\material\hojas-ig\fotos.json', encoding='utf-8'))
-ELEGIDAS = [8, 10, 11, 12, 13, 14, 15, 6, 59, 57, 56, 64, 62, 60, 109, 115, 112]
-for k, n in enumerate(ELEGIDAS, 1):
-    im = Image.open(os.path.join(r'C:\epa-gala\material', fotos[n]['archivo'])).convert('RGB')
-    for ancho in (600, 1200):
-        c = im.copy()
-        if c.width > ancho: c = c.resize((ancho, round(c.height * ancho / c.width)), Image.LANCZOS)
-        c.save(os.path.join(GALERIA, f'g{k:02d}-{ancho}.webp'), quality=78, method=6)
-print('galería:', len(ELEGIDAS), 'fotos', flush=True)
 
 # La previa en cámara lenta (0,5x, cuadros intermedios por movimiento): 1,75 s → 3,5 s. Sin el logo de CapCut (SIN_MARCA).
 sal = os.path.join(VIDEO, 'toma-previa.mp4')
