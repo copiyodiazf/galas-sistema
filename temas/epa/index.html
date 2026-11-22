@@ -577,7 +577,7 @@ const PREVIA = window.VISTA_PREVIA || null;
 if (PREVIA) {
   document.body.insertAdjacentHTML('beforeend', `<div popover id="p-previa"><h3>Vista previa</h3><p style="margin-top:8px">Así se va a ver la página. La compra con QR se habilita cuando abra la venta.</p>
     <button class="cerrar" popovertarget="p-previa" popovertargetaction="hide">Entendido</button></div>
-    <p style="position:fixed;top:10px;left:10px;z-index:40;margin:0;font:900 10px var(--f);letter-spacing:.2em;color:#fff;background:var(--rosa);padding:5px 10px;border-radius:99px;">VISTA PREVIA</p>`);
+    <p style="position:fixed;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:40;margin:0;font:900 10px var(--f);letter-spacing:.2em;color:#fff;background:var(--rosa);padding:6px 11px;border-radius:99px;white-space:nowrap;box-shadow:0 6px 18px -6px rgba(0,0,0,.5);">VISTA PREVIA</p>`);
   $('#recuperar').hidden = true;
   // En la copia publicada no existe el sistema: los enlaces a él (Mis entradas, la compra) muestran el cartel.
   document.addEventListener('click', ev => {
