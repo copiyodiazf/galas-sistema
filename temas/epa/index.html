@@ -170,6 +170,30 @@ h1 .quieras{display:block;font-weight:900;font-size:clamp(18px,5.6vw,34px);lette
 .flechas button{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--borde-vidrio);background:var(--vidrio);color:#fff;font-size:24px;line-height:1;cursor:pointer;
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
 @media (min-width:900px){ .carrusel{--w:240px;--r:330px;} }
+/* Las frases de la escuela (José, 22/11/2026): entran palabra por palabra, en 3D. "Cientos de sueños" tiene un brillo que la recorre,
+   "para siempre" se escribe en cursiva, el patín llega rodando y la corona baja y titila. Íconos propios, no los emojis del mensaje. */
+.frase{perspective:700px;}
+.frase .pal{display:inline-block;opacity:0;transform:translateY(.8em) rotateX(-80deg);filter:blur(6px);transform-origin:50% 100%;
+  transition:opacity .6s var(--curva),transform .9s var(--curva),filter .6s var(--curva);transition-delay:calc(var(--k) * 55ms + var(--base,0s));}
+.frase.visto .pal{opacity:1;transform:none;filter:none;}
+.frase .resalta{font-weight:800;color:transparent;-webkit-background-clip:text;background-clip:text;
+  background-image:linear-gradient(105deg,var(--rosa) 0%,var(--rosa-claro) 35%,#fff 50%,var(--rosa-claro) 65%,var(--rosa) 100%);background-size:250% 100%;
+  animation:destello 3.6s ease-in-out 1.6s infinite;}
+@keyframes destello{0%{background-position:100% 0;}60%,100%{background-position:0 0;}}
+.frase .pal.escrita{font-family:var(--f-script);font-style:normal;font-size:1.7em;line-height:1.1;padding:0 .14em 0 .06em;margin:-.3em 0 -.2em;
+  color:var(--rosa-claro);text-shadow:0 0 16px rgba(255,79,163,.6);opacity:1;filter:none;transform:none;clip-path:inset(0 100% 0 0);
+  transition:clip-path 1.3s cubic-bezier(.45,.05,.35,1);transition-delay:calc(var(--k) * 55ms + var(--base,0s) + .15s);}
+.frase.visto .pal.escrita{clip-path:inset(0 0 0 0);}
+.ico-patin,.ico-corona{width:1.55em;height:1.55em;vertical-align:-.38em;overflow:visible;}
+.frase .ico-patin{margin-right:.4em;transform:translateX(-3.2em);filter:none;transition-duration:.6s,1.3s,.6s;}
+.ico-patin .cuerpo{animation:balanceo 2.8s ease-in-out 1.6s infinite;transform-box:fill-box;transform-origin:30% 100%;}
+.ico-patin .rueda{transform-box:fill-box;transform-origin:center;animation:rodar .9s linear infinite;}
+.frase .ico-corona{margin-left:.3em;transform:translateY(-1.4em) rotate(-35deg) scale(.4);filter:none;transition-delay:calc(var(--k) * 55ms + var(--base,0s) + .9s);}
+.frase.visto .ico-corona{animation:coronita 3.2s ease-in-out 3.4s infinite;}
+@keyframes coronita{50%{transform:translateY(-2px) rotate(-7deg);}}
+.ico-corona .joya{transform-box:fill-box;transform-origin:center;animation:titilar 2.4s ease-in-out infinite;animation-delay:var(--d,0s);}
+.frase .junto{white-space:nowrap;}
+.solo-lector{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
 
 /* ═════ 3) ENTRADAS: sobre el castillo del flyer ═════ */
 .entradas{z-index:2;padding:90px 0;}
@@ -318,9 +342,11 @@ footer a{color:#fff;}
 body.quieto *,body.quieto *::before,body.quieto *::after{animation:none !important;transition:none !important;}
 body.quieto .entra,body.quieto .moneda,body.quieto .mascota img,body.quieto .globo{opacity:1;transform:none;}
 body.quieto .logo-anim .l-aro{stroke-dashoffset:0;}
+body.quieto .frase .pal{opacity:1;transform:none;filter:none;clip-path:none;}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important;}
   .entra,.moneda,.mascota img,.globo{opacity:1;transform:none;}
+  .frase .pal{opacity:1;transform:none;filter:none;clip-path:none;}
   .logo-anim .l-aro{stroke-dashoffset:0;}
   .portada{position:relative;}
 }
@@ -397,8 +423,19 @@ body.quieto .logo-anim .l-aro{stroke-dashoffset:0;}
     <div class="envase">
       <p class="ante entra">Así fue el show 2025</p>
       <h2 class="entra" id="t-show">La magia <em>se vive en la pista</em></h2>
-      <p class="bajada entra">✨ Una pista, cientos de sueños y una noche que quedó grabada en nuestros corazones.</p>
-      <p class="bajada entra" style="margin-top:8px">Porque hay momentos que se viven una vez, pero se sienten para siempre. 💗</p>
+      <p class="bajada frase"><svg class="ico-patin" viewBox="0 0 32 32" aria-hidden="true">
+          <defs><linearGradient id="pt-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8cc6"/><stop offset=".55" stop-color="#ff4fa3"/><stop offset="1" stop-color="#c4237a"/></linearGradient></defs>
+          <g class="cuerpo"><path d="M8.2 3.5h5.6c.9 0 1.6.7 1.6 1.6v7.6l7.4 2.7c1.7.6 2.8 2.1 2.8 3.9v2.4H6.6V5.1c0-.9.7-1.6 1.6-1.6Z" fill="url(#pt-g)"/>
+            <path d="M9.6 7.5h4M9.6 10.5h4M15.4 14.6l2.4.9" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/>
+            <rect x="5.4" y="21.4" width="21.4" height="2.6" rx="1.3" fill="#f4c14d"/><circle cx="27.4" cy="23.6" r="1.7" fill="#f4c14d"/></g>
+          <g class="rueda"><circle cx="10.6" cy="27" r="3.2" fill="#fff"/><circle cx="10.6" cy="27" r="1.1" fill="#1a3cf0"/><path d="M10.6 24.4v1.2" stroke="#1a3cf0" stroke-width="1.2" stroke-linecap="round"/></g>
+          <g class="rueda"><circle cx="21.6" cy="27" r="3.2" fill="#fff"/><circle cx="21.6" cy="27" r="1.1" fill="#1a3cf0"/><path d="M21.6 24.4v1.2" stroke="#1a3cf0" stroke-width="1.2" stroke-linecap="round"/></g></svg>Una pista, <b class="resalta">cientos de sueños</b> y una noche que quedó grabada en nuestros corazones.</p>
+      <p class="bajada frase" style="margin-top:8px;--base:.75s">Porque hay momentos que se viven una vez, pero se sienten <span class="junto"><em class="escrita">para siempre</em>.<svg class="ico-corona" viewBox="0 0 32 32" aria-hidden="true">
+          <defs><linearGradient id="co-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9a8"/><stop offset=".5" stop-color="#f4c14d"/><stop offset="1" stop-color="#c98f1c"/></linearGradient></defs>
+          <path d="M4 23.5 5.6 9.8l6 6.4L16 5.5l4.4 10.7 6-6.4L28 23.5Z" fill="url(#co-g)" stroke="#fff3cf" stroke-width=".8" stroke-linejoin="round"/>
+          <rect x="4" y="23.5" width="24" height="3.6" rx="1.4" fill="url(#co-g)"/>
+          <circle class="joya" cx="16" cy="5.2" r="2.2" fill="#ff4fa3"/><circle class="joya" cx="5.6" cy="9.6" r="1.7" fill="#ff8cc6" style="--d:.5s"/><circle class="joya" cx="26.4" cy="9.6" r="1.7" fill="#ff8cc6" style="--d:1s"/>
+          <circle class="joya" cx="16" cy="25.3" r="1.2" fill="#1a3cf0" style="--d:1.4s"/></svg></span></p>
       <div class="carrusel" id="carrusel" aria-roledescription="carrusel" aria-label="Tomas del show 2025">
         <div class="anillo" id="anillo">
           <figure class="toma" style="--i:0" data-titulo="La previa: los patines bien atados"><video muted loop playsinline preload="none" poster="assets/video/toma-previa.webp" data-src="assets/video/toma-previa.mp4"></video></figure>
@@ -744,6 +781,29 @@ if (!CSS.supports('animation-timeline: view()')) {
   const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add('visto'); io.unobserve(en.target); } }), { threshold: 0.15 });
   $$('.entra').forEach(el => io.observe(el));
 }
+// Las frases que entran palabra por palabra: cada palabra (y cada ícono o resaltado) va en su propio cuadro, numerado para el escalonado.
+// El lector de pantalla lee la frase entera, una sola vez: las palabras sueltas quedan ocultas para él.
+// Lo que va en un .junto no se separa al cortar el renglón (sin eso la corona quedaba sola abajo de "para siempre.").
+$$('.frase').forEach(p => {
+  const entera = document.createElement('span'); entera.className = 'solo-lector'; entera.textContent = p.textContent.replace(/\s+/g, ' ').trim();
+  const vista = document.createElement('span'); vista.setAttribute('aria-hidden', 'true');
+  let k = 0;
+  const marcar = el => { el.classList.add('pal'); el.style.setProperty('--k', k++); return el; };
+  const partir = (origen, destino) => [...origen.childNodes].forEach(n => {
+    if (n.nodeType === 3) {
+      n.textContent.split(/(\s+)/).forEach(t => {
+        if (!t) return;
+        if (/^\s+$/.test(t)) { destino.append(' '); return; }
+        const s = document.createElement('span'); s.textContent = t; destino.append(marcar(s));
+      });
+    } else if (n.classList.contains('junto')) { const j = n.cloneNode(false); partir(n, j); destino.append(j); }
+    else destino.append(marcar(n));
+  });
+  partir(p, vista);
+  p.replaceChildren(entera, vista);
+});
+const ioFrases = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add('visto'); ioFrases.unobserve(en.target); } }), { threshold: 0.6 });
+$$('.frase').forEach(p => ioFrases.observe(p));
 // El logo gira como una moneda y la patinadora salta al llegar a la escuela
 new IntersectionObserver(([en], o) => { if (en.isIntersecting) { $('#moneda').classList.add('gira'); $('#mascota').classList.add('sale'); o.disconnect(); } }, { threshold: 0.25 }).observe($('#escuela'));
 
