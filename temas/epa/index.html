@@ -186,21 +186,33 @@ h1 .quieras{display:block;font-weight:900;font-size:clamp(18px,5.6vw,34px);lette
 .parte.activa .letra{animation:letra .8s var(--curva) both;animation-delay:calc(var(--i) * 24ms + .25s);}
 @keyframes letra{from{opacity:0;transform:translateY(.55em) rotateX(-90deg) scale(.7);filter:blur(5px);}to{opacity:1;transform:none;filter:none;}}
 .parte.sale{animation:salir .45s ease-in both;}
-.parte.sale .letra,.parte.sale .relato-cta{opacity:1;}
+.parte.sale .letra{opacity:1;}
 @keyframes salir{to{opacity:0;transform:translateY(-.45em);filter:blur(4px);}}
-/* "para siempre" y la invitación van en cursiva y se escriben de izquierda a derecha (el relleno es para que no se corten las colas) */
-.parte em,.parte .invitacion{display:inline-block;font-family:var(--f-script);font-style:normal;font-weight:400;line-height:1.05;color:var(--rosa-claro);
-  text-shadow:0 0 16px rgba(255,79,163,.6);clip-path:inset(0 100% 0 0);}
-.parte em{font-size:1.6em;padding:.12em .16em .18em .06em;margin:-.14em -.12em -.22em 0;}
-.parte .invitacion{font-size:clamp(40px,10vw,56px);padding:.12em .3em .2em;margin:2px 0 0;color:#ffd6ea;text-shadow:0 0 22px rgba(255,79,163,.85),0 2px 4px rgba(5,14,69,.6);}
-.parte.activa em,.parte.activa .invitacion{animation:escribir 1.4s cubic-bezier(.45,.05,.35,1) both;animation-delay:calc(var(--i) * 24ms + .35s);}
-.parte.sale em,.parte.sale .invitacion{clip-path:none;}
+/* "para siempre" va en cursiva, con el mismo degradé que "una sola pasión", y se escribe de izquierda a derecha
+   (el relleno es para que no se corten las colas; sin sombra de texto, que con el degradé se ve por adentro de la letra) */
+.parte em{display:inline-block;font-family:var(--f-script);font-style:normal;font-weight:400;line-height:1.05;font-size:1.6em;
+  padding:.12em .16em .18em .06em;margin:-.14em -.12em -.22em 0;background:linear-gradient(180deg,#fff 0%,var(--rosa-claro) 35%,var(--rosa) 90%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;
+  filter:drop-shadow(0 0 14px rgba(255,79,163,.5));clip-path:inset(0 100% 0 0);}
+.parte.activa em{animation:escribir 1.4s cubic-bezier(.45,.05,.35,1) both;animation-delay:calc(var(--i) * 24ms + .35s);}
+.parte.sale em{clip-path:none;}
 @keyframes escribir{from{clip-path:inset(0 100% 0 0);}to{clip-path:inset(0 0 0 0);}}
 .relato-cta{display:inline-flex;align-items:center;gap:9px;margin-top:10px;padding:12px 22px;border-radius:999px;text-decoration:none;color:#fff;font-weight:900;font-size:16px;
-  text-shadow:none;background:linear-gradient(135deg,#ff6cb5,var(--rosa) 45%,#d42b84);box-shadow:0 14px 30px -12px rgba(255,79,163,.8),inset 0 1px 0 rgba(255,255,255,.5);opacity:0;}
+  text-shadow:none;background:linear-gradient(135deg,#ff6cb5,var(--rosa) 45%,#d42b84);box-shadow:0 14px 30px -12px rgba(255,79,163,.8),inset 0 1px 0 rgba(255,255,255,.5);}
 .relato-cta svg{width:20px;height:20px;}
-.parte.activa .relato-cta{animation:boton-cta .8s var(--curva) both;animation-delay:calc(var(--i) * 24ms + 1.6s);}
-@keyframes boton-cta{from{opacity:0;transform:translateY(14px) scale(.85);}to{opacity:1;transform:none;}}
+/* El cierre queda fijo debajo de los puntos (José, 22/11/2026: "probemos dejando estática la última frase"). Cuando pasa
+   adelante la última toma, la invitación y el botón laten */
+.cierre-fijo{margin:30px auto 0;text-align:center;}
+.cierre-fijo .frase{max-width:40ch;margin:0 auto;text-wrap:balance;color:#fff;font-weight:700;font-size:clamp(18px,4.8vw,23px);line-height:1.38;}
+.invitacion-fija{display:inline-block;margin:-.1em 0 -.14em;padding:.22em .3em .26em;font-family:var(--f-script);font-size:clamp(40px,10.5vw,66px);line-height:1.05;white-space:nowrap;
+  background:linear-gradient(180deg,#fff 0%,var(--rosa-claro) 35%,var(--rosa) 90%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(255,79,163,.5));}
+/* La invitación y el botón aparecen enteros una vez, al verse (con la animación ligada al scroll quedaban a medio aparecer
+   mientras se miran los videos, porque están abajo de la pantalla) */
+.sube{opacity:0;transform:translateY(26px) scale(.94);transition:opacity .8s var(--curva),transform .9s var(--curva);transition-delay:var(--retraso,0s);}
+.sube.visto{opacity:1;transform:none;}
+.cierre-fijo.destacado .invitacion-fija{animation:latido 1.5s ease-in-out 2;}
+.cierre-fijo.destacado .relato-cta{animation:latido-cta 1.5s ease-in-out 2;}
+@keyframes latido{50%{transform:scale(1.08);filter:drop-shadow(0 0 30px rgba(255,79,163,.95));}}
+@keyframes latido-cta{50%{transform:scale(1.06);box-shadow:0 0 0 6px rgba(255,79,163,.25),0 18px 40px -10px rgba(255,79,163,.95);}}
 .flechas{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:14px;}
 /* Los puntos del relato: uno por toma; el de la que está adelante se estira y se va llenando hasta que pasa a la siguiente */
 .puntos{display:flex;align-items:center;}
@@ -223,8 +235,8 @@ h1 .quieras{display:block;font-weight:900;font-size:clamp(18px,5.6vw,34px);lette
   background-image:linear-gradient(105deg,var(--rosa) 0%,var(--rosa-claro) 35%,#fff 50%,var(--rosa-claro) 65%,var(--rosa) 100%);background-size:250% 100%;
   animation:destello 3.6s ease-in-out 1.6s infinite;}
 @keyframes destello{0%{background-position:100% 0;}60%,100%{background-position:0 0;}}
-.frase .pal.escrita{font-family:var(--f-script);font-style:normal;font-size:1.7em;line-height:1.1;padding:0 .14em 0 .06em;margin:-.3em 0 -.2em;
-  color:var(--rosa-claro);text-shadow:0 0 16px rgba(255,79,163,.6);opacity:1;filter:none;transform:none;clip-path:inset(0 100% 0 0);
+.frase .pal.escrita{font-family:var(--f-script);font-style:normal;font-size:1.7em;line-height:1.1;padding:.14em .14em .2em .06em;margin:-.44em 0 -.4em;
+  background:linear-gradient(180deg,#fff 0%,var(--rosa-claro) 35%,var(--rosa) 90%);-webkit-background-clip:text;background-clip:text;color:transparent;opacity:1;filter:drop-shadow(0 0 14px rgba(255,79,163,.5));transform:none;clip-path:inset(0 100% 0 0);
   transition:clip-path 1.3s cubic-bezier(.45,.05,.35,1);transition-delay:calc(var(--k) * 55ms + var(--base,0s) + .15s);}
 .frase.visto .pal.escrita{clip-path:inset(0 0 0 0);}
 .ico-patin,.ico-corona{width:1.55em;height:1.55em;vertical-align:-.38em;overflow:visible;}
@@ -392,11 +404,13 @@ body.quieto .entra,body.quieto .moneda,body.quieto .mascota img,body.quieto .glo
 body.quieto .logo-anim .l-aro{stroke-dashoffset:0;}
 body.quieto .frase .pal{opacity:1;transform:none;filter:none;clip-path:none;}
 body.quieto .parte .letra,body.quieto .relato-cta{opacity:1;}
-body.quieto .parte em,body.quieto .parte .invitacion{clip-path:none;}
+body.quieto .parte em{clip-path:none;}
+body.quieto .sube{opacity:1;transform:none;}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important;}
   .entra,.moneda,.mascota img,.globo{opacity:1;transform:none;}
   .frase .pal{opacity:1;transform:none;filter:none;clip-path:none;}
+  .sube{opacity:1;transform:none;}
   .logo-anim .l-aro{stroke-dashoffset:0;}
   .portada{position:relative;}
 }
@@ -472,7 +486,7 @@ body.quieto .parte em,body.quieto .parte .invitacion{clip-path:none;}
     <div class="velo"></div>
     <div class="envase">
       <p class="ante entra">Así fue el show 2025</p>
-      <h2 class="entra" id="t-show">La magia <em>se vive en la pista</em></h2>
+      <h2 class="entra" id="t-show">La magia <em>se vive sobre ruedas</em></h2>
       <p class="bajada frase"><svg class="ico-patin" viewBox="0 0 32 32" aria-hidden="true">
           <defs><linearGradient id="pt-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8cc6"/><stop offset=".55" stop-color="#ff4fa3"/><stop offset="1" stop-color="#c4237a"/></linearGradient></defs>
           <g class="cuerpo"><path d="M8.2 3.5h5.6c.9 0 1.6.7 1.6 1.6v7.6l7.4 2.7c1.7.6 2.8 2.1 2.8 3.9v2.4H6.6V5.1c0-.9.7-1.6 1.6-1.6Z" fill="url(#pt-g)"/>
@@ -496,20 +510,21 @@ body.quieto .parte em,body.quieto .parte .invitacion{clip-path:none;}
           <figure class="toma" style="--i:5" data-titulo="Todas juntas al final"><video muted loop playsinline preload="none" poster="assets/video/toma-final.webp" data-src="assets/video/toma-final.mp4"></video></figure>
         </div>
       </div>
-      <!-- El relato de la escuela: una frase por toma, en el orden de los videos; la última es el cierre -->
+      <!-- El relato de la escuela: una frase por toma, en el orden de los videos (la quinta sigue en la última toma) -->
       <div class="relato" id="relato" aria-live="off">
         <p class="parte">El año pasado vivimos <b>una noche</b> que jamás imaginamos olvidar…</p>
         <p class="parte">Miles de emociones, <b>cientos de sueños</b> y corazones latiendo juntos…</p>
         <p class="parte">Hubo miradas que <b>lo dijeron todo</b> y lágrimas que no pudimos contener…</p>
         <p class="parte">Y entre tantos aplausos, sonrisas y emociones, deseamos que esa noche <b>no terminara jamás</b>…</p>
         <p class="parte">Porque hay momentos que se viven una vez, pero se sienten <span class="junto"><em>para siempre</em>…</span></p>
-        <div class="parte cierre">
-          <p>Y este <b>13 de diciembre</b>, una nueva historia está por comenzar.</p>
-          <p class="invitacion unidad">¡Vení a vivir la magia!</p>
-          <a class="relato-cta unidad" href="#entradas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8.5V6.8C3 5.8 3.8 5 4.8 5h14.4c1 0 1.8.8 1.8 1.8v1.7a2.5 2.5 0 0 0 0 5v1.7c0 1-.8 1.8-1.8 1.8H4.8c-1 0-1.8-.8-1.8-1.8v-1.7a2.5 2.5 0 0 0 0-5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14.5 5.5v2M14.5 10.5v2M14.5 15.5v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Quiero mis entradas</a>
-        </div>
       </div>
       <div class="flechas"><button type="button" id="ant" aria-label="Toma anterior">‹</button><div class="puntos" id="puntos"></div><button type="button" id="sig" aria-label="Toma siguiente">›</button></div>
+      <!-- El cierre, fijo: no gira con las tomas -->
+      <div class="cierre-fijo" id="cierre">
+        <p class="frase">Y este <b class="resalta">13 de diciembre</b>, una nueva historia está por comenzar.</p>
+        <div class="sube"><p class="invitacion-fija">¡Vení a vivir la magia!</p></div>
+        <div class="sube" style="--retraso:.25s"><a class="relato-cta" href="#entradas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8.5V6.8C3 5.8 3.8 5 4.8 5h14.4c1 0 1.8.8 1.8 1.8v1.7a2.5 2.5 0 0 0 0 5v1.7c0 1-.8 1.8-1.8 1.8H4.8c-1 0-1.8-.8-1.8-1.8v-1.7a2.5 2.5 0 0 0 0-5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14.5 5.5v2M14.5 10.5v2M14.5 15.5v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Quiero mis entradas</a></div>
+      </div>
     </div>
   </section>
 
@@ -803,9 +818,10 @@ function encenderPurpurina() {
 if (document.readyState === 'complete') setTimeout(encenderPurpurina, 600); else addEventListener('load', () => setTimeout(encenderPurpurina, 600));
 
 // ───── Carrusel 3D de las tomas con el relato de la escuela: cada toma pasa adelante con su frase, que entra letra por letra,
-// y se queda lo que tarda en leerse (el cierre, más). Gira solo mientras se ve; solo corre el video de adelante ─────
+// y se queda lo que tarda en leerse. Son cinco frases y seis tomas: en la última sigue la quinta y late el cierre, que está
+// fijo debajo. Gira solo mientras se ve; solo corre el video de adelante ─────
 const tomas = $$('.toma'), n = tomas.length, partes = $$('.parte');
-let giro = 0, carruselVisible = false, temporizador = null, parteActual = -1;
+let giro = 0, carruselVisible = false, temporizador = null, parteActual = -1, tomaMostrada = -1;
 // Cada frase se parte en palabras (que no se cortan al final del renglón) y letras numeradas para el escalonado. Lo que va
 // en cursiva y el botón entran enteros. El lector de pantalla lee la frase de corrido, no letra por letra.
 partes.forEach(parte => {
@@ -832,18 +848,24 @@ partes.forEach(parte => {
   parte.prepend(lector);
   parte.dataset.letras = i;
 });
-const duracion = k => partes[k].classList.contains('cierre') ? 9500 : Math.max(5600, 1600 + partes[k].dataset.letras * 55);
+const duracion = k => k < partes.length ? Math.max(5600, 1600 + partes[k].dataset.letras * 55) : 6000;
 const puntos = tomas.map((t, k) => {
   const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', `Parte ${k + 1} de ${n}`); b.append(document.createElement('span'));
   b.addEventListener('click', () => { aMano(); paso(k - ((giro % n) + n) % n); reloj(); });
   $('#puntos').append(b); return b;
 });
 function mostrarParte(k) {
+  if (k === tomaMostrada) return;
+  tomaMostrada = k;
+  puntos.forEach((p, j) => p.setAttribute('aria-current', j === k ? 'step' : 'false'));
+  const cierre = $('#cierre'); cierre.classList.remove('destacado');
+  if (k === n - 1) { void cierre.offsetWidth; cierre.classList.add('destacado'); }
+  const idx = Math.min(k, partes.length - 1);
+  if (idx === parteActual) return;
   const vieja = partes[parteActual];
   if (vieja) { vieja.classList.remove('activa'); vieja.classList.add('sale'); setTimeout(() => { if (!vieja.classList.contains('activa')) vieja.classList.remove('sale'); }, 450); }
-  const nueva = partes[k]; nueva.classList.remove('sale'); void nueva.offsetWidth; nueva.classList.add('activa');
-  parteActual = k;
-  puntos.forEach((p, j) => p.setAttribute('aria-current', j === k ? 'step' : 'false'));
+  const nueva = partes[idx]; nueva.classList.remove('sale'); void nueva.offsetWidth; nueva.classList.add('activa');
+  parteActual = idx;
 }
 function ponerToma() {
   const actual = ((giro % n) + n) % n;
@@ -854,7 +876,7 @@ function ponerToma() {
     if (frente && carruselVisible && !pausado && !AHORRO) { if (!v.src) v.src = v.dataset.src; v.play().catch(() => {}); } else v.pause();
   });
   // La frase entra recién cuando el carrusel está a la vista, así se la ve llegar
-  if (carruselVisible && actual !== parteActual) mostrarParte(actual);
+  if (carruselVisible) mostrarParte(actual);
 }
 function paso(d) { giro += d; ponerToma(); }
 // El punto de la toma de adelante se llena en lo que dura su frase, y entonces pasa a la siguiente
@@ -915,7 +937,7 @@ $$('.frase').forEach(p => {
   p.replaceChildren(entera, vista);
 });
 const ioFrases = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add('visto'); ioFrases.unobserve(en.target); } }), { threshold: 0.6 });
-$$('.frase').forEach(p => ioFrases.observe(p));
+$$('.frase,.sube').forEach(p => ioFrases.observe(p));
 // El logo gira como una moneda y la patinadora salta al llegar a la escuela
 new IntersectionObserver(([en], o) => { if (en.isIntersecting) { $('#moneda').classList.add('gira'); $('#mascota').classList.add('sale'); o.disconnect(); } }, { threshold: 0.25 }).observe($('#escuela'));
 
