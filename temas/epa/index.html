@@ -56,6 +56,10 @@ h2,h3{text-wrap:balance;}
 /* Títulos */
 .ante{font-weight:800;font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--rosa-claro);display:flex;align-items:center;gap:10px;}
 .ante::before{content:"";width:28px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--rosa),var(--oro));flex:none;}
+/* "Organiza EPA" y abajo "Escuela de Patín Artístico" (pedido de la escuela); la rayita acompaña al primer renglón */
+.ante-doble{align-items:flex-start;line-height:1.6;}
+.ante-doble::before{margin-top:.75em;}
+.ante-doble>span>span{display:block;}
 h2{font-weight:900;font-size:clamp(30px,7.6vw,56px);line-height:1.05;letter-spacing:-.02em;margin:12px 0 14px;color:#fff;}
 h2 em{display:inline-block;font-family:var(--f-script);font-style:normal;font-weight:400;font-size:1.3em;letter-spacing:0;line-height:1;
   background:linear-gradient(180deg,#fff 0%,var(--rosa-claro) 35%,var(--rosa) 90%);-webkit-background-clip:text;background-clip:text;color:transparent;
@@ -282,7 +286,8 @@ h1 .quieras{display:block;font-weight:900;font-size:clamp(18px,5.6vw,34px);lette
 .magia .velo{background:linear-gradient(180deg,rgba(5,14,69,.95) 0%,rgba(5,14,69,.12) 20%,rgba(5,14,69,.1) 50%,rgba(5,14,69,.9) 88%);}
 .magia blockquote{padding:0 20px 60px;max-width:820px;margin:0 auto;}
 .magia blockquote p{font-family:var(--f-script);font-size:clamp(38px,9vw,70px);line-height:1.05;color:#fff;text-shadow:0 4px 30px rgba(5,14,69,.9);}
-.magia blockquote p span{color:var(--rosa-claro);}
+/* Tres renglones, como lo pidió la escuela, y todo del mismo color: "la magia" en rosa claro parecía de otra letra */
+.magia blockquote p span{display:block;}
 
 /* ═════ 5) LA ESCUELA: todas juntas en el Arena, de fondo ═════ */
 .escuela{z-index:2;padding:90px 0;}
@@ -303,7 +308,7 @@ h1 .quieras{display:block;font-weight:900;font-size:clamp(18px,5.6vw,34px);lette
 .sedes span{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;background:var(--vidrio);border:1.5px solid var(--borde-vidrio);
   font-weight:800;color:#fff;font-size:14px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
 .sedes span::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--rosa);box-shadow:0 0 10px var(--rosa);}
-.lema{font-family:var(--f-script);font-size:clamp(32px,7vw,44px);line-height:1.1;color:var(--rosa-claro);}
+.lema{font-family:var(--f-script);font-size:clamp(32px,7vw,44px);line-height:1.1;color:var(--rosa-claro);text-wrap:balance;}
 .redes{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;}
 /* La mascota entera, con la remera nueva (22/11/2026): la de antes venía cortada de origen y se le disimulaba el costado con una máscara */
 .mascota{position:relative;justify-self:center;width:min(300px,74vw);aspect-ratio:1/1.34;}
@@ -532,7 +537,7 @@ body.quieto .parte em,body.quieto .parte .invitacion{clip-path:none;}
   <section class="pantalla magia" aria-label="Un show donde la magia, el patinaje y los sueños se viven en la pista">
     <div class="fondo"><img src="assets/arte/arte-patines-900.webp" srcset="assets/arte/arte-patines-600.webp 600w, assets/arte/arte-patines-900.webp 900w" sizes="100vw" alt="" loading="lazy" width="900" height="715"></div>
     <div class="velo"></div>
-    <blockquote class="entra"><p>Un show donde <span>la magia</span>, el patinaje y los sueños se viven en la pista</p></blockquote>
+    <blockquote class="entra"><p><span>Un lugar donde la magia,</span> <span>el patinaje y los sueños</span> <span>se viven en la pista</span></p></blockquote>
   </section>
 
   <!-- 5) LA ESCUELA -->
@@ -573,10 +578,10 @@ body.quieto .parte em,body.quieto .parte .invitacion{clip-path:none;}
       <text class="l-esc" x="301" y="391" text-anchor="middle">ESCUELA DE</text>
       <text class="l-pat" x="301" y="448" text-anchor="middle">PATÍN ARTÍSTICO</text>
     </svg></div>
-        <p class="ante entra">Organiza EPA · Escuela de Patín Artístico</p>
+        <p class="ante ante-doble entra"><span><span>Organiza EPA</span><span>Escuela de Patín Artístico</span></span></p>
         <h2 class="entra" id="t-escuela">3 sedes, <em>una sola pasión</em></h2>
         <div class="sedes entra"><span>Club Sarmiento</span><span>Club Atlético Carlos Paz</span><span>Club Martín Ferreyra</span></div>
-        <p class="lema entra">Donde los sueños se trabajan en equipo</p>
+        <p class="lema entra">Donde los sueños se construyen en equipo</p>
         <div class="redes entra">
           <a class="boton" href="https://www.instagram.com/epa_escuela_de_patin_artistico/" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-ig"/></svg>Instagram</a>
           <a class="boton" href="https://www.tiktok.com/@epapatinartistico" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-tt"/></svg>TikTok</a>
@@ -638,7 +643,7 @@ body.quieto .parte em,body.quieto .parte .invitacion{clip-path:none;}
 <footer>
   <div class="envase">
     <img src="assets/logo-epa.svg" width="600" height="600" alt="EPA · Escuela de Patín Artístico" loading="lazy">
-    <p class="lema">Donde los sueños se trabajan en equipo</p>
+    <p class="lema">Donde los sueños se construyen en equipo</p>
     <span>Show de Fin de Año 2026 · Domingo 13 de diciembre · Estadio Arena, Villa Carlos Paz</span>
     <span>Las entradas online se venden solo en esta página. <a href="/mis-entradas">Mis entradas</a></span>
   </div>
