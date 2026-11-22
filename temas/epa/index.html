@@ -423,7 +423,7 @@ body.quieto .logo-anim .l-aro{stroke-dashoffset:0;}
 
   <!-- 5) LA ESCUELA -->
   <section class="pantalla escuela" id="escuela" aria-labelledby="t-escuela">
-    <div class="fondo"><video id="video-grupo" muted loop playsinline preload="none" poster="assets/video/show25-grupo.webp" aria-hidden="true"></video></div>
+    <div class="fondo"><video id="video-grupo" muted loop playsinline preload="none" poster="assets/video/escuela-fondo.webp" aria-hidden="true"></video></div>
     <div class="velo"></div>
     <div class="envase grilla">
       <div>
@@ -642,7 +642,8 @@ function mirarPortada() {
 let pidiendoCuadro = false;
 addEventListener('scroll', () => { if (!pidiendoCuadro) { pidiendoCuadro = true; requestAnimationFrame(() => { pidiendoCuadro = false; mirarPortada(); }); } }, { passive: true });
 mirarPortada();
-fondo($('#video-grupo'), 'assets/video/show25-grupo.mp4');
+// La escuela: la foto grupal frente al cartel del Arena (en cámara lenta), la ronda y la tribuna (herramientas/fondo-epa-escuela.py)
+fondo($('#video-grupo'), 'assets/video/escuela-fondo.mp4');
 
 // ───── Purpurina sobre la portada (Sparticles, 5 KB, se carga después de lo importante) ─────
 function encenderPurpurina() {
