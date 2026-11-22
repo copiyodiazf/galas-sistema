@@ -285,9 +285,12 @@ h1 .quieras{display:block;font-weight:900;font-size:clamp(18px,5.6vw,34px);lette
 .magia .fondo img{object-position:50% 40%;}
 .magia .velo{background:linear-gradient(180deg,rgba(5,14,69,.95) 0%,rgba(5,14,69,.12) 20%,rgba(5,14,69,.1) 50%,rgba(5,14,69,.9) 88%);}
 .magia blockquote{padding:0 20px 60px;max-width:820px;margin:0 auto;}
-.magia blockquote p{font-family:var(--f-script);font-size:clamp(38px,9vw,70px);line-height:1.05;color:#fff;text-shadow:0 4px 30px rgba(5,14,69,.9);}
-/* Tres renglones, como lo pidió la escuela, y todo del mismo color: "la magia" en rosa claro parecía de otra letra */
-.magia blockquote p span{display:block;}
+.magia blockquote p{font-family:var(--f-script);font-size:clamp(38px,9vw,70px);line-height:1.05;color:#fff;
+  filter:drop-shadow(0 3px 14px rgba(5,14,69,.85)) drop-shadow(0 0 18px rgba(255,79,163,.45));}
+/* Tres renglones, como lo pidió la escuela, con el mismo degradé que "una sola pasión" o "sobre ruedas" (antes era blanca
+   con "la magia" en rosa claro, y parecía de otra letra). Cada renglón lleva su degradé y relleno para que no se corten las colas */
+.magia blockquote p span{display:block;padding:.22em .1em .26em;margin:-.22em 0 -.26em;
+  background:linear-gradient(180deg,#fff 0%,var(--rosa-claro) 35%,var(--rosa) 90%);-webkit-background-clip:text;background-clip:text;color:transparent;}
 
 /* ═════ 5) LA ESCUELA: todas juntas en el Arena, de fondo ═════ */
 .escuela{z-index:2;padding:90px 0;}
