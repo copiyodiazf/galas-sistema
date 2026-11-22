@@ -59,7 +59,9 @@ h2,h3{text-wrap:balance;}
 h2{font-weight:900;font-size:clamp(30px,7.6vw,56px);line-height:1.05;letter-spacing:-.02em;margin:12px 0 14px;color:#fff;}
 h2 em{display:inline-block;font-family:var(--f-script);font-style:normal;font-weight:400;font-size:1.3em;letter-spacing:0;line-height:1;
   background:linear-gradient(180deg,#fff 0%,var(--rosa-claro) 35%,var(--rosa) 90%);-webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 0 18px rgba(255,79,163,.45));padding:0 .08em;}
+  filter:drop-shadow(0 0 18px rgba(255,79,163,.45));padding:.22em .16em .26em;margin:-.22em -.08em -.26em;}
+/* El degradé se pinta solo dentro del recuadro de la letra: las mayúsculas cursivas (la Q de "QR", la V y la P de
+   "Villa Carlos Paz") suben y bajan más que el renglón y se cortaban. El relleno agranda el recuadro y el margen negativo lo compensa. */
 .bajada{color:var(--gris);font-size:17px;max-width:56ch;}
 
 /* Botón de compra: rosa con un brillo que lo recorre */
@@ -129,7 +131,7 @@ h2 em{display:inline-block;font-family:var(--f-script);font-style:normal;font-we
 h1{margin:2px 0 0;font-weight:400;line-height:.9;transform-style:preserve-3d;}
 h1 .sela{display:block;font-family:var(--f-script);font-size:clamp(42px,11vw,72px);color:var(--rosa-claro);line-height:1;
   text-shadow:0 0 14px rgba(5,14,69,.95),0 2px 4px rgba(5,14,69,.8),0 0 26px rgba(255,79,163,.6);animation:aparecer 1s var(--curva) .55s both;}
-h1 .princesa{display:block;font-family:var(--f-script);font-size:clamp(92px,27vw,190px);line-height:.86;margin-top:-.1em;padding:0 .1em;
+h1 .princesa{display:block;font-family:var(--f-script);font-size:clamp(92px,27vw,190px);line-height:.86;margin:-.34em 0 -.1em;padding:.24em .1em .1em;
   background:linear-gradient(180deg,#fff 5%,var(--rosa-claro) 30%,var(--rosa) 75%,#c4237a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 0 26px rgba(255,79,163,.55)) drop-shadow(0 4px 0 rgba(5,14,69,.6));
   animation:volar3d 1.4s var(--curva) .7s both;}
@@ -165,9 +167,46 @@ h1 .quieras{display:block;font-weight:900;font-size:clamp(18px,5.6vw,34px);lette
   filter:brightness(.42) saturate(.8);}
 .toma.frente{filter:none;}
 .toma video{width:100%;height:100%;object-fit:cover;}
-.leyenda{text-align:center;margin-top:18px;font-weight:800;font-size:18px;min-height:1.6em;color:#fff;}
-.flechas{display:flex;justify-content:center;gap:12px;margin-top:10px;}
-.flechas button{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--borde-vidrio);background:var(--vidrio);color:#fff;font-size:24px;line-height:1;cursor:pointer;
+/* El relato de los videos (texto de la escuela, 22/11/2026): cuando una toma pasa adelante, su frase entra letra por letra y se
+   queda lo que tarda en leerse; la última es el cierre, con la fecha, la invitación y las entradas. Las seis frases ocupan la
+   misma celda: el alto lo pone la más larga y la página no salta al cambiar de una a otra. */
+.relato{display:grid;max-width:34ch;margin:22px auto 0;text-align:center;font-weight:700;font-size:clamp(18px,4.8vw,23px);line-height:1.38;color:#fff;
+  text-shadow:0 2px 14px rgba(5,14,69,.85);}
+.parte{grid-area:1/1;align-self:center;margin:0;visibility:hidden;}
+.parte.activa,.parte.sale{visibility:visible;}
+.parte p{margin:0;}
+.parte .junto{white-space:nowrap;}
+.parte b{color:#ff7cbf;font-weight:800;}
+.parte .pala{display:inline-block;white-space:nowrap;perspective:400px;}
+.parte .letra{display:inline-block;opacity:0;}
+.parte.activa .letra{animation:letra .8s var(--curva) both;animation-delay:calc(var(--i) * 24ms + .25s);}
+@keyframes letra{from{opacity:0;transform:translateY(.55em) rotateX(-90deg) scale(.7);filter:blur(5px);}to{opacity:1;transform:none;filter:none;}}
+.parte.sale{animation:salir .45s ease-in both;}
+.parte.sale .letra,.parte.sale .relato-cta{opacity:1;}
+@keyframes salir{to{opacity:0;transform:translateY(-.45em);filter:blur(4px);}}
+/* "para siempre" y la invitación van en cursiva y se escriben de izquierda a derecha (el relleno es para que no se corten las colas) */
+.parte em,.parte .invitacion{display:inline-block;font-family:var(--f-script);font-style:normal;font-weight:400;line-height:1.05;color:var(--rosa-claro);
+  text-shadow:0 0 16px rgba(255,79,163,.6);clip-path:inset(0 100% 0 0);}
+.parte em{font-size:1.6em;padding:.12em .16em .18em .06em;margin:-.14em -.12em -.22em 0;}
+.parte .invitacion{font-size:clamp(40px,10vw,56px);padding:.12em .3em .2em;margin:2px 0 0;color:#ffd6ea;text-shadow:0 0 22px rgba(255,79,163,.85),0 2px 4px rgba(5,14,69,.6);}
+.parte.activa em,.parte.activa .invitacion{animation:escribir 1.4s cubic-bezier(.45,.05,.35,1) both;animation-delay:calc(var(--i) * 24ms + .35s);}
+.parte.sale em,.parte.sale .invitacion{clip-path:none;}
+@keyframes escribir{from{clip-path:inset(0 100% 0 0);}to{clip-path:inset(0 0 0 0);}}
+.relato-cta{display:inline-flex;align-items:center;gap:9px;margin-top:10px;padding:12px 22px;border-radius:999px;text-decoration:none;color:#fff;font-weight:900;font-size:16px;
+  text-shadow:none;background:linear-gradient(135deg,#ff6cb5,var(--rosa) 45%,#d42b84);box-shadow:0 14px 30px -12px rgba(255,79,163,.8),inset 0 1px 0 rgba(255,255,255,.5);opacity:0;}
+.relato-cta svg{width:20px;height:20px;}
+.parte.activa .relato-cta{animation:boton-cta .8s var(--curva) both;animation-delay:calc(var(--i) * 24ms + 1.6s);}
+@keyframes boton-cta{from{opacity:0;transform:translateY(14px) scale(.85);}to{opacity:1;transform:none;}}
+.flechas{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:14px;}
+/* Los puntos del relato: uno por toma; el de la que está adelante se estira y se va llenando hasta que pasa a la siguiente */
+.puntos{display:flex;align-items:center;}
+.puntos button{display:grid;place-items:center;height:34px;padding:0 4px;border:0;background:none;cursor:pointer;}
+.puntos span{display:block;position:relative;overflow:hidden;width:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.35);transition:width .45s var(--curva);}
+.puntos .activo span{width:30px;background:rgba(255,255,255,.22);}
+.puntos .activo span::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(90deg,var(--rosa),var(--rosa-claro));
+  transform-origin:0 50%;animation:llenar var(--dur,6s) linear both;}
+@keyframes llenar{from{transform:scaleX(0);}}
+.flechas>button{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--borde-vidrio);background:var(--vidrio);color:#fff;font-size:24px;line-height:1;cursor:pointer;
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
 @media (min-width:900px){ .carrusel{--w:240px;--r:330px;} }
 /* Las frases de la escuela (José, 22/11/2026): entran palabra por palabra, en 3D. "Cientos de sueños" tiene un brillo que la recorre,
@@ -266,14 +305,15 @@ h1 .quieras{display:block;font-weight:900;font-size:clamp(18px,5.6vw,34px);lette
 .sedes span::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--rosa);box-shadow:0 0 10px var(--rosa);}
 .lema{font-family:var(--f-script);font-size:clamp(32px,7vw,44px);line-height:1.1;color:var(--rosa-claro);}
 .redes{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;}
-.mascota{position:relative;justify-self:center;width:min(300px,74vw);aspect-ratio:1/1.25;}
-.mascota .aro{position:absolute;inset:18% 0 0;border-radius:50%;background:radial-gradient(circle at 50% 40%,rgba(255,79,163,.55),rgba(26,60,240,.35) 60%,transparent 72%);}
-.mascota img{position:absolute;left:8%;bottom:0;width:84%;height:auto;filter:drop-shadow(0 26px 30px rgba(0,0,0,.45));opacity:0;
-  -webkit-mask-image:linear-gradient(90deg,transparent,#000 16%);mask-image:linear-gradient(90deg,transparent,#000 16%);transform-origin:50% 100%;}
+/* La mascota entera, con la remera nueva (22/11/2026): la de antes venía cortada de origen y se le disimulaba el costado con una máscara */
+.mascota{position:relative;justify-self:center;width:min(300px,74vw);aspect-ratio:1/1.34;}
+.mascota .aro{position:absolute;inset:22% 0 0;border-radius:50%;background:radial-gradient(circle at 50% 40%,rgba(255,79,163,.55),rgba(26,60,240,.35) 60%,transparent 72%);}
+.mascota img{position:absolute;left:9%;bottom:0;width:82%;height:auto;filter:drop-shadow(0 26px 30px rgba(0,0,0,.45));opacity:0;transform-origin:50% 100%;}
 .mascota.sale img{animation:saltar 1.2s var(--curva) both;opacity:1;}
 @keyframes saltar{0%{transform:perspective(800px) translateY(40%) translateZ(-120px) scale(.7);opacity:0;}60%{transform:perspective(800px) translateY(-4%) translateZ(40px) scale(1.04);opacity:1;}100%{transform:none;opacity:1;}}
-.globo{position:absolute;top:2%;right:-2%;max-width:170px;padding:12px 15px;border-radius:20px 20px 20px 6px;background:#fff;color:var(--noche);
-  box-shadow:0 18px 40px -14px rgba(0,0,0,.6);font-weight:900;font-size:15px;line-height:1.25;opacity:0;transform:scale(.6) rotate(-6deg);transform-origin:0 100%;transition:all .6s var(--curva) .9s;}
+/* El globo va arriba a la izquierda, sobre el pelo, con la punta hacia la cara: a la derecha tapaba la cara y la mano */
+.globo{position:absolute;top:-3%;left:-8%;max-width:150px;padding:11px 14px;border-radius:20px 20px 6px 20px;background:#fff;color:var(--noche);
+  box-shadow:0 18px 40px -14px rgba(0,0,0,.6);font-weight:900;font-size:14.5px;line-height:1.25;opacity:0;transform:scale(.6) rotate(6deg);transform-origin:100% 100%;transition:all .6s var(--curva) .9s;}
 .globo b{color:var(--rosa);}
 .mascota.sale .globo{opacity:1;transform:none;}
 
@@ -343,6 +383,8 @@ body.quieto *,body.quieto *::before,body.quieto *::after{animation:none !importa
 body.quieto .entra,body.quieto .moneda,body.quieto .mascota img,body.quieto .globo{opacity:1;transform:none;}
 body.quieto .logo-anim .l-aro{stroke-dashoffset:0;}
 body.quieto .frase .pal{opacity:1;transform:none;filter:none;clip-path:none;}
+body.quieto .parte .letra,body.quieto .relato-cta{opacity:1;}
+body.quieto .parte em,body.quieto .parte .invitacion{clip-path:none;}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important;}
   .entra,.moneda,.mascota img,.globo{opacity:1;transform:none;}
@@ -446,8 +488,20 @@ body.quieto .frase .pal{opacity:1;transform:none;filter:none;clip-path:none;}
           <figure class="toma" style="--i:5" data-titulo="Todas juntas al final"><video muted loop playsinline preload="none" poster="assets/video/toma-final.webp" data-src="assets/video/toma-final.mp4"></video></figure>
         </div>
       </div>
-      <p class="leyenda" id="leyenda" aria-live="polite">La previa: los patines bien atados</p>
-      <div class="flechas"><button type="button" id="ant" aria-label="Toma anterior">‹</button><button type="button" id="sig" aria-label="Toma siguiente">›</button></div>
+      <!-- El relato de la escuela: una frase por toma, en el orden de los videos; la última es el cierre -->
+      <div class="relato" id="relato" aria-live="off">
+        <p class="parte">El año pasado vivimos <b>una noche</b> que jamás imaginamos olvidar…</p>
+        <p class="parte">Miles de emociones, <b>cientos de sueños</b> y corazones latiendo juntos…</p>
+        <p class="parte">Hubo miradas que <b>lo dijeron todo</b> y lágrimas que no pudimos contener…</p>
+        <p class="parte">Y entre tantos aplausos, sonrisas y emociones, deseamos que esa noche <b>no terminara jamás</b>…</p>
+        <p class="parte">Porque hay momentos que se viven una vez, pero se sienten <span class="junto"><em>para siempre</em>…</span></p>
+        <div class="parte cierre">
+          <p>Y este <b>13 de diciembre</b>, una nueva historia está por comenzar.</p>
+          <p class="invitacion unidad">¡Vení a vivir la magia!</p>
+          <a class="relato-cta unidad" href="#entradas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8.5V6.8C3 5.8 3.8 5 4.8 5h14.4c1 0 1.8.8 1.8 1.8v1.7a2.5 2.5 0 0 0 0 5v1.7c0 1-.8 1.8-1.8 1.8H4.8c-1 0-1.8-.8-1.8-1.8v-1.7a2.5 2.5 0 0 0 0-5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14.5 5.5v2M14.5 10.5v2M14.5 15.5v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Quiero mis entradas</a>
+        </div>
+      </div>
+      <div class="flechas"><button type="button" id="ant" aria-label="Toma anterior">‹</button><div class="puntos" id="puntos"></div><button type="button" id="sig" aria-label="Toma siguiente">›</button></div>
     </div>
   </section>
 
@@ -531,7 +585,7 @@ body.quieto .frase .pal{opacity:1;transform:none;filter:none;clip-path:none;}
       </div>
       <div class="mascota" id="mascota">
         <div class="aro" aria-hidden="true"></div>
-        <img src="assets/mascota.webp" width="399" height="852" alt="La patinadora animada de EPA, sentada con sus patines, guiñando un ojo" loading="lazy">
+        <img src="assets/mascota.webp" width="600" height="950" alt="La patinadora animada de EPA, con la remera de Patín Artístico, sentada con sus patines y guiñando un ojo" loading="lazy">
         <p class="globo">¡Te espero en la pista el <b>13 de diciembre</b>!</p>
       </div>
     </div>
@@ -740,9 +794,49 @@ function encenderPurpurina() {
 }
 if (document.readyState === 'complete') setTimeout(encenderPurpurina, 600); else addEventListener('load', () => setTimeout(encenderPurpurina, 600));
 
-// ───── Carrusel 3D de las tomas: gira solo cada 3,5 s mientras se ve; solo corre el video de adelante ─────
-const tomas = $$('.toma'), n = tomas.length;
-let giro = 0, carruselVisible = false, temporizador = null;
+// ───── Carrusel 3D de las tomas con el relato de la escuela: cada toma pasa adelante con su frase, que entra letra por letra,
+// y se queda lo que tarda en leerse (el cierre, más). Gira solo mientras se ve; solo corre el video de adelante ─────
+const tomas = $$('.toma'), n = tomas.length, partes = $$('.parte');
+let giro = 0, carruselVisible = false, temporizador = null, parteActual = -1;
+// Cada frase se parte en palabras (que no se cortan al final del renglón) y letras numeradas para el escalonado. Lo que va
+// en cursiva y el botón entran enteros. El lector de pantalla lee la frase de corrido, no letra por letra.
+partes.forEach(parte => {
+  let i = 0;
+  const copia = parte.cloneNode(true); copia.querySelectorAll('a').forEach(a => a.remove());
+  const lector = document.createElement('span'); lector.className = 'solo-lector'; lector.textContent = copia.textContent.replace(/\s+/g, ' ').trim();
+  const partir = nodo => [...nodo.childNodes].forEach(h => {
+    if (h.nodeType === 3) {
+      const trozos = document.createDocumentFragment();
+      h.textContent.split(/(\s+)/).forEach(t => {
+        if (!t) return;
+        if (/^\s+$/.test(t)) { trozos.append(' '); return; }
+        const pala = document.createElement('span'); pala.className = 'pala'; pala.setAttribute('aria-hidden', 'true');
+        for (const c of t) { const l = document.createElement('span'); l.className = 'letra'; l.style.setProperty('--i', i++); l.textContent = c; pala.append(l); }
+        trozos.append(pala);
+      });
+      h.replaceWith(trozos);
+    } else if (h.nodeType === 1 && (h.tagName === 'EM' || h.classList.contains('unidad'))) {
+      h.style.setProperty('--i', i); i += 8;
+      if (h.tagName !== 'A') h.setAttribute('aria-hidden', 'true');
+    } else if (h.nodeType === 1) partir(h);
+  });
+  partir(parte);
+  parte.prepend(lector);
+  parte.dataset.letras = i;
+});
+const duracion = k => partes[k].classList.contains('cierre') ? 9500 : Math.max(5600, 1600 + partes[k].dataset.letras * 55);
+const puntos = tomas.map((t, k) => {
+  const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', `Parte ${k + 1} de ${n}`); b.append(document.createElement('span'));
+  b.addEventListener('click', () => { aMano(); paso(k - ((giro % n) + n) % n); reloj(); });
+  $('#puntos').append(b); return b;
+});
+function mostrarParte(k) {
+  const vieja = partes[parteActual];
+  if (vieja) { vieja.classList.remove('activa'); vieja.classList.add('sale'); setTimeout(() => { if (!vieja.classList.contains('activa')) vieja.classList.remove('sale'); }, 450); }
+  const nueva = partes[k]; nueva.classList.remove('sale'); void nueva.offsetWidth; nueva.classList.add('activa');
+  parteActual = k;
+  puntos.forEach((p, j) => p.setAttribute('aria-current', j === k ? 'step' : 'false'));
+}
 function ponerToma() {
   const actual = ((giro % n) + n) % n;
   $('#anillo').style.setProperty('--giro', `${-giro * 360 / n}deg`);
@@ -751,15 +845,25 @@ function ponerToma() {
     t.classList.toggle('frente', frente);
     if (frente && carruselVisible && !pausado && !AHORRO) { if (!v.src) v.src = v.dataset.src; v.play().catch(() => {}); } else v.pause();
   });
-  $('#leyenda').textContent = tomas[actual].dataset.titulo;
+  // La frase entra recién cuando el carrusel está a la vista, así se la ve llegar
+  if (carruselVisible && actual !== parteActual) mostrarParte(actual);
 }
 function paso(d) { giro += d; ponerToma(); }
-function reloj() { clearInterval(temporizador); if (carruselVisible && !pausado) temporizador = setInterval(() => paso(1), 3500); }
-$('#sig').addEventListener('click', () => { paso(1); reloj(); });
-$('#ant').addEventListener('click', () => { paso(-1); reloj(); });
+// El punto de la toma de adelante se llena en lo que dura su frase, y entonces pasa a la siguiente
+function reloj() {
+  clearTimeout(temporizador);
+  const k = ((giro % n) + n) % n;
+  puntos.forEach(p => p.classList.remove('activo'));
+  const p = puntos[k]; p.style.setProperty('--dur', `${duracion(k)}ms`); void p.offsetWidth; p.classList.add('activo');
+  if (carruselVisible && !pausado) temporizador = setTimeout(() => { $('#relato').setAttribute('aria-live', 'off'); paso(1); reloj(); }, duracion(k));
+}
+// Lo que cambia porque la persona tocó se anuncia al lector de pantalla; lo que cambia solo, no (sería cada 6 segundos)
+const aMano = () => $('#relato').setAttribute('aria-live', 'polite');
+$('#sig').addEventListener('click', () => { aMano(); paso(1); reloj(); });
+$('#ant').addEventListener('click', () => { aMano(); paso(-1); reloj(); });
 let x0 = null;
 $('#carrusel').addEventListener('pointerdown', e => { x0 = e.clientX; });
-$('#carrusel').addEventListener('pointerup', e => { if (x0 !== null && Math.abs(e.clientX - x0) > 40) { paso(e.clientX < x0 ? 1 : -1); reloj(); } x0 = null; });
+$('#carrusel').addEventListener('pointerup', e => { if (x0 !== null && Math.abs(e.clientX - x0) > 40) { aMano(); paso(e.clientX < x0 ? 1 : -1); reloj(); } x0 = null; });
 new IntersectionObserver(([en]) => { carruselVisible = en.isIntersecting; ponerToma(); reloj(); }, { threshold: 0.35 }).observe($('#carrusel'));
 
 // ───── Tarjetas de entradas que se inclinan con el mouse (solo con mouse: en el celular marea) ─────
