@@ -502,12 +502,12 @@ body.quieto .sube{opacity:1;transform:none;}
           <circle class="joya" cx="16" cy="25.3" r="1.2" fill="#1a3cf0" style="--d:1.4s"/></svg></span></p>
       <div class="carrusel" id="carrusel" aria-roledescription="carrusel" aria-label="Tomas del show 2025">
         <div class="anillo" id="anillo">
-          <figure class="toma" style="--i:0" data-titulo="La previa: los patines bien atados"><video muted loop playsinline preload="none" poster="assets/video/toma-previa.webp" data-src="assets/video/toma-previa.mp4"></video></figure>
+          <figure class="toma" style="--i:0" data-titulo="La previa: los patines bien atados"><video muted loop playsinline preload="none" poster="assets/video/toma-previa.webp" data-src="assets/video/toma-previa.mp4?v=2"></video></figure>
           <figure class="toma" style="--i:1" data-titulo="La entrada por el túnel de luces"><video muted loop playsinline preload="none" poster="assets/video/show25-tunel.webp" data-src="assets/video/show25-tunel.mp4"></video></figure>
-          <figure class="toma" style="--i:2" data-titulo="Las más chiquitas, listas para salir"><video muted loop playsinline preload="none" poster="assets/video/toma-chiquitas.webp" data-src="assets/video/toma-chiquitas.mp4"></video></figure>
-          <figure class="toma" style="--i:3" data-titulo="La coreografía bajo el cubo del Arena"><video muted loop playsinline preload="none" poster="assets/video/toma-cubo.webp" data-src="assets/video/toma-cubo.mp4"></video></figure>
-          <figure class="toma" style="--i:4" data-titulo="La tribuna repleta"><video muted loop playsinline preload="none" poster="assets/video/toma-tribuna2.webp" data-src="assets/video/toma-tribuna2.mp4"></video></figure>
-          <figure class="toma" style="--i:5" data-titulo="Todas juntas al final"><video muted loop playsinline preload="none" poster="assets/video/toma-final.webp" data-src="assets/video/toma-final.mp4"></video></figure>
+          <figure class="toma" style="--i:2" data-titulo="Las más chiquitas, listas para salir"><video muted loop playsinline preload="none" poster="assets/video/toma-chiquitas.webp" data-src="assets/video/toma-chiquitas.mp4?v=2"></video></figure>
+          <figure class="toma" style="--i:3" data-titulo="La coreografía bajo el cubo del Arena"><video muted loop playsinline preload="none" poster="assets/video/toma-cubo.webp" data-src="assets/video/toma-cubo.mp4?v=2"></video></figure>
+          <figure class="toma" style="--i:4" data-titulo="La tribuna repleta"><video muted loop playsinline preload="none" poster="assets/video/toma-tribuna2.webp" data-src="assets/video/toma-tribuna2.mp4?v=2"></video></figure>
+          <figure class="toma" style="--i:5" data-titulo="Todas juntas al final"><video muted loop playsinline preload="none" poster="assets/video/toma-final.webp" data-src="assets/video/toma-final.mp4?v=2"></video></figure>
         </div>
       </div>
       <!-- El relato de la escuela: una frase por toma, en el orden de los videos (la quinta sigue en la última toma) -->
@@ -788,7 +788,7 @@ matchMedia('(orientation: portrait)').addEventListener('change', () => {
   const nuevo = ladoPortada(); if (nuevo === lado) return; lado = nuevo;
   vp.poster = `assets/video/princesas-largo-${lado}.webp`; if (vp.src) { vp.src = `assets/video/princesas-largo-${lado}.mp4`; mover(portada); }
 });
-fondo($('#video-show'), 'assets/video/show25-fondo.mp4');
+fondo($('#video-show'), 'assets/video/show25-fondo.mp4?v=2');
 let portadaVista = null;
 function mirarPortada() {
   const vista = scrollY < innerHeight * .95;
