@@ -103,7 +103,10 @@ h2 em{display:inline-block;font-family:var(--f-script);font-style:normal;font-we
 #brillos{position:absolute;inset:0;z-index:0;pointer-events:none;}
 @supports (animation-timeline:scroll()){
   .portada .fondo{animation:alejar linear both;animation-timeline:scroll(root);animation-range:0 100vh;}
-  @keyframes alejar{to{transform:scale(1.18);filter:brightness(.55);}}
+  @keyframes alejar{to{transform:scale(1.18);}}
+  /* Se oscurece con una capa encima y no con un filtro: un filtro sobre el video se recalcula en cada cuadro mientras se baja */
+  .portada .fondo::after{content:"";position:absolute;inset:0;background:#050e45;opacity:0;animation:oscurecer linear both;animation-timeline:scroll(root);animation-range:0 100vh;}
+  @keyframes oscurecer{to{opacity:.45;}}
   .portada .titulo{animation:subir linear both;animation-timeline:scroll(root);animation-range:0 90vh;}
   @keyframes subir{to{transform:translateY(-12vh) scale(.94);opacity:0;}}
 }
@@ -184,10 +187,22 @@ h1 .quieras{display:block;font-weight:900;font-size:clamp(18px,5.6vw,34px);lette
 .chispa{position:absolute;left:var(--x);top:var(--y);width:calc(10px * var(--s));height:calc(10px * var(--s));border-radius:50%;pointer-events:none;
   background:radial-gradient(circle,#fff 0 18%,rgba(255,209,231,.55) 30%,transparent 70%);opacity:0;animation:titileo 4.5s ease-in-out infinite;animation-delay:var(--d);}
 @keyframes titileo{50%{opacity:.7;transform:scale(1.6);}}
+@media (pointer:coarse),(max-width:879px){
+  .marca-capa,.aros-a,.aros-b{animation:none;}
+  .aurora{width:60vmax;height:60vmax;}
+  .aurora.a3{display:none;}
+}
 .marca-agua .ma-epa{font:italic 900 182px var(--f);letter-spacing:-6px;fill:url(#ma-g);}
 .marca-agua .ma-esc{font:700 30px var(--f);letter-spacing:7px;fill:url(#ma-g);}
 .marca-agua .ma-pat{font:900 42px var(--f);letter-spacing:2.5px;fill:url(#ma-g);}
 .carrusel{position:relative;--w:min(42vw,220px);--r:calc(var(--w) * 1.22);height:calc(var(--w) * 16 / 9 + 40px);margin:26px auto 0;perspective:1100px;touch-action:pan-y;}
+/* La toma que corre va en un video PLANO, encima de la de adelante (que queda justo en su lugar: el anillo se aleja lo mismo que
+   la toma se acerca). Un video adentro del anillo 3D el celular lo recompone en cada cuadro, con las otras cinco inclinadas,
+   los bordes redondeados y las sombras: en Android se entrecortaba (José, 24/11/2026). El anillo gira con las imágenes fijas */
+.toma-viva{position:absolute;left:50%;top:20px;width:var(--w);aspect-ratio:9/16;margin-left:calc(var(--w) / -2);border-radius:22px;overflow:hidden;
+  border:3px solid rgba(255,255,255,.85);opacity:0;transition:opacity .35s;pointer-events:none;}
+.toma-viva.lista{opacity:1;}
+.toma-viva video{display:block;width:100%;height:100%;object-fit:cover;}
 .anillo{position:absolute;left:50%;top:20px;width:var(--w);aspect-ratio:9/16;margin-left:calc(var(--w) / -2);transform-style:preserve-3d;
   transform:translateZ(calc(var(--r) * -1)) rotateY(var(--giro,0deg));transition:transform 1.1s var(--curva);}
 .toma{position:absolute;inset:0;border-radius:22px;overflow:hidden;background:var(--noche-2);border:3px solid rgba(255,255,255,.85);
@@ -568,6 +583,8 @@ body.quieto .sube{opacity:1;transform:none;}
           <figure class="toma" style="--i:4" data-titulo="La tribuna repleta"><video muted loop playsinline preload="none" poster="assets/video/toma-tribuna2.webp" data-src="assets/video/toma-tribuna2.mp4?v=2"></video></figure>
           <figure class="toma" style="--i:5" data-titulo="Todas juntas al final"><video muted loop playsinline preload="none" poster="assets/video/toma-final.webp" data-src="assets/video/toma-final.mp4?v=2"></video></figure>
         </div>
+        <!-- La toma que corre: un video plano apoyado sobre la de adelante (el anillo gira con imágenes fijas) -->
+        <div class="toma-viva" id="toma-viva" aria-hidden="true"><video muted loop playsinline preload="none"></video></div>
       </div>
       <!-- El relato de la escuela: una frase por toma, en el orden de los videos (la quinta sigue en la última toma) -->
       <div class="relato" id="relato" aria-live="off">
@@ -931,17 +948,26 @@ function ponerToma() {
   tomas.forEach((t, k) => {
     const v = t.querySelector('video'), frente = k === actual;
     t.classList.toggle('frente', frente);
-    if (frente && carruselVisible && !pausado && !AHORRO) bajarToma(v).then(url => {
-      if (!t.classList.contains('frente') || !carruselVisible || pausado) return;
-      if (v.dataset.puesta !== url) { v.src = url; v.dataset.puesta = url; }
-      v.play().catch(() => {});
-    });
-    else v.pause();
   });
+  ponerViva(actual);
   // La frase entra recién cuando el carrusel está a la vista, así se la ve llegar
   if (carruselVisible) mostrarParte(actual);
 }
 function paso(d) { giro += d; ponerToma(); }
+// El video plano: se apaga mientras el anillo gira y, cuando la toma nueva quedó adelante, arranca desde el principio y aparece
+const viva = $('#toma-viva'), vivaVideo = viva.querySelector('video');
+let vivaK = -1, pedidoViva = 0;
+function ponerViva(k) {
+  if (!carruselVisible || pausado || AHORRO) { vivaVideo.pause(); return; }
+  if (k === vivaK) { if (viva.classList.contains('lista')) vivaVideo.play().catch(() => {}); return; }
+  vivaK = k; const yo = ++pedidoViva;
+  viva.classList.remove('lista');
+  Promise.all([bajarToma(tomas[k].querySelector('video')), new Promise(r => setTimeout(r, 650))]).then(([url]) => {
+    if (yo !== pedidoViva) return;
+    vivaVideo.pause(); vivaVideo.src = url;
+    vivaVideo.play().then(() => { if (yo === pedidoViva) viva.classList.add('lista'); }).catch(() => { if (yo === pedidoViva) vivaK = -1; });
+  });
+}
 // Cada toma se baja entera antes de mostrarse (son cortas: de 180 a 700 KB), en el orden en que pasan, apenas la sección se
 // acerca. En el celular arrancaban antes de terminar de llegar y se frenaban a cargar en el medio (24/11/2026). Si la
 // descarga falla, la toma usa la dirección de siempre.
