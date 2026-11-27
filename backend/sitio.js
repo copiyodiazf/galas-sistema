@@ -206,6 +206,9 @@ export function leerSitio(archivo = process.env.SITIO_ARCHIVO || 'sitio.json') {
       // true = la página muestra el precio del organizador "+ costo de servicio" y la compra desglosa
       // entradas, servicio y total (Patio de Oli, 09/11). Sin eso, un solo precio final en todos lados.
       desgloseServicio: s.desgloseServicio === true && s.precioIncluyeCargo !== true,
+      // true = el organizador también emite y ve las cortesías (El Quinto Elemento, José 27/11/2026). Sin eso, como
+      // desde el 21/11: son solo de la administración.
+      cortesiasOrganizador: s.cortesiasOrganizador === true,
       mail: coloresMail(s.mail || {}),
       // Secciones opcionales de la página: quiénes somos y el llamado a feriantes/emprendedores.
       sobre: s.sobre?.titulo ? { titulo: limpio(s.sobre.titulo, 80), parrafos: (s.sobre.parrafos || []).map(p => limpio(p, 600)).filter(Boolean).slice(0, 6) } : null,

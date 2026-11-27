@@ -109,7 +109,10 @@ const ORGANIZACION = ['admin', 'organizador']          // ven resumen, ventas, p
 // no las ven en ningún listado, búsqueda, planilla ni cuenta: ocupan lugar igual, pero a ellos la capacidad les llega
 // ya sin esos lugares (como las reservadas) y en el plano son butacas ocupadas, sin nombre. En la puerta, el QR de una
 // cortesía vale y se ve como el de cualquier entrada.
-const veCortesias = req => req.usuario?.rol === 'admin'
+// Excepción por gala: con "cortesiasOrganizador": true en su sitio.json, el organizador también las emite y las ve
+// (El Quinto Elemento, José 27/11/2026: Flor da las suyas). La puerta y la boletería, nunca.
+const ROLES_CORTESIA = SITIO.cortesiasOrganizador ? ['admin', 'organizador'] : ['admin']
+const veCortesias = req => ROLES_CORTESIA.includes(req.usuario?.rol)
 const sinCortesias = req => ({ [Op.notIn]: veCortesias(req) ? NO_VENTA : [...NO_VENTA, 'cortesia'] })
 
 const EVENTO_MAIL_FROM = process.env.EVENTO_MAIL_FROM || 'entradas@ejemplo.com.ar'
@@ -1438,8 +1441,9 @@ app.post('/api/admin/entrada-prueba', requireAuth(['admin']), async (req, res) =
   }
 })
 
-// CORTESÍA (solo la administración, ver veCortesias): QR real que se manda por mail. Ocupa lugar pero no es venta.
-app.post('/api/admin/entrada-cortesia', requireAuth(['admin']), async (req, res) => {
+// CORTESÍA (la administración y, si la gala lo habilita, el organizador: ver veCortesias): QR real que se manda por
+// mail. Ocupa lugar pero no es venta.
+app.post('/api/admin/entrada-cortesia', requireAuth(ROLES_CORTESIA), async (req, res) => {
   try {
     const nombre = String(req.body?.nombre || '').trim() || 'Invitación'
     const email = String(req.body?.email || '').trim().toLowerCase()
@@ -1853,9 +1857,9 @@ app.get('/api/config', async (_req, res) => {
 })
 // Para el panel: todos los eventos (también los no publicados) con sus tipos, para la puerta,
 // la boletería y las cortesías.
-app.get('/api/admin/config', requireAuth(['admin', 'control', 'venta', 'organizador']), (_req, res) => {
+app.get('/api/admin/config', requireAuth(['admin', 'control', 'venta', 'organizador']), (req, res) => {
   res.json({ cargoPuntoPct: CARGO_PUNTO_PCT, actual: eventoActual()?.id || null, sandbox: !chytapayEsProduccion(), precioIncluyeCargo: SITIO.precioIncluyeCargo, modo: SITIO.modo,
-    sala: SITIO.sala || null,
+    sala: SITIO.sala || null, cortesias: veCortesias(req),   // si este usuario emite y ve las cortesías
     // unidadPunto: lo que cobra la boletería por entrada hoy (mismo cálculo que el servidor).
     eventos: [...EVENTOS.values()].map(e => ({ id: e.id, nombre: e.nombre, fecha: e.fecha, cuando: cuandoDe(e), pasado: !noPaso(e), ...(SALA ? { numerada: usaSala(e) } : {}),
       tipos: e.tipos.map(t => ({ ...t, unidadPunto: finalDe(precioVigente(t), CARGO_PUNTO_PCT) })) })) })

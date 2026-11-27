@@ -166,6 +166,12 @@ acredita en 30-70 s, pero hay bancos que demoran la transferencia.
   los libres son los mismos) y en el plano son butacas ocupadas, sin nombre. En la puerta el QR de una cortesía
   vale como cualquier entrada ("Ingreso OK", nombre y tipo, sin decir que es cortesía). La pestaña del organizador
   pasó a llamarse "Planilla". Antes (03/11) el organizador también las emitía.
+- **Excepción por gala: `"cortesiasOrganizador": true` en `sitio.json`** (El Quinto Elemento, José 27/11/2026: que Flor
+  dé sus cortesías). El organizador de esa gala las emite (Herramientas o Sala) y las ve en todos lados, como la
+  administración (`ROLES_CORTESIA` en `server.js`; `/api/admin/config` manda `cortesias` y el panel lo sigue con
+  `VE_CORTESIAS`). Su pestaña vuelve a llamarse "Herramientas". La puerta y la boletería, nunca. Sin la opción (Rítmica,
+  Oli, EPA), todo como arriba. Pruebas: 8 nuevas en `prueba-etapas.mjs` (patin-fa); `prueba-sin-numerar.mjs` (Rítmica)
+  sigue 30/30 con "la organización no da cortesías".
 - **Las cortesías no son venta (José, 19/11/2026):** ocupan lugar (descuentan libres) pero no suman a "vendidas" en
   ningún lado: `ocupacion()` las cuenta aparte (`cortesias` por tipo), la tarjeta de cada función dice "N vendidas ·
   M de cortesía" (violeta en la barra, como en el plano) y la Cartelera las muestra debajo ("+ M de cortesía").

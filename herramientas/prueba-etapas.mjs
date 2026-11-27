@@ -5,7 +5,8 @@
 // Servidor local con el tema de la gala y el pago SIMULADO, en una base LOCAL de prueba:
 //   (en backend) TEMA=patin-fa DB_NAME=gala_quinto PORT=3045 CHYTAPAY_SEDE=patin-fa node server.js
 //   DB_NAME=gala_quinto node herramientas/prueba-etapas.mjs 3045 usuarios-panel-quinto.txt
-// Usuarios: admin jose y venta boleteria (crear-usuarios.mjs con USUARIOS_ARCHIVO=usuarios-panel-quinto.txt).
+// Usuarios: admin jose, organizador florencia, control puerta1 y venta boleteria (crear-usuarios.mjs con
+// USUARIOS_ARCHIVO=usuarios-panel-quinto.txt). Desde el 27/11: cortesías del organizador (cortesiasOrganizador).
 import { readFileSync } from 'fs'
 import { createHmac } from 'crypto'
 import { sequelize, Orden, SinImputar } from '../backend/models/index.js'
@@ -143,6 +144,24 @@ ok((await estado(N.id)).estado === 'abandonada', 'tardía por menos del total: n
 const P = await tarde('Pia SinCuil', '30111888')
 await sinAsignar(P)
 ok((await estado(P.id)).estado === 'abandonada', 'tardía sin CUIL del que pagó: no se emite')
+
+// Cortesías del organizador: en patin-fa las emite y las ve Flor (cortesiasOrganizador, José 27/11/2026).
+// En las galas sin esa opción siguen siendo solo de la administración (prueba-butacas y prueba-sin-numerar).
+T.org = await login('florencia'); T.control = await login('puerta1')
+ok(T.org && T.control, 'login del organizador y de la puerta')
+ok((await api('/api/admin/config', { token: T.org })).d.cortesias === true && (await api('/api/admin/config', { token: T.control })).d.cortesias === false,
+  'cortesías: el panel se las habilita al organizador; a la puerta, no')
+const cuerpoC = { evento: ID, tipo: 'general', cantidad: 2, nombre: 'Invitada Flor', email: 'invitada.flor@ejemplo.com' }
+const co = await api('/api/admin/entrada-cortesia', { metodo: 'POST', token: T.org, cuerpo: cuerpoC })
+ok(co.status === 200 && co.d.cantidad === 2, `el organizador emite una cortesía de 2 (${co.status} ${co.d?.error || ''})`)
+ok((await api('/api/admin/entrada-cortesia', { metodo: 'POST', token: T.control, cuerpo: cuerpoC })).status === 403
+  && (await api('/api/admin/entrada-cortesia', { metodo: 'POST', token: T.venta, cuerpo: cuerpoC })).status === 403, 'la puerta y la boletería no emiten cortesías')
+const resC = (await api(`/api/admin/resumen?evento=${ID}`, { token: T.org })).d
+ok(resC.cortesias === 2 && resC.tipos.general.cortesias === 2, 'el resumen del organizador muestra sus cortesías', JSON.stringify(resC.tipos?.general))
+const opsC = (await api(`/api/admin/operaciones?evento=${ID}&estado=cortesia`, { token: T.org })).d
+ok(opsC.cuentas?.cortesia === 1 && opsC.ordenes?.some(o => o.id === co.d.ordenId), 'y la encuentra en Operaciones (filtro Cortesías)')
+ok((await api(`/api/admin/orden/${co.d.ordenId}/qrs`, { token: T.org })).status === 200, 'puede abrir sus QR')
+ok((await api(`/api/admin/orden/${co.d.ordenId}/qrs`, { token: T.control })).status === 404, 'la puerta no abre los QR de una cortesía')
 
 // Limpieza: borra lo que creó esta prueba
 await Orden.destroy({ where: { evento: [ID, ID2] } })
