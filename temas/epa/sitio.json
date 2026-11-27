@@ -1,5 +1,5 @@
 {
-  "_ayuda": "Show de Fin de Año 2026 de EPA · Escuela de Patín Artístico (Villa Carlos Paz, Córdoba): \"Sé la princesa que quieras ser\", domingo 13/12 en el Estadio Arena. Armado el 21/11/2026 con los flyers, 7 videos del show 2025 y la patinadora animada que mandó la escuela por WhatsApp (el Instagram no se pudo bajar). FALTAN de la escuela: la hora, los precios (y si el servicio va adentro o aparte), si hay más de una función, si es numerada, la regla de las dos cuentas de Chytapay (primeras 500 a una cuenta o emparejar), el WhatsApp de consultas y la dirección exacta. Sin tipos, la función se ve como \"Entradas muy pronto\". Entre 800 y 1000 entradas el año pasado.",
+  "_ayuda": "Show de Fin de Año 2026 de EPA · Escuela de Patín Artístico (Villa Carlos Paz, Córdoba): \"Sé la princesa que quieras ser\", domingo 13/12 en el Estadio Arena. Armado el 21/11/2026 con los flyers, 7 videos del show 2025 y la patinadora animada que mandó la escuela por WhatsApp (el Instagram no se pudo bajar). FALTAN de la escuela: los precios (y si el servicio va adentro o aparte), si hay más de una función, si es numerada, la regla de las dos cuentas de Chytapay (primeras 500 a una cuenta o emparejar), el WhatsApp de consultas y la dirección exacta. Sin tipos, la función se ve como \"Entradas muy pronto\". Entre 800 y 1000 entradas el año pasado. La hora (20:00) sale del cronograma del 27/11.",
   "nombre": "Sé la Princesa · Show EPA 2026",
   "lema": "Escuela de Patín Artístico",
   "organiza": "EPA · Escuela de Patín Artístico",
@@ -14,9 +14,24 @@
     "acento": "#ff4fa3",
     "acentoTexto": "#ffffff",
     "titulos": "#1a3cf0",
-    "franja": ["#1a3cf0", "#ff4fa3", "#f4c14d", "#8b6cf0", "#ffd1e7"]
+    "franja": [
+      "#1a3cf0",
+      "#ff4fa3",
+      "#f4c14d",
+      "#8b6cf0",
+      "#ffd1e7"
+    ]
   },
-  "festejo": { "*": ["#1a3cf0", "#ff4fa3", "#ffd1e7", "#f4c14d", "#8b6cf0", "#ffffff"] },
+  "festejo": {
+    "*": [
+      "#1a3cf0",
+      "#ff4fa3",
+      "#ffd1e7",
+      "#f4c14d",
+      "#8b6cf0",
+      "#ffffff"
+    ]
+  },
   "modo": "gala",
   "eventos": [
     {
@@ -28,7 +43,126 @@
       "imagen": "/assets/arte/arte-princesas-600.webp",
       "publicado": true,
       "artistas": [],
-      "tipos": []
+      "tipos": [],
+      "hora": "20:00"
     }
-  ]
+  ],
+  "cronograma": {
+    "_ayuda": "Cronograma del show que mandó la escuela el 27/11/2026 (imagen en C:\\epa-gala\\material\\cronograma). Lo muestra la página y va en el mail de bienvenida. Si cambia el orden, se corrige acá.",
+    "titulo": "Cronograma del show",
+    "bloques": [
+      {
+        "hora": "20:00",
+        "numeros": [
+          {
+            "n": 1,
+            "titulo": "El gran show",
+            "grupo": "Avanzado",
+            "sede": "Sarmiento"
+          },
+          {
+            "n": 2,
+            "titulo": "Aladdín y Jazmín",
+            "grupo": "Kids",
+            "sede": "Sarmiento"
+          },
+          {
+            "n": 3,
+            "titulo": "Rapunzel",
+            "grupo": "Tarde",
+            "sede": "Sarmiento"
+          }
+        ]
+      },
+      {
+        "hora": "20:30",
+        "numeros": [
+          {
+            "n": 4,
+            "titulo": "La Bella y la Bestia",
+            "grupo": "Kids",
+            "sede": "Atlético"
+          },
+          {
+            "n": 5,
+            "titulo": "La Sirenita y amigos marinos",
+            "sede": "Martín Ferreyra"
+          },
+          {
+            "n": 6,
+            "titulo": "Encanto",
+            "grupo": "Inicial",
+            "sede": "Atlético"
+          }
+        ]
+      },
+      {
+        "hora": "21:00",
+        "numeros": [
+          {
+            "n": 7,
+            "titulo": "Maléfica",
+            "grupo": "Adultos",
+            "sede": "Sarmiento"
+          },
+          {
+            "n": 8,
+            "titulo": "Frozen",
+            "grupo": "Inicial",
+            "sede": "Atlético"
+          },
+          {
+            "n": 9,
+            "titulo": "Blancanieves y los siete enanitos",
+            "grupo": "Mañana",
+            "sede": "Sarmiento"
+          }
+        ]
+      },
+      {
+        "hora": "21:30",
+        "numeros": [
+          {
+            "n": 10,
+            "titulo": "Princesas",
+            "grupo": "Inicial",
+            "sede": "Sarmiento"
+          },
+          {
+            "n": 11,
+            "titulo": "El jorobado de Notre Dame",
+            "grupo": "Adultos",
+            "sede": "Atlético"
+          },
+          {
+            "n": 12,
+            "titulo": "Mary Poppins",
+            "grupo": "Avanzado",
+            "sede": "Malagueño"
+          }
+        ]
+      },
+      {
+        "hora": "22:00",
+        "numeros": [
+          {
+            "titulo": "Saludo final",
+            "grupo": "Todas las patinadoras"
+          }
+        ]
+      }
+    ]
+  },
+  "bienvenida": {
+    "_ayuda": "Mail que le llega al comprador cuando escanean la primera entrada de su compra en la puerta (una vez por compra). {nombre} = su primer nombre. Lleva el cronograma de arriba.",
+    "asunto": "{nombre}, ¡te damos la bienvenida a Sé la princesa que quieras ser!",
+    "titulo": "¡Hola, {nombre}! Qué alegría que estés acá",
+    "parrafos": [
+      "Ya estás en el Estadio Arena y en un ratito empieza la magia. Esta noche las patinadoras de EPA, de nuestras sedes del Club Sarmiento, el Club Atlético Carlos Paz y el Club Martín Ferreyra, te van a llevar por los cuentos de princesas, sobre ruedas.",
+      "Detrás de cada coreografía hay un año entero de entrenamientos, caídas, abrazos y sueños. Hoy es su noche: aplaudí fuerte, emocionate y viví cada número con ellas.",
+      "Te dejamos el cronograma para que no te pierdas ningún número:"
+    ],
+    "cierre": "¡Que disfrutes el show, {nombre}! Hoy cada una es la princesa que quiere ser.",
+    "firma": "Con cariño, EPA · Escuela de Patín Artístico"
+  }
 }
